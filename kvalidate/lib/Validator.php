@@ -262,6 +262,7 @@ class sspmod_kvalidate_Validator {
         	}
         }
 	
+		// Validate all EntityDescriptor
 		$query = 'md:EntityDescriptor';
         $elms = $this->_xpath->query($query, $input_elm);
     
@@ -291,8 +292,10 @@ class sspmod_kvalidate_Validator {
     {
     	$status = array();
     	
+    	// Start by doing checks on the EntityDescriptor it self
         $status['vED'] = $this->_vED($input_elm);
 
+		// Validate all IDPSSODescriptors
 		$query = 'md:IDPSSODescriptor';
         $elms = $this->_xpath->query($query, $input_elm);
     
@@ -300,6 +303,7 @@ class sspmod_kvalidate_Validator {
             $status[$input_elm->getAttribute('entityID')] = $this->_processIDPSSODescriptor($elm);
         }
 
+		// Validate all SPSSODescriptors
 		$query = 'md:SPSSODescriptor';
         $elms = $this->_xpath->query($query, $input_elm);
    
@@ -307,7 +311,7 @@ class sspmod_kvalidate_Validator {
             $status[$input_elm->getAttribute('entityID')] = $this->_processSPSSODescriptor($elm);
         }
         
-        // Remove entityDescriptor if it do not validate
+        // Remove entityDescriptor if it does not validate
         if($this->_config['REMOVE_ENTITYDESCRIPTOR'] && in_array(false, $status)) {
         	$this->_messages[] = array( 
             	'level' => KV_STATUS_WARNING,
@@ -338,6 +342,7 @@ class sspmod_kvalidate_Validator {
     {
     	$status = array();
     	
+    	// Run checks
         $status['vCert'] = $this->_vCert($input_elm);
         $status['vSSO'] = $this->_vSSO($input_elm);
         $status['vSLO'] = $this->_vSLO($input_elm);
@@ -365,6 +370,7 @@ class sspmod_kvalidate_Validator {
     {
     	$status = array();
     	
+    	// Run checks
         $status['vCert'] = $this->_vCert($input_elm);
         $status['vACS'] = $this->_vACS($input_elm);
         $status['vSLO'] = $this->_vSLO($input_elm);
@@ -792,7 +798,8 @@ class sspmod_kvalidate_Validator {
         $error = 0;
         
         // Get all KeyDescriptors
-        $elms = $input_elm->getElementsByTagName('KeyDescriptor');
+        $query = 'md:KeyDescriptor';
+        $elms = $this->_xpath->query($query, $input_elm);
         
         foreach($elms AS $elm) {
             $query = 'ds:KeyInfo';
@@ -976,6 +983,7 @@ class sspmod_kvalidate_Validator {
     {
         return $this->_status;
     }
+    
     /**
 	 * Get messages from last validation
 	 *
