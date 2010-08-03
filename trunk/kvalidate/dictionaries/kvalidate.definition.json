@@ -1,0 +1,38 @@
+{
+    "title": {
+        "en": "Kalmar2 metadata validation service"
+    },
+    "validation_header": {
+    	"en": "Validation"
+    },
+    "status_description": {
+    	"en": "Here you can see the result of the validation of the metadata you provided."
+    },
+    "status_ok": {
+    	"en": "The metadata is valid"
+    },
+    "status_error": {
+    	"en": "The metadata is NOT valid"
+    },
+    "xml_source": {
+    	"en": "Metadata XML source"
+    },
+    "input_header": {
+    	"en": "Input"
+    },
+    "validate": {
+    	"en": "Validate"
+    },
+    "result_header": {
+    	"en": "Result"
+    },
+    "message_header": {
+    	"en": "Messages"
+    },
+    "groupvalidation_header": {
+    	"en": "Validation status"
+    },
+    "": {
+    	"en": ""
+    }
+}
