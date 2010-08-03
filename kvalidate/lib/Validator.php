@@ -119,7 +119,7 @@ class sspmod_kvalidate_Validator {
 	 *
 	 * @param array $config Array containing options for the validator. Defaults to <i>null</i>
 	 *
-	 * @see   sspmod_kvalidate_Validator::$_config, PHP_MANUAL#function.libxml-use-internal-errors.php
+	 * @see sspmod_kvalidate_Validator::$_config, PHP_MANUAL#function.libxml-use-internal-errors.php
 	 */
     public function __construct(Array $config = null)
     {
@@ -536,6 +536,7 @@ class sspmod_kvalidate_Validator {
 	 * @param DOMElement $input_elm The element to be validated
 	 *
 	 * @return bool True if the check clears othervise false
+	 * @todo Validate the value of the scope elements
 	 */   
     private function _vScope(DOMElement $input_elm)
     {
@@ -556,7 +557,6 @@ class sspmod_kvalidate_Validator {
                 $error = true;
                 $this->_status = KV_STATUS_ERROR;
             }    
-            // TODO: Validate the value of the scope elements
         }
 
         if(!$error) {
@@ -748,6 +748,7 @@ class sspmod_kvalidate_Validator {
 	 * @param DOMElement $input_elm The element to be validated
 	 *
 	 * @return bool True if the check clears othervise false
+	 * @todo Check that certificate used for signing is accepted
 	 */    
     private function _vEDSignature(DOMElement $input_elm)
     {
@@ -764,7 +765,6 @@ class sspmod_kvalidate_Validator {
         	return false;
 		}
 		
-		// TODO: Check that certificate used for signing is accepted
 		$this->_messages[] = array(
         	'level' => KV_STATUS_SUCCESS,
             'msg' => '[DOCUMENT] vEDSignature check parsed',
@@ -784,6 +784,8 @@ class sspmod_kvalidate_Validator {
 	 * @param DOMElement $input_elm The element to be validated
 	 *
 	 * @return bool True if the check clears othervise false
+	 * @todo If both KeyValue and X509Certificate is present, check to see that they both contain the same key.
+     * @todo Check to see if the certificates are expired        
 	 */
     private function _vCert(DOMElement $input_elm) 
     {   
@@ -889,11 +891,6 @@ class sspmod_kvalidate_Validator {
                     $this->_status = KV_STATUS_ERROR;
                 }
             }
-            /**
-             * TODO: If both KeyValue and X509Certificate is present, check to 
-             * see that they both contain the same key.
-             * TODO: Check to see if the certificates are expired.
-             */
         }
         if($error == 0) {
             $this->_messages[] = array(
