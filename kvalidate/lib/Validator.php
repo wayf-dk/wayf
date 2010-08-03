@@ -23,7 +23,7 @@
  * @copyright  2010 Jacob Christiansen 
  * @license    http://www.gnu.org/licenses/lgpl.html GNU Lesser General Public License
  * @version    SVN: $Id$
- * @link       http://
+ * @link       http://code.google.com/p/wayf/
  */
 
 /**#@+
@@ -50,7 +50,7 @@ define('KV_STATUS_ERROR', 3);
  * @copyright  2010 Jacob Christiansen 
  * @license    http://www.gnu.org/licenses/lgpl.html GNU Lesser General Public License
  * @version    SVN: $Id$
- * @link       http://
+ * @link       http://code.google.com/p/wayf/
  */
 class sspmod_kvalidate_Validator {
 
@@ -159,6 +159,8 @@ class sspmod_kvalidate_Validator {
 	 */
     public function validate($xml)
     {
+	    assert('is_string($xml)');
+	    
 		$this->_xml = new DOMDocument();
 		$this->_xml->preserveWhiteSpace = false; 
 		$this->_xml->formatOutput = true;
@@ -248,19 +250,8 @@ class sspmod_kvalidate_Validator {
 	 *
 	 * @return bool True on success and false on error
 	 */
-    private function _processEntitiesDescriptor($input_elm)
+    private function _processEntitiesDescriptor(DOMElement $input_elm)
     {	
-    	if(!($input_elm instanceof DOMElement)) {
-    		$this->_messages[] = array( 
-            	'level' => KV_STATUS_ERROR,
-                'msg' => '[DOCUMENT] Element not validated',
-                'line' => $input_elm->getLineNo(),
-            ); 
-            $this->_status = KV_STATUS_ERROR;
-
-            return false;
-    	}
-    	
 		// EntitiesDescriptors can be nested
 		$query = 'md:EntitiesDescriptor';
         $elms = $this->_xpath->query($query, $input_elm);
@@ -296,7 +287,7 @@ class sspmod_kvalidate_Validator {
 	 *
 	 * @return bool True if all checks clears othervise false
 	 */
-    private function _processEntityDescriptor(DOMNode $input_elm)
+    private function _processEntityDescriptor(DOMElement $input_elm)
     {
     	$status = array();
     	
@@ -343,7 +334,7 @@ class sspmod_kvalidate_Validator {
 	 *
 	 * @return bool True if all checks clears othervise false
 	 */
-    private function _processIDPSSODescriptor(DOMNode $input_elm)
+    private function _processIDPSSODescriptor(DOMElement $input_elm)
     {
     	$status = array();
     	
@@ -370,7 +361,7 @@ class sspmod_kvalidate_Validator {
 	 *
 	 * @return bool True if all checks clears othervise false
 	 */
-    private function _processSPSSODescriptor(DOMNode $input_elm)
+    private function _processSPSSODescriptor(DOMElement $input_elm)
     {
     	$status = array();
     	
@@ -393,7 +384,7 @@ class sspmod_kvalidate_Validator {
 	 *
 	 * @return bool True if the check clears othervise false
 	 */
-    private function _vEnc(DOMNode $input_elm)
+    private function _vEnc(DOMElement $input_elm)
     {
         $query = 'md:AssertionConsumerService';
         $elms = $this->_xpath->query($query, $input_elm);
@@ -445,7 +436,7 @@ class sspmod_kvalidate_Validator {
 	 *
 	 * @return bool True if the check clears othervise false
 	 */   
-    private function _vSign(DOMNode $input_elm)
+    private function _vSign(DOMElement $input_elm)
     {
         $query = 'md:KeyDescriptor';
 
@@ -484,7 +475,7 @@ class sspmod_kvalidate_Validator {
 	 *
 	 * @return bool True if the check clears othervise false
 	 */   
-    private function _vRequestAttr(DOMNode $input_elm)
+    private function _vRequestAttr(DOMElement $input_elm)
     {
         $query = 'md:AttributeConsumingService/md:RequestedAttribute';
 
@@ -546,7 +537,7 @@ class sspmod_kvalidate_Validator {
 	 *
 	 * @return bool True if the check clears othervise false
 	 */   
-    private function _vScope(DOMNode $input_elm)
+    private function _vScope(DOMElement $input_elm)
     {
         $error = false;
 
@@ -589,7 +580,7 @@ class sspmod_kvalidate_Validator {
 	 *
 	 * @return bool True if the check clears othervise false
 	 */   
-    private function _vED(DOMNode $input_elm)
+    private function _vED(DOMElement $input_elm)
     {
         $att_validUntil = $input_elm->getAttribute('validUntil');
 
@@ -645,7 +636,7 @@ class sspmod_kvalidate_Validator {
 	 *
 	 * @return bool True if the check clears othervise false
 	 */   
-    private function _vSLO(DOMNode $input_elm)
+    private function _vSLO(DOMElement $input_elm)
     {
         $query = '//md:SingleLogoutService';
         $elms = $this->_xpath->query($query, $input_elm);
@@ -685,7 +676,7 @@ class sspmod_kvalidate_Validator {
 	 *
 	 * @return bool True if the check clears othervise false
 	 */    
-    private function _vACS(DOMNode $input_elm)
+    private function _vACS(DOMElement $input_elm)
     {
         $query = '//md:AssertionConsumerService';
         $elms = $this->_xpath->query($query, $input_elm);
@@ -722,7 +713,7 @@ class sspmod_kvalidate_Validator {
 	 *
 	 * @return bool True if the check clears othervise false
 	 */ 
-    private function _vSSO(DOMNode $input_elm)
+    private function _vSSO(DOMElement $input_elm)
     {
         $query = '//md:SingleSignOnService';
         $elms = $this->_xpath->query($query, $input_elm);
@@ -758,7 +749,7 @@ class sspmod_kvalidate_Validator {
 	 *
 	 * @return bool True if the check clears othervise false
 	 */    
-    private function _vEDSignature($input_elm)
+    private function _vEDSignature(DOMElement $input_elm)
     {
    		$ed = new SAML2_XML_md_EntitiesDescriptor($input_elm);
    		$validCerts = $ed->getValidatingCertificates();
@@ -794,7 +785,7 @@ class sspmod_kvalidate_Validator {
 	 *
 	 * @return bool True if the check clears othervise false
 	 */
-    private function _vCert($input_elm) 
+    private function _vCert(DOMElement $input_elm) 
     {   
         $error = 0;
         
@@ -920,11 +911,11 @@ class sspmod_kvalidate_Validator {
 	 *
 	 * Schema validation according to the schema given by the SAML2 spec.
 	 * 
-	 * @param DOMElement $input_elm The element to be validated
+	 * @param DOMDocument $input_elm The element to be validated
 	 *
 	 * @return bool True if the check clears othervise false
 	 */
-    private function _vSchema(DOMNode $input_elm)
+    private function _vSchema(DOMDocument $input_elm)
     {
         if($input_elm->schemaValidate($this->_schema)) {
             $this->_messages[] = array(
