@@ -1,4 +1,31 @@
 <?php
+/**
+ * Kalmar2 metadata validator
+ *
+ * PHP version 5
+ *
+ * The Kalmar2 metadata validator is free software: you can redistribute it
+ * and/or modify it under the terms of the GNU Lesser General Public License
+ * as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * The Kalmar2 metadata validator is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser
+ * General Public License for more details.
+ *
+ * You should haveKalmar2 metadata validator. If not, see
+ * <http://www.gnu.org/licenses/>.
+ *
+ * @package    SimpleSAMLphp
+ * @subpackege Module
+ * @author     Jacob Christiansen <jach@wayf.dk>
+ * @copyright  2010 Jacob Christiansen 
+ * @license    http://www.gnu.org/licenses/lgpl.html GNU Lesser General Public License
+ * @version    SVN: $Id$
+ * @link       http://code.google.com/p/wayf/
+ */
+ 
 function xmlpp($xml) {
 	try {
 		$xml_obj = new SimpleXMLElement($xml);   
