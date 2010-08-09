@@ -1,0 +1,72 @@
+Kalmar2 metadata validator
+==========================
+
+<!-- 
+	This file is written in Markdown syntax. 
+	For more information about how to use the Markdown syntax, read here:
+	http://daringfireball.net/projects/markdown/syntax
+-->
+
+  * Version: `$Id$`
+
+<!-- {{TOC}} -->
+
+Documentation
+-------------
+The Kalmar2 metadata validator is documented in this document and all source
+code is documented to PHPDOC. To get an API documentation of the source code
+please run the [phpDocumentor](http://phpdoc.org/) on the source code.
+
+A mailinglist for issues, questions and commit messages has been set up and can
+be found at [http://groups.google.com/group/wayf-repo](http://groups.google.com/group/wayf-repo).
+Any questions regarding the Kalmar2 metadata validator should be stated here.
+
+Prerequisites
+-------------
+ * PHP version >= 5.3.0
+ * SimpleSAMLphp version >= 1.6.0
+ * Suppoort for the following PHP extensions: `date`, `dom`, `libxml`, `openssl`
+
+Installing
+----------
+The Kalmar2 metadata validator is a SimpleSAMLphp module that will work on
+SimpleSAMLphp version 1.6 and up. The code can be retrived from the SVN
+repository located at [code.google.com/p/wayf/](http://code.google.com/p/wayf/)
+
+The easiest to get the resent version is to checkout the latest version from
+the SVN repository
+
+	cd simplesamlphp/modules
+	svn checkout http://wayf.googlecode.com/svn/trunk/kvalidate kvalidate
+
+If you are using the group validation page, you should copy the config file
+from the `config-templates`directory to the SimpleSAMLphp `config` directory.
+
+	cp simplesamlphp/modules/kvalidate/config-templates/module_kvalidate.php simplesamlphp/config/
+	
+Configuring the Kalmar2 metadata validator
+------------------------------------------
+The basic use of the Kalmar2 metadata validator do not need any configuration.
+The `validate.php`script will display a form where a URL for metadata can be
+provided.
+
+To use the `groupvalidate.php` script, you need to configure one or more tags. 
+a tag is a collection of URL's for metadata, that all will be validated at the
+same time and displayed. Tags has the following layout in the config file:
+
+	'tags' => array(
+		'kalmar' => array(
+			'da' => array(
+				'url' => 'https://wayf.wayf.dk/module.php/aggregator/?id=wayfkalmarexport&mimetype=application/xml',
+				'name' => 'Denmark',
+				'description' => 'Danish metadata',
+			),
+			'no' => array(
+				'url' => 'https://kalmar.feide.no/simplesaml/module.php/aggregator/?id=feidekalmarexport',
+				'name' => 'Norway',
+				'description' => 'Norwegian metadata',
+			),
+		),
+	),
+	
+You can define multiple tags.
