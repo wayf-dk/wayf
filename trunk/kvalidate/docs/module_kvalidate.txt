@@ -70,3 +70,60 @@ same time and displayed. Tags has the following layout in the config file:
 	),
 	
 You can define multiple tags.
+
+Validation
+----------
+the Kalmar2 Metadata validator is used for validating metadata ment for the
+Kalmar2 interfederation. This means that the validator conforms to the
+requirements set in the Kalmar2 interfederation. These requirements are stated
+in the following four documents:
+
+ 1. [OASIS Standard, Metadata for the OASIS Security Assertion Markup Language 
+    (SAML) V2.0. March 2005](http://docs.oasis-open.org/security/saml/v2.0/saml-metadata-2.0-os.pdf)
+ 2. [SAML V2.0 Metadata Interoperability Profile Version 1.0]
+    (http://docs.oasis-open.org/security/saml/Post2.0/sstc-metadata-iop-cd-01.pdf)
+ 3. [Interoperable SAML 2.0 Web Browser SSO Deployment profile]
+    (http://saml2int.org/profile/0.1http://www.kalmar2.org/kalmar2web/members_attchmt/2010_01_29_appendix-a_ver-1.pdf)
+ 4. [Kalmar2 Appendix A]
+    (http://www.kalmar2.org/kalmar2web/members_attchmt/2010_01_29_appendix-a_ver-1.pdf)
+
+### Requirements ###
+Different steps are required in order to comply with the different requirements
+defined in the documents above.
+
+ 1. Defines the following resyrictions:
+    a. Here a simple schema validation of the SAML Metadata XML is sufficient. 
+       Schema defined by OASIS 
+       [http://docs.oasis-open.org/security/saml/v2.0/saml-schema-metadata-2.0.xsd]
+ 2. Defines the following restrictions that the metadata must adhere to
+    a. Each public key must be placed within its own <md:KeyDesriptor> element
+       and the use attribute must be set appropiate
+    b. One ore more of <ds:KeyValue> or <ds:X509Certificaet> must be present in 
+       the <ds:KeyInfo> element
+    c. Certificates should be checked to see if they are expired (metadata is 
+       not to be discarded if it is expired)
+ 3.  The following restrictions is given
+    a. The SingleSignonService must use the HTTP-REDIRECT binding
+    b. The AssersionConsumerService must use the HTTP-POST binding
+    c. If the AssertionConsumerservice location is not using (SSL/HTTPS) a 
+       certificate for encryption should be supplied in a <md:KeyDescriptor> 
+       with the use attribute set to encryption or omitted
+    d. If no <md:KeyDescriptor> is given and the AssertionConsumerService 
+       location is not using SSL/HTTPS, then the metadata should be discarded.
+ 4. The follwoing is given:
+    a. The SingleLogoutService must only be supplied if the entity supports 
+       single logout
+    b. SingleLogoutService binding must be HTTP-REDIRECT
+    c. The national metadata aggregate must be signed
+    d. Each <md:EntityDescriptor> must contain the validUntil attribute and set 
+       to between 6 and 96 hours
+    e. Metadata for IdP's must include a list of scopes
+    f. Metadata for SP's must include a list of requested attributes
+    g. Metadata for IdP's must contain a certificate for signing
+    h. Metadata for SP's must contain a certificate for encryption if endpoints 
+       are not using SSL/HTTPS
+
+Each of the points above must be checked to secure the validity of the
+metadata. Each of the requirements apply for each <md:EntityDescriptor>. If a
+piece of metadata do not comply to the requirements, it is to be dropped, for
+the aggregated metadata.
