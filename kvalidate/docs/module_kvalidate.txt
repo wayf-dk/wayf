@@ -71,59 +71,144 @@ same time and displayed. Tags has the following layout in the config file:
 	
 You can define multiple tags.
 
+Usage
+-----
+At the current time there is two ways to use the Kalmar2 metadata validator.
+
+The first way is to call the groupvalidate.php with the query parameter tag set
+to one of the previouse defind tags in the configuration file.
+
+The second wayf is to call the validate.php script. Here you can insert an URL
+or local file path to the XML metadata document to be validated. You can also
+call the script with the following query parameters:
+
+ * md_url - Should be set to the URL of the metadata
+ * show_warning - If set warnings fromm the validation is showen
+ * show_success - If set all completed checks is showen
+ * show_xml - If set the XML metadata is displayed in a prettyfied format
+ * remove_ed - If set all EntityDescriptor's that do not validate will be
+   removed from the XML metadata.
+
+Also the validator can be called directly within SimpleSAMLphp. Example.
+
+    $validator = new sspmod_kvalidate_Validator();
+    $xml = $validator->validate($xml);
+
+For a complete reference, please se the API documentation.
+
+### Kalmar2 specific usage ###
+I the Kalmar2 interfederation setup, the Kalmar2 metadata validator is used in
+the metarefresh module, to allow validation of metadata upon the arrival of the
+metadata at the Kalmar2 servers. 
+
+The following change has been made to the metaire fresh module. The changes are
+made in the loadSource method:
+
+    try {
+        // Removed for Kalmar2
+        //$entities =
+        //SimpleSAML_Metadata_SAMLParser::parseDescriptorsFile($source['src']);
+        
+        // Added for Kalmar2
+
+        // Get metadata
+        $xml = file_get_contents($source['src']);
+
+        // Validate metadata
+        SimpleSAML_Logger::info('Validating metdata from: ' . $source['src'] . "\n");
+        $config['REMOVE_ENTITYDESCRIPTOR'] = true;
+        $validator = new sspmod_kvalidate_Validator($config);
+        $valid_xml = $validator->validate($xml);
+
+        $entities = SimpleSAML_Metadata_SAMLParser::parseDescriptorsString($valid_xml);
+    }
+
 Validation
 ----------
-the Kalmar2 Metadata validator is used for validating metadata ment for the
+The Kalmar2 Metadata validator is used for validating metadata ment for the
 Kalmar2 interfederation. This means that the validator conforms to the
 requirements set in the Kalmar2 interfederation. These requirements are stated
 in the following four documents:
 
  1. [OASIS Standard, Metadata for the OASIS Security Assertion Markup Language 
     (SAML) V2.0. March 2005](http://docs.oasis-open.org/security/saml/v2.0/saml-metadata-2.0-os.pdf)
- 2. [SAML V2.0 Metadata Interoperability Profile Version 1.0]
-    (http://docs.oasis-open.org/security/saml/Post2.0/sstc-metadata-iop-cd-01.pdf)
- 3. [Interoperable SAML 2.0 Web Browser SSO Deployment profile]
-    (http://saml2int.org/profile/0.1http://www.kalmar2.org/kalmar2web/members_attchmt/2010_01_29_appendix-a_ver-1.pdf)
- 4. [Kalmar2 Appendix A]
-    (http://www.kalmar2.org/kalmar2web/members_attchmt/2010_01_29_appendix-a_ver-1.pdf)
+ 2. [SAML V2.0 Metadata Interoperability Profile Version 1.0](http://docs.oasis-open.org/security/saml/Post2.0/sstc-metadata-iop-cd-01.pdf)
+ 3. [Interoperable SAML 2.0 Web Browser SSO Deployment profile](http://saml2int.org/profile/0.1http://www.kalmar2.org/kalmar2web/members_attchmt/2010_01_29_appendix-a_ver-1.pdf)
+ 4. [Kalmar2 Appendix A](http://www.kalmar2.org/kalmar2web/members_attchmt/2010_01_29_appendix-a_ver-1.pdf)
 
 ### Requirements ###
 Different steps are required in order to comply with the different requirements
-defined in the documents above.
+defined in the documents above. The following requirements are given. Numbers
+in () refers to line numbers in the given document:
 
- 1. Defines the following resyrictions:
-    a. Here a simple schema validation of the SAML Metadata XML is sufficient. 
-       Schema defined by OASIS 
-       [http://docs.oasis-open.org/security/saml/v2.0/saml-schema-metadata-2.0.xsd]
+ 1. Defines the following restrictions:
+  1. Here a simple schema validation of the SAML Metadata XML is sufficient. 
+     Schema defined by OASIS 
+     <http://docs.oasis-open.org/security/saml/v2.0/saml-schema-metadata-2.0.xsd>
  2. Defines the following restrictions that the metadata must adhere to
-    a. Each public key must be placed within its own <md:KeyDesriptor> element
-       and the use attribute must be set appropiate
-    b. One ore more of <ds:KeyValue> or <ds:X509Certificaet> must be present in 
-       the <ds:KeyInfo> element
-    c. Certificates should be checked to see if they are expired (metadata is 
-       not to be discarded if it is expired)
- 3.  The following restrictions is given
-    a. The SingleSignonService must use the HTTP-REDIRECT binding
-    b. The AssersionConsumerService must use the HTTP-POST binding
-    c. If the AssertionConsumerservice location is not using (SSL/HTTPS) a 
-       certificate for encryption should be supplied in a <md:KeyDescriptor> 
-       with the use attribute set to encryption or omitted
-    d. If no <md:KeyDescriptor> is given and the AssertionConsumerService 
-       location is not using SSL/HTTPS, then the metadata should be discarded.
+  1. Each public key must be placed within its own <md:KeyDescriptor> element
+     and the use attribute must be set appropiate and expressed using a
+     <ds:KeyInfo>. (289-291)
+  2. One ore more of <ds:KeyValue> or <ds:X509Certificaet> must be present in 
+     the <ds:KeyInfo> element. (292-294)
+  3. Certificates should be checked to see if they are expired (metadata is 
+     not to be discarded if it is expired). (304)
+  4. Metadata obtained via unsecure channal, should be signed. (349-351)
+ 3. The following restrictions is given
+  1. The SingleSignonService must use the HTTP-REDIRECT binding. (85-86)
+  2. The AssersionConsumerService must use the HTTP-POST binding. (98)
+  3. If the AssertionConsumerservice location is not using (SSL/HTTPS) a 
+     certificate for encryption should be supplied in a <md:KeyDescriptor> 
+     with the use attribute set to encryption or omitted. (131-135)
+  4. If no <md:KeyDescriptor> is given and the AssertionConsumerService 
+     location is not using SSL/HTTPS, then the metadata should be discarded.
+     (131-142)
  4. The follwoing is given:
-    a. The SingleLogoutService must only be supplied if the entity supports 
-       single logout
-    b. SingleLogoutService binding must be HTTP-REDIRECT
-    c. The national metadata aggregate must be signed
-    d. Each <md:EntityDescriptor> must contain the validUntil attribute and set 
-       to between 6 and 96 hours
-    e. Metadata for IdP's must include a list of scopes
-    f. Metadata for SP's must include a list of requested attributes
-    g. Metadata for IdP's must contain a certificate for signing
-    h. Metadata for SP's must contain a certificate for encryption if endpoints 
-       are not using SSL/HTTPS
+  1. The SingleLogoutService must only be supplied if the entity supports 
+     single logout. (20) 
+  2. SingleLogoutService binding must be HTTP-REDIRECT. (24)
+  3. The national metadata aggregate must be signed. (34-35)
+  4. Each <md:EntityDescriptor> must contain the validUntil attribute and set 
+     to between 6 and 96 hours. (39-41)
+  5. Metadata for IdP's must include a list of scopes. (42)
+  6. Metadata for SP's must include a list of requested attributes. (48)
+  7. Metadata for IdP's must contain a certificate for signing. (68)
+  8. Metadata for SP's must contain a certificate for encryption if endpoints 
+     are not using SSL/HTTPS. (68-69)
+  9. NameFormat for attributes must be
+     urn:oasis:names:tc:SAML:2.0:atttrname-format:uri. (95-96)
 
-Each of the points above must be checked to secure the validity of the
-metadata. Each of the requirements apply for each <md:EntityDescriptor>. If a
-piece of metadata do not comply to the requirements, it is to be dropped, for
-the aggregated metadata.
+Each of the points above must be checked to secure the validity of the 
+metadata. Each of the requirements apply for each <md:EntityDescriptor>.
+
+The following validation functions are implemented in the Kalmar2 metadata
+validator:
+
+ * _vSchema (1-1)<br />
+   Schema validation according to the schema given by the SAML2 spec.
+ * _vCert (2-1, 2-2)<br />
+   Each <md:KeyDescriptor> only contains one key. <md:KeyDescriptor> contains 
+   at least one <ds:KeyValue> or one <ds:X509Data><ds:X509Certificate>. If 
+   given, the <ds:X509Certificate> contains a public key with recognized type.
+ * _vSSO (3-1)<br />
+   <md:SingleSignOnService> must use the HTTP-REDIRECT binding.
+ * _vASC (3-2)<br />
+   <md:AssertionConsumerService> must use the HTTP-POST binding.
+ * _vSLO (4-2)<br />
+   <md:SingleLogoutService> must use the HTTP-REDIRECT binding.
+ * _vED (4-4)<br />
+   <md:EntityDescriptor> must contain a validUntil attribute. The validUntil 
+   timestamp is between 6 and 96 hours in the future.
+ * _vScope (4-5)<br />
+   <md:IDPSSOdescriptor> must contain at least <shibmd:Scope>
+ * _vRequestAttr (4-6, 4-9)<br />
+   <md:SPSSODescriptor> must contain at least one <md:RequestedAttributes>.
+   Each <md:RequestedAttributes> has the NameFormat attribute and set to
+   urn:oasis:names:tc:SAML:2.0:attrname-format:uri
+ * _vSign (4-7)<br />
+   <md:IDPSSOdescriptor> must contain a certificate for signing
+ * _vEnc (3-3, 4-8)<br />
+   <md:SPSSOdescriptor> must contain a certificate for encrypting if ACS 
+   endpoint is HTTP.
+ * _vEDSignature (4-3)<br />
+   If present, the <md:EntitiesDescriptor> is signed.
