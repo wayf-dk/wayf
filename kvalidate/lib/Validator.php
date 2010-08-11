@@ -601,8 +601,8 @@ class sspmod_kvalidate_Validator {
         } else {
         	// Validate the timestamp
         	$validTime = strtotime($att_validUntil);
-        	$minTime = time() + (60*60*6);
-        	$maxTime = time() + (60*60*96);
+        	$minTime = time() + (60*60*6-30);
+        	$maxTime = time() + (60*60*96+30);
         	
         	if( ($validTime-$minTime) < 0 ) {
         		$this->_messages[] = array(
