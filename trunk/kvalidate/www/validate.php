@@ -30,7 +30,7 @@ $globalConfig = SimpleSAML_Configuration::getInstance();
 
 $t = new SimpleSAML_XHTML_Template($globalConfig, 'kvalidate:validate.tpl.php');
 
-if(isset($_REQUEST['md_url'])) {
+if(!empty($_REQUEST['md_url']) || !empty($_REQUEST['md_xml'])) {
 	$config = array();
 	
 	$t->data['show_success'] = isset($_REQUEST['show_success']) ? true : false;	
@@ -38,10 +38,14 @@ if(isset($_REQUEST['md_url'])) {
 	$t->data['show_xml'] = isset($_REQUEST['show_xml']) ? true : false;
 	$config['REMOVE_ENTITYDESCRIPTOR'] = isset($_REQUEST['remove_ed']) ? true : false;
 
-	$md_url = filter_var($_REQUEST['md_url'], FILTER_VALIDATE_URL);
-	$t->data['md_url'] = $md_url;
-	$xml = file_get_contents($md_url);
-	
+    if(!empty($_REQUEST['md_url'])) {
+	    $md_url = filter_var($_REQUEST['md_url'], FILTER_VALIDATE_URL);
+	    $t->data['md_url'] = $md_url;
+	    $xml = file_get_contents($md_url);
+    } else if(!empty($_REQUEST['md_xml'])) {
+        $xml = $_REQUEST['md_xml'];
+    }
+
 	$validator = new sspmod_kvalidate_Validator($config);
 
 	$t->data['xml'] = $validator->validate($xml);

@@ -120,9 +120,14 @@ if(isset($this->data['md_url'])) {
 	echo $this->data['md_url'];
 } 
 echo '" />
-				<input type="submit" name="submit" value="' . $this->t('{kvalidate:kvalidate:validate}') . '" />			
 			</td>			
-		</tr>
+        </tr>
+        <tr>
+            <td>XML:</td>
+            <td>
+                <textarea name="md_xml"></textarea>
+            </td>
+        </tr>
 		<tr>
 			<td>Show completed checks:</td>
 			<td>
@@ -147,6 +152,11 @@ echo '" />
 				<input type="checkbox" name="remove_ed">
 			</td>
 		</tr>
+        <tr>
+            <td colspan="2">
+                <input type="submit" name="submit" value="' . $this->t('{kvalidate:kvalidate:validate}') . '" />			
+            </td>
+        </tr>
 	</table>
 </form>';
 	
