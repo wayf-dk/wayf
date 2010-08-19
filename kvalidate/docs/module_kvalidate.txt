@@ -85,9 +85,14 @@ call the script with the following query parameters:
  * md_url - Should be set to the URL of the metadata
  * show_warning - If set warnings fromm the validation is showen
  * show_success - If set all completed checks is showen
+ * show_md_url - If set the field for setting the metadata URL is shown
+ * show_md_xml - If set the field for setting the XML metadata is shown
  * show_xml - If set the XML metadata is displayed in a prettyfied format
  * remove_ed - If set all EntityDescriptor's that do not validate will be
    removed from the XML metadata.
+
+If no parameters is sent to the script, the field for inputting XML metadata is
+shown.
 
 Also the validator can be called directly within SimpleSAMLphp. Example.
 

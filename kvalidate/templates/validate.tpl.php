@@ -112,7 +112,7 @@ echo '<h2>' . $this->t('{kvalidate:kvalidate:input_header}') . '</h2>';
 echo '
 <form method="post" action="?">
 	<table style="width: 95%;">';
-if(isset($this->data['show_md_url'])) {
+if($this->data['show_md_url']) {
     echo '
 		<tr>
 			<td style="padding-right: 10px; width: 20%;">URL:</td>
@@ -124,12 +124,15 @@ if(isset($this->data['show_md_url'])) {
     echo '" style="width: 99%;"/>
 			</td>			
             </tr>';
-} else {
+}
+if($this->data['show_md_xml'] || (!$this->data['show_md_xml'] && !$this->data['show_md_url'])) {
     echo '
         <tr>
             <td style="width: 20%;">XML:</td>
             <td>
-            <textarea name="md_xml" style="width: 100%;" rows=20></textarea>
+            <textarea name="md_xml" style="width: 100%;" rows=20>';
+    echo $this->data['orig_xml'];
+    echo '</textarea>
             </td>
         </tr>';
 }
