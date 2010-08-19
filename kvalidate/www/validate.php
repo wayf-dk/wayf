@@ -36,6 +36,7 @@ if(!empty($_REQUEST['md_url']) || !empty($_REQUEST['md_xml'])) {
 	$t->data['show_success'] = isset($_REQUEST['show_success']) ? true : false;	
 	$t->data['show_warning'] = isset($_REQUEST['show_warning']) ? true : false;
 	$t->data['show_xml'] = isset($_REQUEST['show_xml']) ? true : false;
+	$t->data['show_md_url'] = isset($_REQUEST['show_md_url']) ? true : false;
 	$config['REMOVE_ENTITYDESCRIPTOR'] = isset($_REQUEST['remove_ed']) ? true : false;
 
     if(!empty($_REQUEST['md_url'])) {

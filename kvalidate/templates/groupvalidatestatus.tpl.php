@@ -83,7 +83,7 @@ foreach($this->data['entities'] AS $k => $v) {
 		echo '</td>';
 	}
 	echo '<td>' . $v['name'] . '</td>';
-	echo '<td><a href="validate.php?md_url=' . rawurlencode($v['url']) . '&show_warning&show_xml"><b>Details</b></a></td>';
+	echo '<td><a href="validate.php?md_url=' . rawurlencode($v['url']) . '&show_warning&show_xml&show_md_url"><b>Details</b></a></td>';
 	echo '</tr>';	
 }	
 	

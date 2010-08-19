@@ -111,23 +111,29 @@ echo '<h1>' . $this->t('{kvalidate:kvalidate:validation_header}') . '</h1>';
 echo '<h2>' . $this->t('{kvalidate:kvalidate:input_header}') . '</h2>';
 echo '
 <form method="post" action="?">
-	<table>
+	<table style="width: 95%;">';
+if(isset($this->data['show_md_url'])) {
+    echo '
 		<tr>
-			<td style="padding-right: 10px;">URL:</td>
+			<td style="padding-right: 10px; width: 20%;">URL:</td>
 			<td>
 				<input type="text" name="md_url" value="';
-if(isset($this->data['md_url'])) {
-	echo $this->data['md_url'];
-} 
-echo '" />
+    if(isset($this->data['md_url'])) {
+	    echo $this->data['md_url'];
+    } 
+    echo '" style="width: 99%;"/>
 			</td>			
-        </tr>
+            </tr>';
+} else {
+    echo '
         <tr>
-            <td>XML:</td>
+            <td style="width: 20%;">XML:</td>
             <td>
-                <textarea name="md_xml"></textarea>
+            <textarea name="md_xml" style="width: 100%;" rows=20></textarea>
             </td>
-        </tr>
+        </tr>';
+}
+echo '
 		<tr>
 			<td>Show completed checks:</td>
 			<td>
