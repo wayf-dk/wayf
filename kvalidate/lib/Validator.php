@@ -220,6 +220,7 @@ class sspmod_kvalidate_Validator {
         	$this->_vEDSignature($sigXML->documentElement);
             $this->_processEntitiesDescriptor($root_element);
         } else if($root_element->localName == 'EntityDescriptor'){
+            $this->_vEntityValidUntil($input_elm);
             $this->_processEntityDescriptor($root_element);
         } else {
             $this->_messages[] = array( 
@@ -277,6 +278,9 @@ class sspmod_kvalidate_Validator {
                 }
             }
         }
+        
+        // Start by doing checks on the EntityDescriptor it self
+        $status['vED'] = $this->_vEntitiesValidUntil($input_elm);
 	
 		// Validate all EntityDescriptor
 		$query = 'md:EntityDescriptor';
@@ -294,11 +298,10 @@ class sspmod_kvalidate_Validator {
 	/**
 	 * Validate an EntityDescriptor
 	 *
-	 * The check _vED is performed on the the EntityDescriptor. All embeded
-	 * IDPSSODescriptor and SPSSODescriptor is precessed. If the the option
-	 * REMOVE_ENTITYDESCRIPTOR was set when the validator was created,
-	 * EntityDescriptor with faulty IDPSSODescriptor or SPSSODescriptor will be
-	 * removed from the metadata.
+     * All embeded IDPSSODescriptor and SPSSODescriptor is precessed. If the 
+     * the option REMOVE_ENTITYDESCRIPTOR was set when the validator was 
+     * created, EntityDescriptor with faulty IDPSSODescriptor or 
+     * SPSSODescriptor will be removed from the metadata.
 	 *
 	 * @param DOMElement $input_elm The element to be validated
 	 *
@@ -307,9 +310,6 @@ class sspmod_kvalidate_Validator {
     private function _processEntityDescriptor(DOMElement $input_elm)
     {
     	$status = array();
-    	
-    	// Start by doing checks on the EntityDescriptor it self
-        $status['vED'] = $this->_vED($input_elm);
 
 		// Validate all IDPSSODescriptors
 		$query = 'md:IDPSSODescriptor';
@@ -677,16 +677,94 @@ class sspmod_kvalidate_Validator {
     }
 
 	/**
-	 * vED validation check
+	 * vEntitiesValidUntil validation check
 	 *
-	 * <md:EntityDescriptor> must contain a validUntil attribute. The
-	 * validUntil timestamp is between 6 and 96 hours in the furure.
+	 * <md:EntitiesDescriptor> can contain a validUntil attribute. The
+	 * validUntil timestamp must be between 6 and 96 hours in the furure. If a 
+     * valid validUntil attribute is not found, all child EntityDescriptor is 
+     * searched for valid validUntil attributes,
 	 * 
 	 * @param DOMElement $input_elm The element to be validated
 	 *
 	 * @return bool True if the check clears othervise false
 	 */   
-    private function _vED(DOMElement $input_elm)
+    private function _vEntitiesValidUntil(DOMElement $input_elm)
+    {
+        $error = false;
+
+        $att_validUntil = $input_elm->getAttribute('validUntil');
+
+        // Check if the EntitiesDescriptor contains a validUntil attribute
+        if(!empty($att_validUntil)) {
+        	// Validate the timestamp
+        	$validTime = strtotime($att_validUntil);
+        	$minTime = time() + (60*60*6-30);
+        	$maxTime = time() + (60*60*96+30);
+        	
+        	if( ($validTime-$minTime) < 0 ) {
+        		$this->_messages[] = array(
+                	'level' => KV_STATUS_ERROR,
+                	'msg' => '[DOCUMENT] validUntil MUST be at least 6 hours in the future. validUntil set to ' . $att_validUntil . '<br />MUST be at least ' . date('c', $minTime),
+                	'line' => $input_elm->getLineNo(),
+            	);
+            	$this->_status = KV_STATUS_ERROR;
+                $error = true;
+            }
+
+        	if( ($maxTime - $validTime) < 0 ) {
+        		$this->_messages[] = array(
+                	'level' => KV_STATUS_ERROR,
+                	'msg' => '[DOCUMENT] validUntil MUST not be more that 96 hours in the future. validUntil set to ' . $att_validUntil . '<br />MUST not be more than ' . date('c', $maxTime),
+                	'line' => $input_elm->getLineNo(),
+            	);
+            	$this->_status = KV_STATUS_ERROR;
+                $error = true;
+        	}
+
+            // validUntil is good. No need to check all EntityDescriptor
+            if(!$error) {
+                $this->_messages[] = array(
+                    'level' => KV_STATUS_SUCCESS,
+                    'msg' => '[DOCUMENT] vEntitiesValidUntil check parsed',
+                    'line' => $input_elm->getLineNo(),
+                ); 
+                return true;
+            }
+        }
+
+		// Validate validUntil on all EntityDescriptor
+		$query = 'md:EntityDescriptor';
+        $elms = $this->_xpath->query($query, $input_elm);
+
+        $status = array();
+
+        foreach($elms AS $elm) {
+            $status[$input_elm->getAttribute('entityID')] = $this->_vEntityValidUntil($elm);
+        }
+
+        if(!in_array(false, $status)) {
+            $this->_messages[] = array(
+                'level' => KV_STATUS_SUCCESS,
+                'msg' => '[DOCUMENT] vEntitiesValidUntil check parsed',
+                'line' => $input_elm->getLineNo(),
+            ); 
+            return true;
+        }
+
+        return false;
+    }
+
+	/**
+	 * vEntityValidUntil validation check
+	 *
+	 * <md:EntityDescriptor> must contain a validUntil attribute. The
+     * validUntil timestamp must be between 6 and 96 hours in the furure.
+	 * 
+	 * @param DOMElement $input_elm The element to be validated
+	 *
+	 * @return bool True if the check clears othervise false
+	 */   
+    private function _vEntityValidUntil(DOMElement $input_elm)
     {
         $att_validUntil = $input_elm->getAttribute('validUntil');
 
@@ -699,45 +777,45 @@ class sspmod_kvalidate_Validator {
             $this->_status = KV_STATUS_ERROR;
             return false;
         } else {
-        	// Validate the timestamp
-        	$validTime = strtotime($att_validUntil);
-        	$minTime = time() + (60*60*6-30);
-        	$maxTime = time() + (60*60*96+30);
-        	
-        	if( ($validTime-$minTime) < 0 ) {
-        		$this->_messages[] = array(
-                	'level' => KV_STATUS_ERROR,
-                	'msg' => '[' . $input_elm->getAttribute('entityID') . '] validUntil MUST be at least 6 hours in the future. validUntil set to ' . $att_validUntil . '<br />MUST be at least ' . date('c', $minTime),
-                	'line' => $input_elm->getLineNo(),
-            	);
-            	$this->_status = KV_STATUS_ERROR;
-            	return false;
-        	}
+            // Validate the timestamp
+            $validTime = strtotime($att_validUntil);
+            $minTime = time() + (60*60*6-30);
+            $maxTime = time() + (60*60*96+30);
 
-        	if( ($maxTime - $validTime) < 0 ) {
-        		$this->_messages[] = array(
-                	'level' => KV_STATUS_ERROR,
-                	'msg' => '[' . $input_elm->getAttribute('entityID') . '] validUntil MUST not be more that 96 hours in the future. validUntil set to ' . $att_validUntil . '<br />MUST not be more than ' . date('c', $maxTime),
-                	'line' => $input_elm->getLineNo(),
-            	);
-            	$this->_status = KV_STATUS_ERROR;
-            	return false;
-        	}
-        	
-            $this->_messages[] = array(
-                'level' => KV_STATUS_SUCCESS,
-                'msg' => '[' . $input_elm->getAttribute('entityID') . '] vED check parsed',
-                'line' => $input_elm->getLineNo(),
-            ); 
-            return true;
+            if( ($validTime-$minTime) < 0 ) {
+                $this->_messages[] = array(
+                    'level' => KV_STATUS_ERROR,
+                    'msg' => '[' . $input_elm->getAttribute('entityID') . '] validUntil MUST be at least 6 hours in the future. validUntil set to ' . $att_validUntil . '<br />MUST be at least ' . date('c', $minTime),
+                    'line' => $input_elm->getLineNo(),
+                );
+                $this->_status = KV_STATUS_ERROR;
+                return false;
+            }
+
+            if( ($maxTime - $validTime) < 0 ) {
+                $this->_messages[] = array(
+                    'level' => KV_STATUS_ERROR,
+                    'msg' => '[' . $input_elm->getAttribute('entityID') . '] validUntil MUST not be more that 96 hours in the future. validUntil set to ' . $att_validUntil . '<br />MUST not be more than ' . date('c', $maxTime),
+                    'line' => $input_elm->getLineNo(),
+                );
+                $this->_status = KV_STATUS_ERROR;
+                return false;
+            }
         }
+
+        $this->_messages[] = array(
+            'level' => KV_STATUS_SUCCESS,
+            'msg' => '[' . $input_elm->getAttribute('entityID') . '] vED check parsed',
+            'line' => $input_elm->getLineNo(),
+        ); 
+        return true;
     }
 
-	/**
-	 * vSLO validation check
-	 *
-	 * <md:SingleLogoutService> must use the HTTP-REDIRECT binding
-	 * 
+    /**
+     * vSLO validation check
+     *
+     * <md:SingleLogoutService> must use the HTTP-REDIRECT binding
+     * 
 	 * @param DOMElement $input_elm The element to be validated
 	 *
 	 * @return bool True if the check clears othervise false
