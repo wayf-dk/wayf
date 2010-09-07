@@ -347,6 +347,7 @@ class sspmod_kvalidate_Validator {
         $status['vSSO'] = $this->_vSSO($input_elm);
         $status['vSLO'] = $this->_vSLO($input_elm);
         $status['vScope'] = $this->_vScope($input_elm);
+        $status['vExtension'] = $this->_vExtension($input_elm);
         $status['vSign'] = $this->_vSign($input_elm);
         
         return !in_array(false, $status);
@@ -384,7 +385,8 @@ class sspmod_kvalidate_Validator {
 	 * vEnc validation check
 	 *
 	 * <md:SPSSOdescriptor> must contain a certificate for encrypting if ACS
-	 * endpoint is HTTP.
+	 * endpoint is HTTP. A warning i shown if the included certificate is not 
+     * marked for encryption.
 	 * 
 	 * @param DOMElement $input_elm The element to be validated
 	 *
@@ -392,6 +394,7 @@ class sspmod_kvalidate_Validator {
 	 */
     private function _vEnc(DOMElement $input_elm)
     {
+        $kd_found = false;
         $query = 'md:AssertionConsumerService';
         $elms = $this->_xpath->query($query, $input_elm);
 
@@ -409,15 +412,26 @@ class sspmod_kvalidate_Validator {
                     foreach($elms AS $elm) {
                         if($elm->hasAttribute('use')) {
                             if($elm->getAttribute('use') == 'encryption') {
-                                $this->_messages[] = array( 
-                                    'level' => KV_STATUS_SUCCESS,
-                                    'msg' => '[' . $input_elm->parentNode->getAttribute('entityID') . '] vEnc check parsed',
-                                    'line' => $elm->getLineNo(),
-                                );
-                                return true; 
+                                $kd_found = true;
                             }
+                        } else {
+                            $this->_messages[] = array( 
+                                'level' => KV_STATUS_WARNING,
+                                'msg' => '[' . $input_elm->patentNode->getAttribute('entityID') . '] `use` attribute not given in `KeyDescriptor`. Should be set to `encryption`',
+                                'line' => $input_elm->getLineNo(),
+                            );
+                            $kd_found = true;
                         }
                     }
+                    if($kd_found) {
+                        $this->_messages[] = array( 
+                            'level' => KV_STATUS_SUCCESS,
+                            'msg' => '[' . $input_elm->parentNode->getAttribute('entityID') . '] vEnc check parsed',
+                            'line' => $elm->getLineNo(),
+                        );
+                        return true; 
+                    }
+
                     $this->_messages[] = array( 
                         'level' => KV_STATUS_ERROR,
                         'msg' => '[' . $input_elm->parentNode->getAttribute('entityID') . '] No certificate for encryption found',
@@ -534,10 +548,58 @@ class sspmod_kvalidate_Validator {
         return false;
     }
 
+    /**
+     * vExtension check
+     *
+     * <md:Extensions> must not contain other elements than <shibmd:Scope>
+     *
+	 * @param DOMElement $input_elm The element to be validated
+	 *
+	 * @return bool True if the check clears othervise false
+     */
+    private function _vExtension(DOMElement $input_elm)
+    {
+        $error = false;
+
+        $query = 'md:Extensions';
+
+        $elms = $this->_xpath->query($query, $input_elm);
+
+        foreach($elms AS $elm) {
+            if($elm->hasChildNodes()) {
+                $sub_elms = $elm->childNodes;
+                foreach($sub_elms AS $sub_elm) {
+                    $nodeName = $sub_elm->nodeName;
+                    if($nodeName != 'shibmd:Scope') {
+                        $this->_messages[] = array( 
+                            'level' => KV_STATUS_ERROR,
+                            'msg' => '[' . $input_elm->parentNode->getAttribute('entityID') . '] Only `shibmd:Scope` element allowed in `Extensions` element. `' . $nodeName . '` given',
+                            'line' => $elm->getLineNo(),
+                        ); 
+                        $error = true;
+                        $this->_status = KV_STATUS_ERROR;
+                    }    
+                }
+            }
+        }
+
+        if(!$error) {
+            $this->_messages[] = array( 
+                'level' => KV_STATUS_SUCCESS,
+                'msg' => '[' . $input_elm->parentNode->getAttribute('entityID') . '] vExtension check parsed',
+                'line' => $input_elm->getLineNo(),
+            );
+            return true; 
+        }
+        
+        return false;
+    }
+
 	/**
 	 * vScope validation check
 	 *
-	 * <md:IDPSSOdescriptor> must contain at least <shibmd:Scope>
+	 * <md:IDPSSOdescriptor> must contain at least <shibmd:Scope> and `regexp` 
+     * attribute must be set to false.
 	 * 
 	 * @param DOMElement $input_elm The element to be validated
 	 *
@@ -553,6 +615,16 @@ class sspmod_kvalidate_Validator {
 
         $elms = $this->_xpath->query($query, $input_elm);
 
+        if($elms->length == 0) {
+            $this->_messages[] = array( 
+                'level' => KV_STATUS_ERROR,
+                'msg' => '[' . $input_elm->parentNode->getAttribute('entityID') . '] `shibmd:Scope` is missing',
+                'line' => $input_elm->getLineNo(),
+            );
+            $this->_status = KV_STATUS_ERROR;
+            return false;
+        }
+
         foreach($elms AS $elm) {
             if(empty($elm->nodeValue)) {
                 $this->_messages[] = array( 
@@ -563,6 +635,18 @@ class sspmod_kvalidate_Validator {
                 $error = true;
                 $this->_status = KV_STATUS_ERROR;
             }    
+            if($elm->hasAttribute('regexp')) {
+                $attr = $elm->getAttribute('regexp');
+                if($attr != 'false') {
+                    $this->_messages[] = array( 
+                        'level' => KV_STATUS_ERROR,
+                        'msg' => '[' . $input_elm->parentNode->getAttribute('entityID') . '] `regexp` attribute on ´shibmd:Scope´ is set to ' . $attr . '. MUST be set to `false` or omitted',
+                        'line' => $elm->getLineNo(),
+                    ); 
+                    $error = true;
+                    $this->_status = KV_STATUS_ERROR;
+                }
+            }
         }
 
         if(!$error) {
@@ -644,7 +728,7 @@ class sspmod_kvalidate_Validator {
 	 */   
     private function _vSLO(DOMElement $input_elm)
     {
-        $query = '//md:SingleLogoutService';
+        $query = 'md:SingleLogoutService';
         $elms = $this->_xpath->query($query, $input_elm);
 
         if($elms->length == 0) {
@@ -684,13 +768,13 @@ class sspmod_kvalidate_Validator {
 	 */    
     private function _vACS(DOMElement $input_elm)
     {
-        $query = '//md:AssertionConsumerService';
+        $query = 'md:AssertionConsumerService';
         $elms = $this->_xpath->query($query, $input_elm);
 
         foreach($elms AS $elm) {
             $binding = $elm->getAttribute('Binding');
         
-            if($binding = 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST') {
+            if($binding == 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST') {
                 $this->_messages[] = array(
                     'level' => KV_STATUS_SUCCESS,
                     'msg' => '[' . $elm->parentNode->parentNode->getAttribute('entityID') . '] vACS check parsed',
@@ -758,8 +842,19 @@ class sspmod_kvalidate_Validator {
 	 */    
     private function _vEDSignature(DOMElement $input_elm)
     {
-   		$ed = new SAML2_XML_md_EntitiesDescriptor($input_elm);
-   		$validCerts = $ed->getValidatingCertificates();
+        try {
+            $ed = new SAML2_XML_md_EntitiesDescriptor($input_elm);
+            // Will throw an exception if signature is invalid
+            $validCerts = $ed->getValidatingCertificates();
+        } catch(Exception $e) {
+			$this->_messages[] = array(
+            	'level' => KV_STATUS_ERROR,
+            	'msg' => '[DOCUMENT] ' . $e->getMessage(),
+            	'line' => $input_elm->getLineNo(),
+        	); 
+        	$this->_status = KV_STATUS_ERROR;
+        	return false;
+        }
 
 		if(empty($validCerts)) {
 			$this->_messages[] = array(

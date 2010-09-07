@@ -42,7 +42,13 @@ if(!empty($_REQUEST['md_url']) || !empty($_REQUEST['md_xml'])) {
 	$config['REMOVE_ENTITYDESCRIPTOR'] = isset($_REQUEST['remove_ed']) ? true : false;
 
     if(!empty($_REQUEST['md_url'])) {
-	    $md_url = filter_var($_REQUEST['md_url'], FILTER_VALIDATE_URL);
+        /**
+         * Can not be used because of bug in FILTER_VALIDATE_URL 
+         * (http://bugs.php.net/bug.php?id=51192). Bug should be fixed in PHP 
+         * 5.3.3/5.2.14
+         */
+	    //$md_url = filter_var($_REQUEST['md_url'], FILTER_VALIDATE_URL);
+	    $md_url = $_REQUEST['md_url'];
 	    $t->data['md_url'] = $md_url;
 	    $xml = file_get_contents($md_url);
     } else if(!empty($_REQUEST['md_xml'])) {

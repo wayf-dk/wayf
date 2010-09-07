@@ -54,9 +54,14 @@ $validator = new sspmod_kvalidate_Validator($config);
 ksort($tag);
 
 foreach($tag AS $k => $entity) {
-	$md_url = filter_var($entity['url'], FILTER_VALIDATE_URL);
+    /**
+     * Can not be used because of bug in FILTER_VALIDATE_URL 
+     * (http://bugs.php.net/bug.php?id=51192). Bug should be fixed in PHP 
+     * 5.3.3/5.2.14
+     */
+    //$md_url = filter_var($entity['url'], FILTER_VALIDATE_URL);
+	$md_url = $entity['url'];
 	$xml = file_get_contents($md_url);
-	
 	$t->data['entities'][$k]['xml'] = $validator->validate($xml);
 	$t->data['entities'][$k]['messages'] = $validator->getMessages();
 	$t->data['entities'][$k]['status'] = $validator->getStatus();
