@@ -244,7 +244,9 @@ class sspmod_kvalidate_Validator {
 	/**
 	 * Validate an EntitiesDescriptor
 	 *
-	 * All embeded EntityDescriptor and EntitiesDescriptor will be validated
+	 * All embeded EntityDescriptor and EntitiesDescriptor will be validated. 
+     * Nested EntitiesDescriptor is not allowed and will be removed if option 
+     * set in config.
 	 *
 	 * @param DOMElement $input_elm The element to be validated
 	 *
@@ -257,9 +259,23 @@ class sspmod_kvalidate_Validator {
         $elms = $this->_xpath->query($query, $input_elm);
         
         if($elms->length > 0) {
-        	foreach($elms AS $elm) {
-            	$this->_processEntitiesDescriptor($elm);
-        	}
+            $this->_messages[] = array( 
+                'level' => KV_STATUS_ERROR,
+                'msg' => '[DOCUMENT] Nested EntitiesDescriptor not allowed',
+                'line' => $input_elm->getLineNo(),
+            ); 
+            foreach($elms AS $elm) {
+                // Remove EntitiesDescriptor because nested EntitiesDescritor is 
+                // not allowed.
+                if($this->_config['REMOVE_ENTITYDESCRIPTOR']) {
+                    $this->_messages[] = array( 
+                        'level' => KV_STATUS_WARNING,
+                        'msg' => '[DOCUMENT] Nested EntitiesDescriptor has been removed',
+                        'line' => $elm->getLineNo(),
+                    );
+                    $parentNode = $elm->parentNode->removeChild($elm);
+                }
+            }
         }
 	
 		// Validate all EntityDescriptor
