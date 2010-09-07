@@ -99,7 +99,7 @@ $this->data['head'] = '
 			font-family: monospace;
 			text-align: left;
 		}
-		body {margin: 0px; margin-left: 5px;}
+		body {margin: 0px; margin-left: 0px;}
 		td {vertical-align: top;}
 		code {white-space: nowrap;}
 	</style>';
