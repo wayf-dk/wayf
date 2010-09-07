@@ -349,6 +349,7 @@ class sspmod_kvalidate_Validator {
 	 * - vSLO
 	 * - vScope
 	 * - vSign
+	 * - vOrgName
 	 *
 	 * @param DOMElement $input_elm The element to be validated
 	 *
@@ -365,6 +366,7 @@ class sspmod_kvalidate_Validator {
         $status['vScope'] = $this->_vScope($input_elm);
         $status['vExtension'] = $this->_vExtension($input_elm);
         $status['vSign'] = $this->_vSign($input_elm);
+        $status['vOrgName'] = $this->_vOrgName($input_elm);
         
         return !in_array(false, $status);
     }
@@ -378,6 +380,7 @@ class sspmod_kvalidate_Validator {
 	 * - vSLO
 	 * - vRequestAttr
 	 * - vEnc
+     * - vNameDesc
 	 *
 	 * @param DOMElement $input_elm The element to be validated
 	 *
@@ -393,8 +396,125 @@ class sspmod_kvalidate_Validator {
         $status['vSLO'] = $this->_vSLO($input_elm);
         $status['vRequestAttr'] = $this->_vRequestAttr($input_elm);
         $status['vEnc'] = $this->_vEnc($input_elm);
+        $status['vNameDesc'] = $this->_vNameDesc($input_elm);
         
         return !in_array(false, $status);
+    }
+
+	/**
+	 * vNameDesc validation check
+	 *
+     * <md:AttributeCinsumingService> must contain a english name and 
+     * description.
+	 * 
+	 * @param DOMElement $input_elm The element to be validated
+	 *
+	 * @return bool True if the check clears othervise false
+	 */
+    private function _vNameDesc(DOMElement $input_elm)
+    {
+        $query = 'md:AttributeConsumingService';
+
+        $elms = $this->_xpath->query($query, $input_elm);
+
+        foreach($elms AS $elm) {
+            $query_name = 'md:ServiceName';
+
+            $elms_name = $this->_xpath->query($query_name, $elm);
+
+            $found_name = false;
+            foreach($elms_name AS $elm_name) {
+                if($elm_name->getAttribute('xml:lang') == 'en') {
+                    $found_name = true;
+                    break;
+                }
+            }
+            if(!$found_name) {
+                $this->_messages[] = array( 
+                    'level' => KV_STATUS_ERROR,
+                    'msg' => '[' . $input_elm->parentNode->getAttribute('entityID') . '] No english name found for service',
+                    'line' => $input_elm->getLineNo(),
+                );
+                return true;
+            }
+
+            $query_desc = 'md:ServiceDescription';
+
+            $elms_desc = $this->_xpath->query($query_desc, $elm);
+
+            $found_desc = false;
+            foreach($elms_desc AS $elm_desc) {
+                if($elm_desc->getAttribute('xml:lang') == 'en') {
+                    $found_desc = true;
+                    break;
+                }
+            }
+            if(!$found_desc) {
+                $this->_messages[] = array( 
+                    'level' => KV_STATUS_ERROR,
+                    'msg' => '[' . $input_elm->parentNode->getAttribute('entityID') . '] No english description found for service',
+                    'line' => $input_elm->getLineNo(),
+                );
+                return true;
+            }
+        }
+
+        if($found_name && $found_desc) {
+            $this->_messages[] = array( 
+                'level' => KV_STATUS_SUCCESS,
+                'msg' => '[' . $input_elm->parentNode->getAttribute('entityID') . '] vNameDesc check parsed',
+                'line' => $input_elm->getLineNo(),
+            );
+            return true;
+        }
+    }
+
+	/**
+	 * vOrgName validation check
+	 *
+     * <md:EntityDescriptor> must contain a english name in the 
+     * <md:Organization> element.
+	 * 
+	 * @param DOMElement $input_elm The element to be validated
+	 *
+	 * @return bool True if the check clears othervise false
+	 */
+    private function _vOrgName(DOMElement $input_elm)
+    {
+        $query = 'md:Organization';
+
+        $elms = $this->_xpath->query($query, $input_elm->parentNode);
+
+        foreach($elms AS $elm) {
+            $query_name = 'md:OrganizationName';
+
+            $elms_name = $this->_xpath->query($query_name, $elm);
+
+            $found_name = false;
+            foreach($elms_name AS $elm_name) {
+                if($elm_name->getAttribute('xml:lang') == 'en') {
+                    $found_name = true;
+                    break;
+                }
+            }
+            if(!$found_name) {
+                $this->_messages[] = array( 
+                    'level' => KV_STATUS_ERROR,
+                    'msg' => '[' . $input_elm->parentNode->getAttribute('entityID') . '] No english name found for IdP',
+                    'line' => $input_elm->getLineNo(),
+                );
+                return true;
+            }
+        }
+
+        if($found_name) {
+            $this->_messages[] = array( 
+                'level' => KV_STATUS_SUCCESS,
+                'msg' => '[' . $input_elm->parentNode->getAttribute('entityID') . '] vOrgName check parsed',
+                'line' => $input_elm->getLineNo(),
+            );
+            return true;
+        }
     }
 
 	/**
