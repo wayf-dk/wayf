@@ -259,12 +259,12 @@ class sspmod_kvalidate_Validator {
         $elms = $this->_xpath->query($query, $input_elm);
         
         if($elms->length > 0) {
-            $this->_messages[] = array( 
-                'level' => KV_STATUS_ERROR,
-                'msg' => '[DOCUMENT] Nested EntitiesDescriptor not allowed',
-                'line' => $input_elm->getLineNo(),
-            ); 
             foreach($elms AS $elm) {
+                $this->_messages[] = array( 
+                    'level' => KV_STATUS_ERROR,
+                    'msg' => '[DOCUMENT] Nested EntitiesDescriptor not allowed',
+                    'line' => $elm->getLineNo(),
+                ); 
                 // Remove EntitiesDescriptor because nested EntitiesDescritor is 
                 // not allowed.
                 if($this->_config['REMOVE_ENTITYDESCRIPTOR']) {
