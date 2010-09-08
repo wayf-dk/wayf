@@ -131,7 +131,9 @@ if($this->data['show_md_xml'] || (!$this->data['show_md_xml'] && !$this->data['s
             <td style="width: 20%;">XML:</td>
             <td>
             <textarea name="md_xml" style="width: 100%;" rows=20>';
-    echo $this->data['orig_xml'];
+    if(isset($this->data['orig_xml'])) {
+        echo $this->data['orig_xml'];
+    }
     echo '</textarea>
             </td>
         </tr>';
