@@ -220,7 +220,7 @@ class sspmod_kvalidate_Validator {
         	$this->_vEDSignature($sigXML->documentElement);
             $this->_processEntitiesDescriptor($root_element);
         } else if($root_element->localName == 'EntityDescriptor'){
-            $this->_vEntityValidUntil($input_elm);
+            $this->_vEntityValidUntil($root_element);
             $this->_processEntityDescriptor($root_element);
         } else {
             $this->_messages[] = array( 
