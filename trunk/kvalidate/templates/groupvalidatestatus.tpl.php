@@ -62,31 +62,35 @@ $this->includeAtTemplateBase('includes/header.php');
 
 echo '<h1>' . $this->t('{kvalidate:kvalidate:groupvalidation_header}') . ' - ' . $this->data['group'] . '</h1>';
 
-echo '<p>Below you can see the validation status of the metadata.</p>';
-echo '
-<table style="width: 300px;">
-	<tr>
-		<th>Status</th>
-		<th>Entity</th>
-		<th></th>
-	</tr>';
-	
-foreach($this->data['entities'] AS $k => $v) {
-	echo '<tr>';
-	if($v['status'] == KV_STATUS_SUCCESS || $v['status'] == KV_STATUS_WARNING) {
-		echo '<td>';
-		echo '<img src="/' . $this->data['baseurlpath'] . 'resources/icons/silk/accept.png" alt="Metadata is valid" />';
-		echo '</td>';
-	} else if($v['status'] == KV_STATUS_ERROR) {
-		echo '<td>';
-		echo '<img src="/' . $this->data['baseurlpath'] . 'resources/icons/silk/exclamation.png" alt="Metadata is valid" />';
-		echo '</td>';
-	}
-	echo '<td>' . $v['name'] . '</td>';
-	echo '<td><a href="validate.php?md_url=' . rawurlencode($v['url']) . '&show_warning&show_xml&show_md_url"><b>Details</b></a></td>';
-	echo '</tr>';	
-}	
-	
-echo '</table>';
+if(isset($this->data['error'])) {
+    echo '<br /><p style="color: #FF0000; font-weight: bold;">' . $this->data['error'] . '</p>';
+} else {
+    echo '<p>Below you can see the validation status of the metadata.</p>';
+    echo '
+        <table style="width: 300px;">
+        <tr>
+        <th>Status</th>
+        <th>Entity</th>
+        <th></th>
+        </tr>';
+
+    foreach($this->data['entities'] AS $k => $v) {
+        echo '<tr>';
+        if($v['status'] == KV_STATUS_SUCCESS || $v['status'] == KV_STATUS_WARNING) {
+            echo '<td>';
+            echo '<img src="/' . $this->data['baseurlpath'] . 'resources/icons/silk/accept.png" alt="Metadata is valid" />';
+            echo '</td>';
+        } else if($v['status'] == KV_STATUS_ERROR) {
+            echo '<td>';
+            echo '<img src="/' . $this->data['baseurlpath'] . 'resources/icons/silk/exclamation.png" alt="Metadata is valid" />';
+            echo '</td>';
+        }
+        echo '<td>' . $v['name'] . '</td>';
+        echo '<td><a href="validate.php?md_url=' . rawurlencode($v['url']) . '&show_warning&show_xml&show_md_url"><b>Details</b></a></td>';
+        echo '</tr>';	
+    }	
+
+    echo '</table>';
+}
 
 $this->includeAtTemplateBase('includes/footer.php');
