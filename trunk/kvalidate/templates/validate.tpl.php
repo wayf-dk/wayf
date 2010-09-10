@@ -140,25 +140,25 @@ if($this->data['show_md_xml'] || (!$this->data['show_md_xml'] && !$this->data['s
 }
 echo '
 		<tr>
-			<td>Show completed checks:</td>
+			<td>' . $this->t('{kvalidate:kvalidate:show_completed_checks}') . ':</td>
 			<td>
 				<input type="checkbox" name="show_success">
 			</td>
 		</tr>
 		<tr>
-			<td>Show warnings:</td>
+			<td>' . $this->t('{kvalidate:kvalidate:show_warnings}') . ':</td>
 			<td>
 				<input type="checkbox" name="show_warning" checked="checked">
 			</td>
 		</tr>
 		<tr>
-			<td>Show XML:</td>
+			<td>' . $this->t('{kvalidate:kvalidate:show_xml}') . ':</td>
 			<td>
 				<input type="checkbox" name="show_xml" checked="checked">
 			</td>
 		</tr>
 		<tr>
-			<td>Remove invalid EntityDescriptor:</td>
+			<td>' . $this->t('{kvalidate:kvalidate:remove_entities}') . ':</td>
 			<td>
 				<input type="checkbox" name="remove_ed">
 			</td>
@@ -176,9 +176,9 @@ if(isset($this->data['xml'])) {
 	echo '<p>' . $this->t('{kvalidate:kvalidate:status_description}') . '</p>';	
 	
 	if($this->data['status'] == KV_STATUS_SUCCESS || $this->data['status'] == KV_STATUS_WARNING) {
-		echo '<p style="text-align: center; font-size: 20px; font-weight: bold; border: 1px solid #000000; width: 95%;"><img src="/' . $this->data['baseurlpath'] . 'resources/icons/checkmark48.png" alt="Metadata is valid" style="display: inline; padding-left: 10px;" />' . '</h2>';
+		echo '<p style="text-align: center; font-size: 20px; font-weight: bold; border: 1px solid #000000; width: 95%;"><img src="/' . $this->data['baseurlpath'] . 'resources/icons/checkmark48.png" alt="' . $this->t('{kvalidate:kvalidate:status_ok}') . '" style="display: inline; padding-left: 10px;" />' . '</h2>';
 		echo $this->t('{kvalidate:kvalidate:status_ok}');
-		echo '<img src="/' . $this->data['baseurlpath'] . 'resources/icons/checkmark48.png" alt="Metadata is valid" style="display: inline; padding-left: 10px;" />' . '</p>';
+		echo '<img src="/' . $this->data['baseurlpath'] . 'resources/icons/checkmark48.png" alt="' . $this->t('{kvalidate:kvalidate:status_ok}') . '" style="display: inline; padding-left: 10px;" />' . '</p>';
 	} else {
 		echo '<p style="text-align: center; font-size: 20px; font-weight: bold; border: 1px solid #000000; width: 95%;">' . $this->t('{kvalidate:kvalidate:status_error}') . '</p>';
 	}
@@ -188,8 +188,6 @@ if(isset($this->data['xml'])) {
 	foreach($this->data['messages'] AS $msg) {
 		if($msg['level'] == KV_STATUS_SUCCESS && $this->data['show_success']) {
 			echo '<div style="border: 1px solid #7fa748; background: #5F911B; margin-bottom: 10px; padding: 5px; color: white; font-weight: bold; width: 95%;">';
-			//echo '<img src="/' . $this->data['baseurlpath'] . 'resources/icons/checkmark48.png" alt="Metadata is valid" style="float: left;" />';
-			//echo 'In line: ' . $msg['line'] . '<br />';
 			echo $msg['msg'];
 			echo '</div>';
 		} else if($msg['level'] == KV_STATUS_ERROR) {
@@ -210,14 +208,14 @@ if(isset($this->data['xml'])) {
 	if($this->data['show_xml']) {
 		// Display the XML source with line numbers
 		echo '<h2>' . $this->t('{kvalidate:kvalidate:xml_source}') . '</h2>';
-		echo '<p><b>NOTE</b> Do not copy paste the XML below as it is formatted for easy reading and is not correct. Please use the original source.</p>';
+		echo '<p>' . $this->t('{kvalidate:kvalidate:note_xml}') . '</p>';
 		
 		if($xml = xmlpp($this->data['xml'])) {
 			$lines = implode(range(1, preg_match_all('/\<br\s\/\>/', $xml, $matches)+1), '<br />');	
 		
 			echo '<table><tr><td class="num">' . $lines . '</td><td class="xml">' . $xml . '</td></tr></table>';
 		} else {
-			echo '<p>The XML surce can not be displayed</p>';
+			echo '<p>' . $this->t('{kvalidate:kvalidate:xml_no_show}') . '</p>';
 		}
 	}
 }
