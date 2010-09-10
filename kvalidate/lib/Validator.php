@@ -649,8 +649,28 @@ class sspmod_kvalidate_Validator {
         }
         
         $error = false;
-        
+
         foreach($elms AS $elm) {
+        	if(!$elm->hasAttribute('Name')) {
+        		$this->_messages[] = array( 
+            		'level' => KV_STATUS_ERROR,
+            		'msg' => '[' . $input_elm->parentNode->getAttribute('entityID') . '] RequestedAttribute do not have the Name attribute',
+            		'line' => $elm->getLineNo(),
+        		); 
+        		$this->_status = KV_STATUS_ERROR;
+        		$error = true;
+        	} else {
+                $name = $elm->getAttribute('Name');
+        		if(preg_match_all('/^urn:oid:([0-9]+\.)*([0-9]+)$/', $name, $matches) != 1) {
+        			$this->_messages[] = array( 
+            			'level' => KV_STATUS_ERROR,
+            			'msg' => '[' . $input_elm->parentNode->getAttribute('entityID') . '] RequestedAttribute do not have the correct Name. the value is required to be in urn:oid format but ' . $name . ' specified',
+            			'line' => $elm->getLineNo(),
+        			); 
+        			$this->_status = KV_STATUS_ERROR;
+        			$error = true;
+                }
+        	}
         	if(!$elm->hasAttribute('NameFormat')) {
         		$this->_messages[] = array( 
             		'level' => KV_STATUS_ERROR,
