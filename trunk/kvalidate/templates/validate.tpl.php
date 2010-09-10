@@ -80,30 +80,10 @@ function xmlpp($xml) {
 }  
 
 // --------------------------------------------------------------
+
 $this->data['header'] = $this->t('{kvalidate:kvalidate:title}');
 
-$this->data['head'] = '
-	<style type="text/css">
-		.num {
-			float: left;
-			color: gray;
-			font-size: 13px;
-			font-family: monospace;
-			text-align: right;
-			margin-right: 6pt;
-			padding-right: 6pt;
-			border-right: 1px solid gray;
-		}
-		.xml {
-			font-size: 13px;
-			font-family: monospace;
-			text-align: left;
-		}
-		body {margin: 0px; margin-left: 0px;}
-		td {vertical-align: top;}
-		code {white-space: nowrap;}
-	</style>';
-
+$this->data['head'] = '<link rel="stylesheet" type="text/css" href="resources/style.css" />';
 
 $this->includeAtTemplateBase('includes/header.php');
 
@@ -176,7 +156,8 @@ if(isset($this->data['xml'])) {
 	echo '<p>' . $this->t('{kvalidate:kvalidate:status_description}') . '</p>';	
 	
 	if($this->data['status'] == KV_STATUS_SUCCESS || $this->data['status'] == KV_STATUS_WARNING) {
-		echo '<p style="text-align: center; font-size: 20px; font-weight: bold; border: 1px solid #000000; width: 95%;"><img src="/' . $this->data['baseurlpath'] . 'resources/icons/checkmark48.png" alt="' . $this->t('{kvalidate:kvalidate:status_ok}') . '" style="display: inline; padding-left: 10px;" />' . '</h2>';
+        echo '<p style="text-align: center; font-size: 20px; font-weight: bold; border: 1px solid #000000; width: 95%;">';
+        echo '<img src="/' . $this->data['baseurlpath'] . 'resources/icons/checkmark48.png" alt="' . $this->t('{kvalidate:kvalidate:status_ok}') . '" style="display: inline; padding-left: 10px;" />';
 		echo $this->t('{kvalidate:kvalidate:status_ok}');
 		echo '<img src="/' . $this->data['baseurlpath'] . 'resources/icons/checkmark48.png" alt="' . $this->t('{kvalidate:kvalidate:status_ok}') . '" style="display: inline; padding-left: 10px;" />' . '</p>';
 	} else {
