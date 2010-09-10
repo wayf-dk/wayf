@@ -1,0 +1,29 @@
+body {
+    margin: 0px; 
+    margin-left: 0px;
+}
+
+td {
+    vertical-align: top;
+}
+
+code {
+    white-space: nowrap;
+}
+
+.num {
+    float: left;
+    color: gray;
+    font-size: 13px;
+    font-family: monospace;
+    text-align: right;
+    margin-right: 6pt;
+    padding-right: 6pt;
+    border-right: 1px solid gray;
+}
+
+.xml {
+    font-size: 13px;
+    font-family: monospace;
+    text-align: left;
+}
