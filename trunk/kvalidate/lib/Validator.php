@@ -417,12 +417,14 @@ class sspmod_kvalidate_Validator {
 
         $elms = $this->_xpath->query($query, $input_elm);
 
+        $found_name = false;
+        $found_desc = false;
+
         foreach($elms AS $elm) {
             $query_name = 'md:ServiceName';
 
             $elms_name = $this->_xpath->query($query_name, $elm);
 
-            $found_name = false;
             foreach($elms_name AS $elm_name) {
                 if($elm_name->getAttribute('xml:lang') == 'en') {
                     $found_name = true;
@@ -442,7 +444,6 @@ class sspmod_kvalidate_Validator {
 
             $elms_desc = $this->_xpath->query($query_desc, $elm);
 
-            $found_desc = false;
             foreach($elms_desc AS $elm_desc) {
                 if($elm_desc->getAttribute('xml:lang') == 'en') {
                     $found_desc = true;
