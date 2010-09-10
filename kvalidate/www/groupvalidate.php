@@ -35,17 +35,23 @@ if(isset($_GET['tag'])) {
 		$tag = $tags[$_GET['tag']];
 	} else {
 		$error = 'Tag not defined';
-		exit;
 	}
 } else {
+    $_GET['tag'] = '';
 	$error = 'No tag given';
-	exit;
 }
 
 $t = new SimpleSAML_XHTML_Template($globalConfig, 'kvalidate:groupvalidatestatus.tpl.php');
 
-$t->data['entities'] = array();
 $t->data['group'] = htmlentities($_GET['tag']);
+
+if(isset($error)) {
+    $t->data['error'] = $error;
+    $t->show();
+    exit;
+}
+
+$t->data['entities'] = array();
 	
 $config['REMOVE_ENTITYDESCRIPTOR'] = $kv_config->getBoolean('remove.entitydescriptor', false);
 	
