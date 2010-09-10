@@ -1019,13 +1019,13 @@ class sspmod_kvalidate_Validator {
 	 */ 
     private function _vSSO(DOMElement $input_elm)
     {
-        $query = '//md:SingleSignOnService';
+        $query = 'md:SingleSignOnService';
         $elms = $this->_xpath->query($query, $input_elm);
 
         foreach($elms AS $elm) {
             $binding = $elm->getAttribute('Binding');
         
-            if($binding = 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-REDIRECT') {
+            if($binding == 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-REDIRECT') {
                 $this->_messages[] = array(
                     'level' => KV_STATUS_SUCCESS,
                     'msg' => '[' . $elm->parentNode->parentNode->getAttribute('entityID') . '] vSSO check parsed',
