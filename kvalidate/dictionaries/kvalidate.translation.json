@@ -1,0 +1,53 @@
+{
+    "title": {
+        "da": "Kalmar2 metadata validator service"
+    },
+    "validation_header": {
+    	"da": "Validator"
+    },
+    "status_description": {
+    	"da": "Her kan du se valideringsresultatet af det metadata som du indtastede."
+    },
+    "status_ok": {
+    	"da": "Metadata er gyldigt"
+    },
+    "status_error": {
+    	"da": "Metadata er IKKE gyldig"
+    },
+    "xml_source": {
+    	"da": "Metadata XML kilde"
+    },
+    "input_header": {
+    	"da": "Input"
+    },
+    "validate": {
+    	"da": "Valider"
+    },
+    "result_header": {
+    	"da": "Resultat"
+    },
+    "message_header": {
+    	"da": "Beskeder"
+    },
+    "groupvalidation_header": {
+    	"da": "Status på validering"
+    },
+    "show_completed_checks": {
+    	"da": "Vis færdige tjek"
+    },
+    "show_warnings": {
+    	"da": "Vis advarsler"
+    },
+    "show_xml": {
+    	"da": "Vis XML"
+    },
+    "remove_entities": {
+    	"da": "Fjern ugyldige EntityDescriptor"
+    },
+    "note_xml": {
+    	"da": "<b>NOTE</b> Kopir ikke nedenstående XML, da det er formateret for at lette læsligheden og derfor ikke korrekt. Brug venligst originalen."
+    },
+    "xml_no_show": {
+    	"da": "XML kilden kan ikke vises"
+    }
+}

@@ -32,7 +32,22 @@
     "groupvalidation_header": {
     	"en": "Validation status"
     },
-    "": {
-    	"en": ""
+    "show_completed_checks": {
+    	"en": "Show completed checks"
+    },
+    "show_warnings": {
+    	"en": "Show warnings"
+    },
+    "show_xml": {
+    	"en": "Show XML"
+    },
+    "remove_entities": {
+    	"en": "Remove invalid EntityDescriptor"
+    },
+    "note_xml": {
+    	"en": "<b>NOTE</b> Do not copy paste the XML below as it is formatted for easy reading and is not correct. Please use the original source."
+    },
+    "xml_no_show": {
+    	"en": "The XML surce can not be displayed"
     }
 }
