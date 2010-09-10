@@ -1045,7 +1045,7 @@ class sspmod_kvalidate_Validator {
         foreach($elms AS $elm) {
             $binding = $elm->getAttribute('Binding');
         
-            if($binding == 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-REDIRECT') {
+            if($binding == 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect') {
                 $this->_messages[] = array(
                     'level' => KV_STATUS_SUCCESS,
                     'msg' => '[' . $elm->parentNode->parentNode->getAttribute('entityID') . '] vSSO check parsed',
@@ -1057,7 +1057,7 @@ class sspmod_kvalidate_Validator {
 
         $this->_messages[] = array(
             'level' => KV_STATUS_ERROR,
-            'msg' => '[' . $input_elm->parentNode->getAttribute('entityID') . '] SingleSignOnService MUST use HTTP-REDIRECT binding. No endpoints using this binding was found.',
+            'msg' => '[' . $input_elm->parentNode->getAttribute('entityID') . '] SingleSignOnService MUST use HTTP-Redirect binding. No endpoints using this binding was found.',
             'line' => $input_elm->getLineNo(),
         ); 
         $this->_status = KV_STATUS_ERROR;
