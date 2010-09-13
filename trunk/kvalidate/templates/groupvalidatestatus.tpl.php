@@ -65,12 +65,12 @@ echo '<h1>' . $this->t('{kvalidate:kvalidate:groupvalidation_header}') . ' - ' .
 if(isset($this->data['error'])) {
     echo '<br /><p style="color: #FF0000; font-weight: bold;">' . $this->data['error'] . '</p>';
 } else {
-    echo '<p>Below you can see the validation status of the metadata.</p>';
+    echo '<p>' . $this->t('{kvalidate:kvalidate:see_group_status}') . '</p>';
     echo '
         <table style="width: 300px;">
         <tr>
-        <th>Status</th>
-        <th>Entity</th>
+        <th>' . $this->t('{kvalidate:kvalidate:status}') . '</th>
+        <th>' . $this->t('{kvalidate:kvalidate:entity}') . '</th>
         <th></th>
         </tr>';
 
@@ -78,15 +78,15 @@ if(isset($this->data['error'])) {
         echo '<tr>';
         if($v['status'] == KV_STATUS_SUCCESS || $v['status'] == KV_STATUS_WARNING) {
             echo '<td>';
-            echo '<img src="/' . $this->data['baseurlpath'] . 'resources/icons/silk/accept.png" alt="Metadata is valid" />';
+            echo '<img src="/' . $this->data['baseurlpath'] . 'resources/icons/silk/accept.png" alt="' . $this->t('{kvalidate:kvalidate:status_ok}') . '" />';
             echo '</td>';
         } else if($v['status'] == KV_STATUS_ERROR) {
             echo '<td>';
-            echo '<img src="/' . $this->data['baseurlpath'] . 'resources/icons/silk/exclamation.png" alt="Metadata is valid" />';
+            echo '<img src="/' . $this->data['baseurlpath'] . 'resources/icons/silk/exclamation.png" alt="' . $this->t('{kvalidate:kvalidate:status_error}') . '" />';
             echo '</td>';
         }
         echo '<td>' . $v['name'] . '</td>';
-        echo '<td><a href="validate.php?md_url=' . rawurlencode($v['url']) . '&show_warning&show_xml&show_md_url"><b>Details</b></a></td>';
+        echo '<td><a href="validate.php?md_url=' . rawurlencode($v['url']) . '&show_warning&show_xml&show_md_url"><b>' . $this->t('{kvalidate:kvalidate:details}') . '</b></a></td>';
         echo '</tr>';	
     }	
 

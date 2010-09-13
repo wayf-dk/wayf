@@ -49,5 +49,17 @@
     },
     "xml_no_show": {
     	"da": "XML kilden kan ikke vises"
+    },
+    "see_group_status": {
+        "da": "Her under kan du se status på valideringen af metadata."
+    },
+    "status": {
+    	"da": "Status"
+    },
+    "entity": {
+    	"da": "Enhed"
+    },
+    "details": {
+    	"da": "Detaljer"
     }
 }
