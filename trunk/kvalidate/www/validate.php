@@ -43,6 +43,7 @@ if(!empty($_REQUEST['md_url']) || !empty($_REQUEST['md_xml'])) {
 	$t->data['show_md_xml'] = !empty($_REQUEST['md_xml']) ? true : $t->data['show_md_xml'];
 
 	$config['REMOVE_ENTITYDESCRIPTOR'] = isset($_REQUEST['remove_ed']) ? true : false;
+    $t->data['remove_ed'] = $config['REMOVE_ENTITYDESCRIPTOR'];
 
     if(!empty($_REQUEST['md_url'])) {
         /**
