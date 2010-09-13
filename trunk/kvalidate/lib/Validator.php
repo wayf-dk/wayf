@@ -397,6 +397,7 @@ class sspmod_kvalidate_Validator {
         $status['vRequestAttr'] = $this->_vRequestAttr($input_elm);
         $status['vEnc'] = $this->_vEnc($input_elm);
         $status['vNameDesc'] = $this->_vNameDesc($input_elm);
+        $status['vExtension'] = $this->_vExtension($input_elm);
         
         return !in_array(false, $status);
     }
