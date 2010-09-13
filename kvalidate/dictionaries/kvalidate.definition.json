@@ -49,5 +49,17 @@
     },
     "xml_no_show": {
     	"en": "The XML surce can not be displayed"
+    },
+    "see_group_status": {
+        "en": "Below you can see the validation status of the metadata."
+    },
+    "status": {
+    	"en": "Status"
+    },
+    "entity": {
+    	"en": "Entity"
+    },
+    "details": {
+    	"en": "Details"
     }
 }
