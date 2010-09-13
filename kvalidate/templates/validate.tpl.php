@@ -122,25 +122,41 @@ echo '
 		<tr>
 			<td>' . $this->t('{kvalidate:kvalidate:show_completed_checks}') . ':</td>
 			<td>
-				<input type="checkbox" name="show_success">
+            <input type="checkbox" name="show_success" ';
+if(isset($this->data['show_success']) && $this->data['show_success']) {
+    echo 'checked="checked"';
+}
+echo '>
 			</td>
 		</tr>
 		<tr>
 			<td>' . $this->t('{kvalidate:kvalidate:show_warnings}') . ':</td>
 			<td>
-				<input type="checkbox" name="show_warning" checked="checked">
+				<input type="checkbox" name="show_warning" ';
+if(isset($this->data['show_warning']) && $this->data['show_warning']) {
+    echo 'checked="checked"';
+}
+echo '>
 			</td>
 		</tr>
 		<tr>
 			<td>' . $this->t('{kvalidate:kvalidate:show_xml}') . ':</td>
 			<td>
-				<input type="checkbox" name="show_xml" checked="checked">
+				<input type="checkbox" name="show_xml" ';
+if(isset($this->data['show_xml']) && $this->data['show_xml']) {
+    echo 'checked="checked"';
+}
+echo '>
 			</td>
 		</tr>
 		<tr>
 			<td>' . $this->t('{kvalidate:kvalidate:remove_entities}') . ':</td>
 			<td>
-				<input type="checkbox" name="remove_ed">
+				<input type="checkbox" name="remove_ed" ';
+if(isset($this->data['remove_ed']) && $this->data['remove_ed']) {
+    echo 'checked="checked"';
+}
+echo '>
 			</td>
 		</tr>
         <tr>
