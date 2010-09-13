@@ -156,30 +156,30 @@ if(isset($this->data['xml'])) {
 	echo '<p>' . $this->t('{kvalidate:kvalidate:status_description}') . '</p>';	
 	
 	if($this->data['status'] == KV_STATUS_SUCCESS || $this->data['status'] == KV_STATUS_WARNING) {
-        echo '<p style="text-align: center; font-size: 20px; font-weight: bold; border: 1px solid #000000; width: 95%;">';
-        echo '<img src="/' . $this->data['baseurlpath'] . 'resources/icons/checkmark48.png" alt="' . $this->t('{kvalidate:kvalidate:status_ok}') . '" style="display: inline; padding-left: 10px;" />';
+        echo '<p class="header_status">';
+        echo '<img src="/' . $this->data['baseurlpath'] . 'resources/icons/checkmark48.png" alt="' . $this->t('{kvalidate:kvalidate:status_ok}') . '" class="img_header_status" />';
 		echo $this->t('{kvalidate:kvalidate:status_ok}');
-		echo '<img src="/' . $this->data['baseurlpath'] . 'resources/icons/checkmark48.png" alt="' . $this->t('{kvalidate:kvalidate:status_ok}') . '" style="display: inline; padding-left: 10px;" />' . '</p>';
+		echo '<img src="/' . $this->data['baseurlpath'] . 'resources/icons/checkmark48.png" alt="' . $this->t('{kvalidate:kvalidate:status_ok}') . '" class="img_header_status" />' . '</p>';
 	} else {
-		echo '<p style="text-align: center; font-size: 20px; font-weight: bold; border: 1px solid #000000; width: 95%;">' . $this->t('{kvalidate:kvalidate:status_error}') . '</p>';
+		echo '<p class="header_status">' . $this->t('{kvalidate:kvalidate:status_error}') . '</p>';
 	}
 	
 	echo '<h2>' . $this->t('{kvalidate:kvalidate:message_header}') . '</h2>';
 	
 	foreach($this->data['messages'] AS $msg) {
 		if($msg['level'] == KV_STATUS_SUCCESS && $this->data['show_success']) {
-			echo '<div style="border: 1px solid #7fa748; background: #5F911B; margin-bottom: 10px; padding: 5px; color: white; font-weight: bold; width: 95%;">';
+			echo '<div class="status_success">';
 			echo $msg['msg'];
 			echo '</div>';
 		} else if($msg['level'] == KV_STATUS_ERROR) {
-			echo '<div style="border: 1px solid #000000; background: #DD6D07; margin-bottom: 10px; padding: 5px; min-height: 48px; width: 95%;">';
-			echo '<img src="/' . $this->data['baseurlpath'] . 'resources/icons/experience/gtk-dialog-error.48x48.png" alt="Metadata is NOT valid" style="float: left; padding-right: 5px;" />';
+			echo '<div class="status_error">';
+			echo '<img src="/' . $this->data['baseurlpath'] . 'resources/icons/experience/gtk-dialog-error.48x48.png" alt="' . $this->t('{kvalidate:kvalidate:status_error}') . '" class="img_status_error" />';
 			echo 'In line: ' . $msg['line'] . '<br />';
 			echo $msg['msg'];
 			echo '</div>';
 		} else if($msg['level'] == KV_STATUS_WARNING && $this->data['show_warning']) {
-			echo '<div style="border: 1px solid #000000; background-color: #AAAA00; margin-bottom: 10px; padding: 5px; min-height: 48px; width: 95%;">';
-			echo '<img src="/' . $this->data['baseurlpath'] . 'resources/icons/experience/gtk-dialog-warning.48x48.png" alt="Metadata is NOT valid" style="float: left; padding-right: 5px;" />';
+			echo '<div class="status_warning">';
+			echo '<img src="/' . $this->data['baseurlpath'] . 'resources/icons/experience/gtk-dialog-warning.48x48.png" alt="' . $this->t('{kvalidate:kvalidate:status_error}') . '" class="img_status_error" />';
 			echo 'In line: ' . $msg['line'] . '<br />';
 			echo $msg['msg'];
 			echo '</div>';
