@@ -27,3 +27,49 @@ code {
     font-family: monospace;
     text-align: left;
 }
+
+.status_success {
+    border: 1px solid #7fa748; 
+    background: #5F911B; 
+    margin-bottom: 10px; 
+    padding: 5px; 
+    color: white; 
+    font-weight: bold; 
+    width: 95%;
+}
+
+.status_error {
+    border: 1px solid #000000; 
+    background: #DD6D07; 
+    margin-bottom: 10px; 
+    padding: 5px; 
+    min-height: 48px; 
+    width: 95%;
+}
+
+.status_warning {
+    border: 1px solid #000000; 
+    background-color: #AAAA00; 
+    margin-bottom: 10px; 
+    padding: 5px; 
+    min-height: 48px; 
+    width: 95%;
+}
+			
+.img_status_error {
+    float: left; 
+    padding-right: 5px;
+}
+
+.header_status {
+    text-align: center; 
+    font-size: 20px; 
+    font-weight: bold; 
+    border: 1px solid #000000; 
+    width: 95%;
+}
+
+.img_header_status {
+    display: inline;
+    padding-left: 10px;
+}
