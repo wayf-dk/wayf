@@ -1,3 +1,4 @@
+/* validate.tpl.php */
 body {
     margin: 0px; 
     margin-left: 0px;
@@ -72,4 +73,39 @@ code {
 .img_header_status {
     display: inline;
     padding-left: 10px;
+}
+
+/* groupvalidate.tpl.php */
+.group_table {
+    border-collapse: collapse;
+    margin: 0px 0px 20px;
+    padding: 0px;
+    border-spacing: 2px 2px;
+    border-color: gray;
+    display: table;
+    width: 300px;
+}
+
+.group_table td {
+    border: 1px solid #5F911B;
+    padding: 3px;
+    margin: 0px;
+    display: table-cell;
+    vertical-align: inherit;
+}
+
+.group_table th {
+    border: 1px solid #5F911B;
+    background: #7FA748;
+    color: white;
+    padding: 3px;
+    margin: 0px;
+    font-weight: bold;
+    display: table-cell;
+    vertical-align: inherit;
+}
+
+.group_error {
+    color: #FF0000; 
+    font-weight: bold;
 }
