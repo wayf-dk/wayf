@@ -364,7 +364,7 @@ class sspmod_kvalidate_Validator {
         $status['vSSO'] = $this->_vSSO($input_elm);
         $status['vSLO'] = $this->_vSLO($input_elm);
         $status['vScope'] = $this->_vScope($input_elm);
-        $status['vExtension'] = $this->_vExtension($input_elm);
+        //$status['vExtension'] = $this->_vExtension($input_elm);
         $status['vSign'] = $this->_vSign($input_elm);
         $status['vOrgName'] = $this->_vOrgName($input_elm);
         
@@ -397,7 +397,7 @@ class sspmod_kvalidate_Validator {
         $status['vRequestAttr'] = $this->_vRequestAttr($input_elm);
         $status['vEnc'] = $this->_vEnc($input_elm);
         $status['vNameDesc'] = $this->_vNameDesc($input_elm);
-        $status['vExtension'] = $this->_vExtension($input_elm);
+        //$status['vExtension'] = $this->_vExtension($input_elm);
         
         return !in_array(false, $status);
     }
