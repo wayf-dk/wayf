@@ -1185,9 +1185,9 @@ class sspmod_kvalidate_Validator {
                  * Appending, prepending and wrapping the cert, so that OpenSSL 
                  * will accept it.
                  */
-                $key = "-----BEGIN CERTIFICATE-----\n";
-                $key .= wordwrap($cert->item(0)->nodeValue, 64, "\n", true);
-                $key .= "\n-----END CERTIFICATE-----";
+                $key = wordwrap($cert->item(0)->nodeValue, 64, "\n", true);
+                $key = trim($key);
+                $key = "-----BEGIN CERTIFICATE-----\n" .$key . "\n-----END CERTIFICATE-----";
 
                 $res = openssl_get_publickey($key); 
 
