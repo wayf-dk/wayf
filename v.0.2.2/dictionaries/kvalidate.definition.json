@@ -1,0 +1,65 @@
+{
+    "title": {
+        "en": "Kalmar2 metadata validation service"
+    },
+    "validation_header": {
+    	"en": "Validation"
+    },
+    "status_description": {
+    	"en": "Here you can see the result of the validation of the metadata you provided."
+    },
+    "status_ok": {
+    	"en": "The metadata is valid"
+    },
+    "status_error": {
+    	"en": "The metadata is NOT valid"
+    },
+    "xml_source": {
+    	"en": "Metadata XML source"
+    },
+    "input_header": {
+    	"en": "Input"
+    },
+    "validate": {
+    	"en": "Validate"
+    },
+    "result_header": {
+    	"en": "Result"
+    },
+    "message_header": {
+    	"en": "Messages"
+    },
+    "groupvalidation_header": {
+    	"en": "Validation status"
+    },
+    "show_completed_checks": {
+    	"en": "Show completed checks"
+    },
+    "show_warnings": {
+    	"en": "Show warnings"
+    },
+    "show_xml": {
+    	"en": "Show XML"
+    },
+    "remove_entities": {
+    	"en": "Remove invalid EntityDescriptor"
+    },
+    "note_xml": {
+    	"en": "<b>NOTE</b> Do not copy paste the XML below as it is formatted for easy reading and is not correct. Please use the original source."
+    },
+    "xml_no_show": {
+    	"en": "The XML surce can not be displayed"
+    },
+    "see_group_status": {
+        "en": "Below you can see the validation status of the metadata."
+    },
+    "status": {
+    	"en": "Status"
+    },
+    "entity": {
+    	"en": "Entity"
+    },
+    "details": {
+    	"en": "Details"
+    }
+}
