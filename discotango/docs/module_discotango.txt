@@ -1,0 +1,49 @@
+Discotango discovery service
+==========================
+
+<!-- 
+    This file is written in Markdown syntax. 
+    For more information about how to use the Markdown syntax, read here:
+    http://daringfireball.net/projects/markdown/syntax
+-->
+
+  * Version: `$Id$`
+
+<!-- {{TOC}} -->
+
+Documentation
+-------------
+The Discotango discovery service is a PoC implementation of a geolocation 
+enabled discovery service. The discovery service will display ench entity from 
+metadata in a filtered list only listing the entities that are visible in the 
+map. Each entity can have multiple locations accociated with it.
+
+Setup
+-----
+To use the discotango discovery service, you will have to download the source 
+code and place it in the modules directory in your simpleSAMLphp installation.
+
+Then you have to enable the module by placing an empty file in the discotango 
+directory called 'enable'.
+
+You will have to add geolocation information to each of the entities you are 
+using. NOTE: The dicsotango discovery service vill read metadata from the 
+saml2-idp-remote.php and not XML metadata.
+
+The geolocation data is to inserted for each entity. The format is as
+following:
+
+    'GeolocationHint' => array(
+        0 => array(
+            'coord' => 'xx.xxxxx,yy.yyyy',
+            'description' => 'Extra info about the location',
+        ),
+        ...
+    ),
+
+You can add as many locations for each entity as you like. Entities that do not 
+contain at least one GeolocationHint will not be displayed in the discovery
+service.
+
+The last thing you need to do, is to direct your service to use the Discotango 
+discovery service URL.
