@@ -17,11 +17,13 @@ $this->data['jquery'] = array('version' => '1.6', 'core' => TRUE, 'ui' => TRUE, 
 
 $coords2 = "var tmp = null;\n";
 foreach ($this->data['idplist'] AS $idpentry) {
-    $coords2 .= "tmp = new discotango.IdP(\"" . htmlspecialchars($idpentry['entityid']) . "\", \"" . htmlspecialchars($this->t('idpname_' . $idpentry['entityid'])) . "\");\n";
-    foreach($idpentry['GeolocationHint'] AS $hint) {
-        $coords2 .= "tmp.addLocation(new google.maps.LatLng(" . $hint['coord'] . "), \"" . $hint['description'] . "\");\n";
+    if(isset($idpentry['GeolocationHint'])) {
+        $coords2 .= "tmp = new discotango.IdP(\"" . htmlspecialchars($idpentry['entityid']) . "\", \"" . htmlspecialchars($this->t('idpname_' . $idpentry['entityid'])) . "\");\n";
+        foreach($idpentry['GeolocationHint'] AS $hint) {
+            $coords2 .= "tmp.addLocation(new google.maps.LatLng(" . $hint['coord'] . "), \"" . $hint['description'] . "\");\n";
+        }
+        $coords2 .= "discotango.idps[\"" . htmlspecialchars($idpentry['entityid']) . "\"] = tmp;\n";
     }
-    $coords2 .= "discotango.idps[\"" . htmlspecialchars($idpentry['entityid']) . "\"] = tmp;\n";
 }
 
 $this->data['head'] = '    
