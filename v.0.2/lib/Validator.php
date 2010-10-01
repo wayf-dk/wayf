@@ -614,7 +614,7 @@ class sspmod_kvalidate_Validator {
                 $this->_messages[] = array(
                     'level' => KV_STATUS_WARNING,
                     'msg' => '[' . $input_elm->patentNode->getAttribute('entityID') . '] `use` attribute not given in `KeyDescriptor`. Should be set to `signing`',
-                    'line' => $input_elm->getLineNo(),
+                    'line' => $elm->getLineNo(),
                 );
                 return true;
             }
