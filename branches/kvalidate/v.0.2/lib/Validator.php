@@ -555,7 +555,7 @@ class sspmod_kvalidate_Validator {
                         } else {
                             $this->_messages[] = array( 
                                 'level' => KV_STATUS_WARNING,
-                                'msg' => '[' . $input_elm->patentNode->getAttribute('entityID') . '] `use` attribute not given in `KeyDescriptor`. Should be set to `encryption`',
+                                'msg' => '[' . $input_elm->parentNode->getAttribute('entityID') . '] `use` attribute not given in `KeyDescriptor`. Should be set to `encryption`',
                                 'line' => $input_elm->getLineNo(),
                             );
                             $kd_found = true;
@@ -613,7 +613,7 @@ class sspmod_kvalidate_Validator {
             } else {
                 $this->_messages[] = array(
                     'level' => KV_STATUS_WARNING,
-                    'msg' => '[' . $input_elm->patentNode->getAttribute('entityID') . '] `use` attribute not given in `KeyDescriptor`. Should be set to `signing`',
+                    'msg' => '[' . $input_elm->parentNode->getAttribute('entityID') . '] `use` attribute not given in `KeyDescriptor`. Should be set to `signing`',
                     'line' => $elm->getLineNo(),
                 );
                 return true;
