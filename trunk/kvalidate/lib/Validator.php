@@ -848,7 +848,7 @@ class sspmod_kvalidate_Validator {
         	// Validate the timestamp
         	$validTime = strtotime($att_validUntil);
         	$minTime = time() + (60*60*6-30);
-        	$maxTime = time() + (60*60*96+30);
+        	$maxTime = time() + (60*60*240+30);
         	
         	if( ($validTime-$minTime) < 0 ) {
         		$this->_messages[] = array(
@@ -863,7 +863,7 @@ class sspmod_kvalidate_Validator {
         	if( ($maxTime - $validTime) < 0 ) {
         		$this->_messages[] = array(
                 	'level' => KV_STATUS_ERROR,
-                	'msg' => '[DOCUMENT] validUntil MUST not be more that 96 hours in the future. validUntil set to ' . $att_validUntil . '<br />MUST not be more than ' . date('c', $maxTime),
+                	'msg' => '[DOCUMENT] validUntil MUST not be more that 240 hours in the future. validUntil set to ' . $att_validUntil . '<br />MUST not be more than ' . date('c', $maxTime),
                 	'line' => $input_elm->getLineNo(),
             	);
             	$this->_status = KV_STATUS_ERROR;
@@ -929,7 +929,7 @@ class sspmod_kvalidate_Validator {
             // Validate the timestamp
             $validTime = strtotime($att_validUntil);
             $minTime = time() + (60*60*6-30);
-            $maxTime = time() + (60*60*96+30);
+            $maxTime = time() + (60*60*240+30);
 
             if( ($validTime-$minTime) < 0 ) {
                 $this->_messages[] = array(
@@ -944,7 +944,7 @@ class sspmod_kvalidate_Validator {
             if( ($maxTime - $validTime) < 0 ) {
                 $this->_messages[] = array(
                     'level' => KV_STATUS_ERROR,
-                    'msg' => '[' . $input_elm->getAttribute('entityID') . '] validUntil MUST not be more that 96 hours in the future. validUntil set to ' . $att_validUntil . '<br />MUST not be more than ' . date('c', $maxTime),
+                    'msg' => '[' . $input_elm->getAttribute('entityID') . '] validUntil MUST not be more that 240 hours in the future. validUntil set to ' . $att_validUntil . '<br />MUST not be more than ' . date('c', $maxTime),
                     'line' => $input_elm->getLineNo(),
                 );
                 $this->_status = KV_STATUS_ERROR;
