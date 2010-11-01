@@ -552,13 +552,6 @@ class sspmod_kvalidate_Validator {
                             if($elm->getAttribute('use') == 'encryption') {
                                 $kd_found = true;
                             }
-                        } else {
-                            $this->_messages[] = array( 
-                                'level' => KV_STATUS_WARNING,
-                                'msg' => '[' . $input_elm->parentNode->getAttribute('entityID') . '] `use` attribute not given in `KeyDescriptor`. Should be set to `encryption`',
-                                'line' => $input_elm->getLineNo(),
-                            );
-                            $kd_found = true;
                         }
                     }
                     if($kd_found) {
@@ -610,13 +603,6 @@ class sspmod_kvalidate_Validator {
                     );
                     return true; 
                 }
-            } else {
-                $this->_messages[] = array(
-                    'level' => KV_STATUS_WARNING,
-                    'msg' => '[' . $input_elm->parentNode->getAttribute('entityID') . '] `use` attribute not given in `KeyDescriptor`. Should be set to `signing`',
-                    'line' => $elm->getLineNo(),
-                );
-                return true;
             }
         }
         $this->_messages[] = array( 
