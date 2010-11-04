@@ -349,7 +349,7 @@ class sspmod_kvalidate_Validator {
 	 * - vSLO
 	 * - vScope
 	 * - vSign
-	 * - vOrgName
+	 * - vOrganization
 	 *
 	 * @param DOMElement $input_elm The element to be validated
 	 *
@@ -366,7 +366,7 @@ class sspmod_kvalidate_Validator {
         $status['vScope'] = $this->_vScope($input_elm);
         $status['vExtension'] = $this->_vExtension($input_elm);
         $status['vSign'] = $this->_vSign($input_elm);
-        $status['vOrgName'] = $this->_vOrgName($input_elm);
+        $status['vOrganization'] = $this->_vOrganization($input_elm);
         
         return !in_array(false, $status);
     }
@@ -472,7 +472,7 @@ class sspmod_kvalidate_Validator {
     }
 
 	/**
-	 * vOrgName validation check
+	 * vOrganization validation check
 	 *
      * <md:EntityDescriptor> must contain a english name in the 
      * <md:Organization> element.
@@ -481,55 +481,117 @@ class sspmod_kvalidate_Validator {
 	 *
 	 * @return bool True if the check clears othervise false
 	 */
-    private function _vOrgName(DOMElement $input_elm)
+    private function _vOrganization(DOMElement $input_elm)
     {
         $query = 'md:Organization';
 
         $elms = $this->_xpath->query($query, $input_elm->parentNode);
 
-        foreach($elms AS $elm) {
-            $query_name = 'md:OrganizationName';
-
-            $elms_name = $this->_xpath->query($query_name, $elm);
-
-            $found_name = false;
-            foreach($elms_name AS $elm_name) {
-                if($elm_name->getAttribute('xml:lang') == 'en') {
-                    $found_name = true;
-                    break;
-                }
-            }
-            if(!$found_name) {
+        // The organization element must be present
+        if($elms->length < 1) {
                 $this->_messages[] = array( 
                     'level' => KV_STATUS_ERROR,
-                    'msg' => '[' . $input_elm->parentNode->getAttribute('entityID') . '] No english name found for IdP',
+                    'msg' => '[' . $input_elm->parentNode->getAttribute('entityID') . '] No organization elements found for IdP.',
                     'line' => $input_elm->getLineNo(),
                 );
                 return true;
+        }
+        
+        $found_name = false;
+        $found_display_name = false;
+        $found_url = false;
+        $url_error = true;
+
+        $elm = $elms->item(0);
+
+        // Check that at least en english name exists
+        $query_name = 'md:OrganizationName';
+
+        $elms_name = $this->_xpath->query($query_name, $elm);
+
+        foreach($elms_name AS $elm_name) {
+            if($elm_name->getAttribute('xml:lang') == 'en') {
+                $found_name = true;
+                break;
             }
         }
 
-        if($found_name) {
+        // Check that at least en english display name exists
+        $query_name = 'md:OrganizationDisplayName';
+
+        $elms_name = $this->_xpath->query($query_name, $elm);
+
+        foreach($elms_name AS $elm_name) {
+            if($elm_name->getAttribute('xml:lang') == 'en') {
+                $found_display_name = true;
+                break;
+            }
+        }
+
+        // Check that at least en english url exists and no empty URLs are found
+        $query_name = 'md:OrganizationURL';
+
+        $elms_name = $this->_xpath->query($query_name, $elm);
+
+        foreach($elms_name AS $elm_name) {
+            if($elm_name->getAttribute('xml:lang') == 'en') {
+                $found_url = true;
+            }
+            if (empty($elm_name->nodeValue)) {
+                $this->_messages[] = array( 
+                    'level' => KV_STATUS_ERROR,
+                    'msg' => '[' . $elm_name->parentNode->parentNode->getAttribute('entityID') . '] Empty URL found for IdP. Empty URL not allowed',
+                    'line' => $elm_name->getLineNo(),
+                );
+                $url_error = false;
+            }
+        }
+
+        if(!$found_name) {
+            $this->_messages[] = array( 
+                'level' => KV_STATUS_ERROR,
+                'msg' => '[' . $input_elm->parentNode->getAttribute('entityID') . '] No english name found for IdP',
+                'line' => $input_elm->getLineNo(),
+            );
+        }
+
+        if(!$found_display_name) {
+            $this->_messages[] = array( 
+                'level' => KV_STATUS_ERROR,
+                'msg' => '[' . $input_elm->parentNode->getAttribute('entityID') . '] No english display name found for IdP',
+                'line' => $input_elm->getLineNo(),
+            );
+        }
+
+        if(!$found_url) {
+            $this->_messages[] = array( 
+                'level' => KV_STATUS_ERROR,
+                'msg' => '[' . $input_elm->parentNode->getAttribute('entityID') . '] No english URL found for IdP',
+                'line' => $input_elm->getLineNo(),
+            );
+        }
+
+        if($found_name && $found_display_name && $found_url && $url_error) {
             $this->_messages[] = array( 
                 'level' => KV_STATUS_SUCCESS,
-                'msg' => '[' . $input_elm->parentNode->getAttribute('entityID') . '] vOrgName check parsed',
+                'msg' => '[' . $input_elm->parentNode->getAttribute('entityID') . '] vOrganization check parsed',
                 'line' => $input_elm->getLineNo(),
             );
             return true;
         }
     }
 
-	/**
-	 * vEnc validation check
-	 *
-	 * <md:SPSSOdescriptor> must contain a certificate for encrypting if ACS
-	 * endpoint is HTTP. A warning i shown if the included certificate is not 
+    /**
+     * vEnc validation check
+     *
+     * <md:SPSSOdescriptor> must contain a certificate for encrypting if ACS
+     * endpoint is HTTP. A warning i shown if the included certificate is not 
      * marked for encryption.
-	 * 
-	 * @param DOMElement $input_elm The element to be validated
-	 *
-	 * @return bool True if the check clears othervise false
-	 */
+     * 
+     * @param DOMElement $input_elm The element to be validated
+     *
+     * @return bool True if the check clears othervise false
+     */
     private function _vEnc(DOMElement $input_elm)
     {
         $kd_found = false;
@@ -538,20 +600,18 @@ class sspmod_kvalidate_Validator {
 
         foreach($elms AS $elm) {
             $binding = $elm->getAttribute('Binding');
-        
+
             if($binding = 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST') {
                 $location = $elm->getAttribute('Location');
-               
+
                 if(preg_match('/^https/', $location) == 0) {
                     $query = 'md:KeyDescriptor';
 
                     $elms = $this->_xpath->query($query, $input_elm); 
 
                     foreach($elms AS $elm) {
-                        if($elm->hasAttribute('use')) {
-                            if($elm->getAttribute('use') == 'encryption') {
-                                $kd_found = true;
-                            }
+                        if(!$elm->hasAttribute('use') || ($elm->hasAttribute('use') && $elm->getAttribute('use') == 'encryption')) {
+                            $kd_found = true;
                         }
                     }
                     if($kd_found) {
@@ -578,15 +638,15 @@ class sspmod_kvalidate_Validator {
         return true;
     }
 
-	/**
-	 * vSign validation check
-	 *
-	 * <md:IDPSSOdescriptor> must contain a certificate for signing
-	 * 
-	 * @param DOMElement $input_elm The element to be validated
-	 *
-	 * @return bool True if the check clears othervise false
-	 */   
+    /**
+     * vSign validation check
+     *
+     * <md:IDPSSOdescriptor> must contain a certificate for signing
+     * 
+     * @param DOMElement $input_elm The element to be validated
+     *
+     * @return bool True if the check clears othervise false
+     */   
     private function _vSign(DOMElement $input_elm)
     {
         $query = 'md:KeyDescriptor';
@@ -594,17 +654,16 @@ class sspmod_kvalidate_Validator {
         $elms = $this->_xpath->query($query, $input_elm); 
 
         foreach($elms AS $elm) {
-            if($elm->hasAttribute('use')) {
-                if($elm->getAttribute('use') == 'signing') {
-                    $this->_messages[] = array( 
-                        'level' => KV_STATUS_SUCCESS,
-                        'msg' => '[' . $input_elm->parentNode->getAttribute('entityID') . '] vSign check parsed',
-                        'line' => $elm->getLineNo(),
-                    );
-                    return true; 
-                }
+            if (!$elm->hasAttribute('use') || ($elm->hasAttribute('use') && $elm->getAttribute('use') == 'signing')) {
+                $this->_messages[] = array( 
+                    'level' => KV_STATUS_SUCCESS,
+                    'msg' => '[' . $input_elm->parentNode->getAttribute('entityID') . '] vSign check parsed',
+                    'line' => $elm->getLineNo(),
+                );
+                return true; 
             }
         }
+
         $this->_messages[] = array( 
             'level' => KV_STATUS_ERROR,
             'msg' => '[' . $input_elm->parentNode->getAttribute('entityID') . '] No certificate for signing found',
@@ -614,18 +673,18 @@ class sspmod_kvalidate_Validator {
 
         return false;
     }
- 
- 	/**
-	 * vRequestAttr validation check
-	 *
-	 * <md:SPSSODescriptor> must contain at least one <md:RequestedAttributes>
-	 * Each <md:RequestedAttributes> has the NameFormat attribute and set to
-	 * urn:oasis:names:tc:SAML:2.0:attrname-format:uri
-	 * 
-	 * @param DOMElement $input_elm The element to be validated
-	 *
-	 * @return bool True if the check clears othervise false
-	 */   
+
+    /**
+     * vRequestAttr validation check
+     *
+     * <md:SPSSODescriptor> must contain at least one <md:RequestedAttributes>
+     * Each <md:RequestedAttributes> has the NameFormat attribute and set to
+     * urn:oasis:names:tc:SAML:2.0:attrname-format:uri
+     * 
+     * @param DOMElement $input_elm The element to be validated
+     *
+     * @return bool True if the check clears othervise false
+     */   
     private function _vRequestAttr(DOMElement $input_elm)
     {
         $query = 'md:AttributeConsumingService/md:RequestedAttribute';
@@ -633,68 +692,68 @@ class sspmod_kvalidate_Validator {
         $elms = $this->_xpath->query($query, $input_elm);
 
         if($elms->length < 1) {
-        	$this->_messages[] = array( 
-            	'level' => KV_STATUS_ERROR,
-            	'msg' => '[' . $input_elm->parentNode->getAttribute('entityID') . '] No RequestedAttribute given',
-            	'line' => $input_elm->getLineNo(),
-        	); 
-        	$this->_status = KV_STATUS_ERROR;
+            $this->_messages[] = array( 
+                'level' => KV_STATUS_ERROR,
+                'msg' => '[' . $input_elm->parentNode->getAttribute('entityID') . '] No RequestedAttribute given',
+                'line' => $input_elm->getLineNo(),
+            ); 
+            $this->_status = KV_STATUS_ERROR;
 
-        	return false;    
+            return false;    
         }
-        
+
         $error = false;
 
         foreach($elms AS $elm) {
-        	if(!$elm->hasAttribute('Name')) {
-        		$this->_messages[] = array( 
-            		'level' => KV_STATUS_ERROR,
-            		'msg' => '[' . $input_elm->parentNode->getAttribute('entityID') . '] RequestedAttribute do not have the Name attribute',
-            		'line' => $elm->getLineNo(),
-        		); 
-        		$this->_status = KV_STATUS_ERROR;
-        		$error = true;
-        	} else {
+            if(!$elm->hasAttribute('Name')) {
+                $this->_messages[] = array( 
+                    'level' => KV_STATUS_ERROR,
+                    'msg' => '[' . $input_elm->parentNode->getAttribute('entityID') . '] RequestedAttribute do not have the Name attribute',
+                    'line' => $elm->getLineNo(),
+                ); 
+                $this->_status = KV_STATUS_ERROR;
+                $error = true;
+            } else {
                 $name = $elm->getAttribute('Name');
-        		if(preg_match_all('/^urn:oid:([0-9]+\.)*([0-9]+)$/', $name, $matches) != 1) {
-        			$this->_messages[] = array( 
-            			'level' => KV_STATUS_ERROR,
-            			'msg' => '[' . $input_elm->parentNode->getAttribute('entityID') . '] RequestedAttribute do not have the correct Name. the value is required to be in urn:oid format but ' . $name . ' specified',
-            			'line' => $elm->getLineNo(),
-        			); 
-        			$this->_status = KV_STATUS_ERROR;
-        			$error = true;
+                if(preg_match_all('/^urn:oid:([0-9]+\.)*([0-9]+)$/', $name, $matches) != 1) {
+                    $this->_messages[] = array( 
+                        'level' => KV_STATUS_ERROR,
+                        'msg' => '[' . $input_elm->parentNode->getAttribute('entityID') . '] RequestedAttribute do not have the correct Name. the value is required to be in urn:oid format but ' . $name . ' specified',
+                        'line' => $elm->getLineNo(),
+                    ); 
+                    $this->_status = KV_STATUS_ERROR;
+                    $error = true;
                 }
-        	}
-        	if(!$elm->hasAttribute('NameFormat')) {
-        		$this->_messages[] = array( 
-            		'level' => KV_STATUS_ERROR,
-            		'msg' => '[' . $input_elm->parentNode->getAttribute('entityID') . '] RequestedAttribute do not have the NameFormat attribute',
-            		'line' => $elm->getLineNo(),
-        		); 
-        		$this->_status = KV_STATUS_ERROR;
-        		$error = true;
-        	} else {
-        		$nameFormat = $elm->getAttribute('NameFormat');
-        		if($nameFormat != 'urn:oasis:names:tc:SAML:2.0:attrname-format:uri') {
-        			$this->_messages[] = array( 
-            			'level' => KV_STATUS_ERROR,
-            			'msg' => '[' . $input_elm->parentNode->getAttribute('entityID') . '] RequestedAttribute do not have the correct NameFormat.<br />\'urn:oasis:names:tc:SAML:2.0:attrname-format:uri\' is required but ' . $nameFormat . ' specified',
-            			'line' => $elm->getLineNo(),
-        			); 
-        			$this->_status = KV_STATUS_ERROR;
-        			$error = true;
-        		}
-        	}
+            }
+            if(!$elm->hasAttribute('NameFormat')) {
+                $this->_messages[] = array( 
+                    'level' => KV_STATUS_ERROR,
+                    'msg' => '[' . $input_elm->parentNode->getAttribute('entityID') . '] RequestedAttribute do not have the NameFormat attribute',
+                    'line' => $elm->getLineNo(),
+                ); 
+                $this->_status = KV_STATUS_ERROR;
+                $error = true;
+            } else {
+                $nameFormat = $elm->getAttribute('NameFormat');
+                if($nameFormat != 'urn:oasis:names:tc:SAML:2.0:attrname-format:uri') {
+                    $this->_messages[] = array( 
+                        'level' => KV_STATUS_ERROR,
+                        'msg' => '[' . $input_elm->parentNode->getAttribute('entityID') . '] RequestedAttribute do not have the correct NameFormat.<br />\'urn:oasis:names:tc:SAML:2.0:attrname-format:uri\' is required but ' . $nameFormat . ' specified',
+                        'line' => $elm->getLineNo(),
+                    ); 
+                    $this->_status = KV_STATUS_ERROR;
+                    $error = true;
+                }
+            }
         }
 
-		if(!$error) {        
-        	$this->_messages[] = array( 
+        if(!$error) {        
+            $this->_messages[] = array( 
                 'level' => KV_STATUS_SUCCESS,
                 'msg' => '[' . $input_elm->parentNode->getAttribute('entityID') . '] vRequestAttr check parsed',
                 'line' => $input_elm->getLineNo(),
             );
-			return true; 
+            return true; 
         }
         return false;
     }
@@ -704,13 +763,15 @@ class sspmod_kvalidate_Validator {
      *
      * <md:Extensions> must not contain other elements than <shibmd:Scope>
      *
-	 * @param DOMElement $input_elm The element to be validated
-	 *
-	 * @return bool True if the check clears othervise false
+     * @param DOMElement $input_elm The element to be validated
+     *
+     * @return bool True if the check clears othervise false
      */
     private function _vExtension(DOMElement $input_elm)
     {
         $error = false;
+
+        $allowed_elements = array('shibmd:Scope', 'DiscoveryResponse');
 
         $query = 'md:Extensions';
 
@@ -721,10 +782,10 @@ class sspmod_kvalidate_Validator {
                 $sub_elms = $elm->childNodes;
                 foreach($sub_elms AS $sub_elm) {
                     $nodeName = $sub_elm->nodeName;
-                    if($nodeName != 'shibmd:Scope') {
+                    if(!in_array($nodeName, $allowed_elements)) {
                         $this->_messages[] = array( 
                             'level' => KV_STATUS_ERROR,
-                            'msg' => '[' . $input_elm->parentNode->getAttribute('entityID') . '] Only `shibmd:Scope` element allowed in `Extensions` element. `' . $nodeName . '` given',
+                            'msg' => '[' . $input_elm->parentNode->getAttribute('entityID') . '] `' . $nodeName . '`element is not allowed in the `Extension` element.',
                             'line' => $elm->getLineNo(),
                         ); 
                         $error = true;
@@ -742,21 +803,21 @@ class sspmod_kvalidate_Validator {
             );
             return true; 
         }
-        
+
         return false;
     }
 
-	/**
-	 * vScope validation check
-	 *
-	 * <md:IDPSSOdescriptor> must contain at least <shibmd:Scope> and `regexp` 
+    /**
+     * vScope validation check
+     *
+     * <md:IDPSSOdescriptor> must contain at least <shibmd:Scope> and `regexp` 
      * attribute must be set to false.
-	 * 
-	 * @param DOMElement $input_elm The element to be validated
-	 *
-	 * @return bool True if the check clears othervise false
-	 * @todo Validate the value of the scope elements
-	 */   
+     * 
+     * @param DOMElement $input_elm The element to be validated
+     *
+     * @return bool True if the check clears othervise false
+     * @todo Validate the value of the scope elements
+     */   
     private function _vScope(DOMElement $input_elm)
     {
         $error = false;
@@ -811,18 +872,18 @@ class sspmod_kvalidate_Validator {
         return false;
     }
 
-	/**
-	 * vEntitiesValidUntil validation check
-	 *
-	 * <md:EntitiesDescriptor> can contain a validUntil attribute. The
-	 * validUntil timestamp must be between 6 and 96 hours in the furure. If a 
+    /**
+     * vEntitiesValidUntil validation check
+     *
+     * <md:EntitiesDescriptor> can contain a validUntil attribute. The
+     * validUntil timestamp must be between 6 and 96 hours in the furure. If a 
      * valid validUntil attribute is not found, all child EntityDescriptor is 
      * searched for valid validUntil attributes,
-	 * 
-	 * @param DOMElement $input_elm The element to be validated
-	 *
-	 * @return bool True if the check clears othervise false
-	 */   
+     * 
+     * @param DOMElement $input_elm The element to be validated
+     *
+     * @return bool True if the check clears othervise false
+     */   
     private function _vEntitiesValidUntil(DOMElement $input_elm)
     {
         $error = false;
@@ -831,30 +892,30 @@ class sspmod_kvalidate_Validator {
 
         // Check if the EntitiesDescriptor contains a validUntil attribute
         if(!empty($att_validUntil)) {
-        	// Validate the timestamp
-        	$validTime = strtotime($att_validUntil);
-        	$minTime = time() + (60*60*6-30);
-        	$maxTime = time() + (60*60*240+30);
-        	
-        	if( ($validTime-$minTime) < 0 ) {
-        		$this->_messages[] = array(
-                	'level' => KV_STATUS_ERROR,
-                	'msg' => '[DOCUMENT] validUntil MUST be at least 6 hours in the future. validUntil set to ' . $att_validUntil . '<br />MUST be at least ' . date('c', $minTime),
-                	'line' => $input_elm->getLineNo(),
-            	);
-            	$this->_status = KV_STATUS_ERROR;
+            // Validate the timestamp
+            $validTime = strtotime($att_validUntil);
+            $minTime = time() + (60*60*6-30);
+            $maxTime = time() + (60*60*240+30);
+
+            if( ($validTime-$minTime) < 0 ) {
+                $this->_messages[] = array(
+                    'level' => KV_STATUS_ERROR,
+                    'msg' => '[DOCUMENT] validUntil MUST be at least 6 hours in the future. validUntil set to ' . $att_validUntil . '<br />MUST be at least ' . date('c', $minTime),
+                    'line' => $input_elm->getLineNo(),
+                );
+                $this->_status = KV_STATUS_ERROR;
                 $error = true;
             }
 
-        	if( ($maxTime - $validTime) < 0 ) {
-        		$this->_messages[] = array(
-                	'level' => KV_STATUS_ERROR,
-                	'msg' => '[DOCUMENT] validUntil MUST not be more that 240 hours in the future. validUntil set to ' . $att_validUntil . '<br />MUST not be more than ' . date('c', $maxTime),
-                	'line' => $input_elm->getLineNo(),
-            	);
-            	$this->_status = KV_STATUS_ERROR;
+            if( ($maxTime - $validTime) < 0 ) {
+                $this->_messages[] = array(
+                    'level' => KV_STATUS_ERROR,
+                    'msg' => '[DOCUMENT] validUntil MUST not be more that 240 hours in the future. validUntil set to ' . $att_validUntil . '<br />MUST not be more than ' . date('c', $maxTime),
+                    'line' => $input_elm->getLineNo(),
+                );
+                $this->_status = KV_STATUS_ERROR;
                 $error = true;
-        	}
+            }
 
             // validUntil is good. No need to check all EntityDescriptor
             if(!$error) {
@@ -867,8 +928,8 @@ class sspmod_kvalidate_Validator {
             }
         }
 
-		// Validate validUntil on all EntityDescriptor
-		$query = 'md:EntityDescriptor';
+        // Validate validUntil on all EntityDescriptor
+        $query = 'md:EntityDescriptor';
         $elms = $this->_xpath->query($query, $input_elm);
 
         $status = array();
@@ -889,16 +950,16 @@ class sspmod_kvalidate_Validator {
         return false;
     }
 
-	/**
-	 * vEntityValidUntil validation check
-	 *
-	 * <md:EntityDescriptor> must contain a validUntil attribute. The
+    /**
+     * vEntityValidUntil validation check
+     *
+     * <md:EntityDescriptor> must contain a validUntil attribute. The
      * validUntil timestamp must be between 6 and 96 hours in the furure.
-	 * 
-	 * @param DOMElement $input_elm The element to be validated
-	 *
-	 * @return bool True if the check clears othervise false
-	 */   
+     * 
+     * @param DOMElement $input_elm The element to be validated
+     *
+     * @return bool True if the check clears othervise false
+     */   
     private function _vEntityValidUntil(DOMElement $input_elm)
     {
         $att_validUntil = $input_elm->getAttribute('validUntil');
@@ -951,10 +1012,10 @@ class sspmod_kvalidate_Validator {
      *
      * <md:SingleLogoutService> must use the HTTP-REDIRECT binding
      * 
-	 * @param DOMElement $input_elm The element to be validated
-	 *
-	 * @return bool True if the check clears othervise false
-	 */   
+     * @param DOMElement $input_elm The element to be validated
+     *
+     * @return bool True if the check clears othervise false
+     */   
     private function _vSLO(DOMElement $input_elm)
     {
         $query = 'md:SingleLogoutService';
@@ -966,7 +1027,7 @@ class sspmod_kvalidate_Validator {
 
         foreach($elms AS $elm) {
             $binding = $elm->getAttribute('Binding');
-        
+
             if($binding = 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-REDIRECT') {
                 $this->_messages[] = array(
                     'level' => KV_STATUS_SUCCESS,
@@ -986,15 +1047,15 @@ class sspmod_kvalidate_Validator {
         return false;
     }
 
-	/**
-	 * vACS validation check
-	 *
-	 * <md:AssertionConsumerService> must use the HTTP-POST binding
-	 * 
-	 * @param DOMElement $input_elm The element to be validated
-	 *
-	 * @return bool True if the check clears othervise false
-	 */    
+    /**
+     * vACS validation check
+     *
+     * <md:AssertionConsumerService> must use the HTTP-POST binding
+     * 
+     * @param DOMElement $input_elm The element to be validated
+     *
+     * @return bool True if the check clears othervise false
+     */    
     private function _vACS(DOMElement $input_elm)
     {
         $query = 'md:AssertionConsumerService';
@@ -1002,7 +1063,7 @@ class sspmod_kvalidate_Validator {
 
         foreach($elms AS $elm) {
             $binding = $elm->getAttribute('Binding');
-        
+
             if($binding == 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST') {
                 $this->_messages[] = array(
                     'level' => KV_STATUS_SUCCESS,
@@ -1019,19 +1080,19 @@ class sspmod_kvalidate_Validator {
             'line' => $input_elm->getLineNo(),
         ); 
         $this->_status = KV_STATUS_ERROR;
-        
+
         return false;
     }
- 
- 	/**
-	 * vSSO validation check
-	 *
-	 * <md:SingleSignOnService> must use the HTTP-REDIRECT binding
-	 * 
-	 * @param DOMElement $input_elm The element to be validated
-	 *
-	 * @return bool True if the check clears othervise false
-	 */ 
+
+    /**
+     * vSSO validation check
+     *
+     * <md:SingleSignOnService> must use the HTTP-REDIRECT binding
+     * 
+     * @param DOMElement $input_elm The element to be validated
+     *
+     * @return bool True if the check clears othervise false
+     */ 
     private function _vSSO(DOMElement $input_elm)
     {
         $query = 'md:SingleSignOnService';
@@ -1039,7 +1100,7 @@ class sspmod_kvalidate_Validator {
 
         foreach($elms AS $elm) {
             $binding = $elm->getAttribute('Binding');
-        
+
             if($binding == 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect') {
                 $this->_messages[] = array(
                     'level' => KV_STATUS_SUCCESS,
@@ -1059,16 +1120,16 @@ class sspmod_kvalidate_Validator {
         return false;
     }
 
- 	/**
-	 * vEDSignature validation check
-	 *
-	 * If present, the <md:EntitiesDescriptor> is signed
-	 * 
-	 * @param DOMElement $input_elm The element to be validated
-	 *
-	 * @return bool True if the check clears othervise false
-	 * @todo Check that certificate used for signing is accepted
-	 */    
+    /**
+     * vEDSignature validation check
+     *
+     * If present, the <md:EntitiesDescriptor> is signed
+     * 
+     * @param DOMElement $input_elm The element to be validated
+     *
+     * @return bool True if the check clears othervise false
+     * @todo Check that certificate used for signing is accepted
+     */    
     private function _vEDSignature(DOMElement $input_elm)
     {
         try {
@@ -1076,59 +1137,59 @@ class sspmod_kvalidate_Validator {
             // Will throw an exception if signature is invalid
             $validCerts = $ed->getValidatingCertificates();
         } catch(Exception $e) {
-			$this->_messages[] = array(
-            	'level' => KV_STATUS_ERROR,
-            	'msg' => '[DOCUMENT] ' . $e->getMessage(),
-            	'line' => $input_elm->getLineNo(),
-        	); 
-        	$this->_status = KV_STATUS_ERROR;
-        	return false;
+            $this->_messages[] = array(
+                'level' => KV_STATUS_ERROR,
+                'msg' => '[DOCUMENT] ' . $e->getMessage(),
+                'line' => $input_elm->getLineNo(),
+            ); 
+            $this->_status = KV_STATUS_ERROR;
+            return false;
         }
 
-		if(empty($validCerts)) {
-			$this->_messages[] = array(
-            	'level' => KV_STATUS_ERROR,
-            	'msg' => '[DOCUMENT] Invalid signature on EntitiesDescriptor',
-            	'line' => $input_elm->getLineNo(),
-        	); 
-        	$this->_status = KV_STATUS_ERROR;
-        	return false;
-		}
-		
-		$this->_messages[] = array(
-        	'level' => KV_STATUS_SUCCESS,
+        if(empty($validCerts)) {
+            $this->_messages[] = array(
+                'level' => KV_STATUS_ERROR,
+                'msg' => '[DOCUMENT] Invalid signature on EntitiesDescriptor',
+                'line' => $input_elm->getLineNo(),
+            ); 
+            $this->_status = KV_STATUS_ERROR;
+            return false;
+        }
+
+        $this->_messages[] = array(
+            'level' => KV_STATUS_SUCCESS,
             'msg' => '[DOCUMENT] vEDSignature check parsed',
             'line' => $input_elm->getLineNo(),
         ); 
         return true;
     }
 
- 	/**
-	 * vCert validation check
-	 *
-	 * Each <md:KeyDescriptor> only contains one key <md:KeyDescriptor>
-	 * contains at least one <ds:KeyValue> or one
-	 * <ds:X509Data><ds:X509Certificate>. If given, the
-	 * <ds:X509Certificate> contains a public key with recognized type.
-	 * 
-	 * @param DOMElement $input_elm The element to be validated
-	 *
-	 * @return bool True if the check clears othervise false
-	 * @todo If both KeyValue and X509Certificate is present, check to see that they both contain the same key.
+    /**
+     * vCert validation check
+     *
+     * Each <md:KeyDescriptor> only contains one key <md:KeyDescriptor>
+     * contains at least one <ds:KeyValue> or one
+     * <ds:X509Data><ds:X509Certificate>. If given, the
+     * <ds:X509Certificate> contains a public key with recognized type.
+     * 
+     * @param DOMElement $input_elm The element to be validated
+     *
+     * @return bool True if the check clears othervise false
+     * @todo If both KeyValue and X509Certificate is present, check to see that they both contain the same key.
      * @todo Check to see if the certificates are expired        
-	 */
+     */
     private function _vCert(DOMElement $input_elm) 
     {   
         $error = 0;
-        
+
         // Get all KeyDescriptors
         $query = 'md:KeyDescriptor';
         $elms = $this->_xpath->query($query, $input_elm);
-        
+
         foreach($elms AS $elm) {
             $query = 'ds:KeyInfo';
             $elms2 = $this->_xpath->query($query, $elm);
-            
+
             // Check that only one KeyInfo is located in the KeyDescriptor
             if($elms2->length > 1) {
                 $this->_messages[] = array(
@@ -1153,7 +1214,7 @@ class sspmod_kvalidate_Validator {
 
             // Only one element given
             $elm2 = $elms2->item(0);
-            
+
             $query = 'ds:KeyValue';
             $kv = $this->_xpath->query($query, $elm2);
 
@@ -1171,7 +1232,7 @@ class sspmod_kvalidate_Validator {
                 $error = 1;
                 continue;
             }
-            
+
             if($cert->length == 1) {
                 /**
                  * Validate that the certificate contains a public key
@@ -1198,13 +1259,13 @@ class sspmod_kvalidate_Validator {
                         $this->_status = KV_STATUS_ERROR;
                         continue;
                     }
-                    
+
                     // Does the public key has recognized type
                     if($info['type'] < 0 || $info['type'] > 3) {
                         $this->_messages[] = array(
                             'level' => KV_STATUS_ERROR,
                             'msg' => '[' . $elm->parentNode->parentNode->getAttribute('entityID') . '] Certificate in the X509Certificate element is not valid',
-                        	'line' => $cert->item(0)->getLineNo(),
+                            'line' => $cert->item(0)->getLineNo(),
                         ); 
                         $this->_status = KV_STATUS_ERROR;
                         $error = 1;
@@ -1215,7 +1276,7 @@ class sspmod_kvalidate_Validator {
                         $this->_messages[] = array(
                             'level' => KV_STATUS_ERROR,
                             'msg' => '[' . $elm->parentNode->parentNode->getAttribute('entityID') . ']dd OpenSSL error: ' . $msg,
-                        	'line' => $cert->item(0)->getLineNo(),
+                            'line' => $cert->item(0)->getLineNo(),
                         ); 
                     }
                     $error = 1;
@@ -1234,15 +1295,15 @@ class sspmod_kvalidate_Validator {
         return false;
     }
 
- 	/**
-	 * vSchema validation check
-	 *
-	 * Schema validation according to the schema given by the SAML2 spec.
-	 * 
-	 * @param DOMDocument $input_elm The element to be validated
-	 *
-	 * @return bool True if the check clears othervise false
-	 */
+    /**
+     * vSchema validation check
+     *
+     * Schema validation according to the schema given by the SAML2 spec.
+     * 
+     * @param DOMDocument $input_elm The element to be validated
+     *
+     * @return bool True if the check clears othervise false
+     */
     private function _vSchema(DOMDocument $input_elm)
     {
         if($input_elm->schemaValidate($this->_schema)) {
@@ -1259,14 +1320,14 @@ class sspmod_kvalidate_Validator {
         return false;
     }
 
-	/**
-	 * Get libXML errors
-	 *
-	 * Custom error handler for libXML errors. All errors from libXML is parsed
-	 * and aproiate error message is generated.
-	 *
-	 * @see PHP_MANUAL#book.libxml.php 
-	 */
+    /**
+     * Get libXML errors
+     *
+     * Custom error handler for libXML errors. All errors from libXML is parsed
+     * and aproiate error message is generated.
+     *
+     * @see PHP_MANUAL#book.libxml.php 
+     */
     private function _getLibxmlErrors()
     {
         $errors = libxml_get_errors();
@@ -1274,15 +1335,15 @@ class sspmod_kvalidate_Validator {
             $e = array();
             // Get error type
             switch ($error->level) {
-                case LIBXML_ERR_WARNING:
-                    $e['level'] = KV_STATUS_WARNING;
-                    break;
-                case LIBXML_ERR_ERROR:
-                    $e['level'] = KV_STATUS_ERROR;
-                    break;
-                case LIBXML_ERR_FATAL:
-                    $e['level'] = KV_STATUS_ERROR;
-                    break;
+            case LIBXML_ERR_WARNING:
+                $e['level'] = KV_STATUS_WARNING;
+                break;
+            case LIBXML_ERR_ERROR:
+                $e['level'] = KV_STATUS_ERROR;
+                break;
+            case LIBXML_ERR_FATAL:
+                $e['level'] = KV_STATUS_ERROR;
+                break;
             }
 
             // Construct error message
@@ -1297,22 +1358,22 @@ class sspmod_kvalidate_Validator {
         libxml_clear_errors();
     }
 
-	/**
-	 * Get that status of the last validation
-	 *
-	 * @return int Status flag
-	 * @see    KV_STATUS_UNDEFINED, KV_STATUS_SUCCESS, KV_STATUS_WARNING, KV_STATUS_ERROR
-	 */
+    /**
+     * Get that status of the last validation
+     *
+     * @return int Status flag
+     * @see    KV_STATUS_UNDEFINED, KV_STATUS_SUCCESS, KV_STATUS_WARNING, KV_STATUS_ERROR
+     */
     public function getStatus()
     {
         return $this->_status;
     }
-    
+
     /**
-	 * Get messages from last validation
-	 *
-	 * @return array Array of messages
-	 */
+     * Get messages from last validation
+     *
+     * @return array Array of messages
+     */
     public function getMessages()
     {
         return $this->_messages;
