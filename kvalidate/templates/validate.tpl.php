@@ -182,22 +182,22 @@ if(isset($this->data['xml'])) {
 	
 	echo '<h2>' . $this->t('{kvalidate:kvalidate:message_header}') . '</h2>';
 	
-	foreach($this->data['messages'] AS $msg) {
-		if($msg['level'] == KV_STATUS_SUCCESS && $this->data['show_success']) {
+	foreach($this->data['logger'] AS $msg) {
+		if($msg->level === sspmod_kvalidate_Logger::LEVEL_SUCCESS && $this->data['show_success']) {
 			echo '<div class="status_success">';
-			echo $msg['msg'];
+			echo $msg;
 			echo '</div>';
-		} else if($msg['level'] == KV_STATUS_ERROR) {
+		} else if($msg->level === sspmod_kvalidate_Logger::LEVEL_ERROR) {
 			echo '<div class="status_error">';
 			echo '<img src="/' . $this->data['baseurlpath'] . 'resources/icons/experience/gtk-dialog-error.48x48.png" alt="' . $this->t('{kvalidate:kvalidate:status_error}') . '" class="img_status_error" />';
-			echo 'In line: ' . $msg['line'] . '<br />';
-			echo $msg['msg'];
+			echo 'In line: ' . $msg->line . '<br />';
+			echo $msg;
 			echo '</div>';
-		} else if($msg['level'] == KV_STATUS_WARNING && $this->data['show_warning']) {
+		} else if($msg->level === sspmod_kvalidate_Logger::LEVEL_WARNING && $this->data['show_warning']) {
 			echo '<div class="status_warning">';
 			echo '<img src="/' . $this->data['baseurlpath'] . 'resources/icons/experience/gtk-dialog-warning.48x48.png" alt="' . $this->t('{kvalidate:kvalidate:status_error}') . '" class="img_status_error" />';
-			echo 'In line: ' . $msg['line'] . '<br />';
-			echo $msg['msg'];
+			echo 'In line: ' . $msg->line . '<br />';
+			echo $msg;
 			echo '</div>';
 		}
 	}
