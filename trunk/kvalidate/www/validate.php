@@ -65,7 +65,7 @@ if(!empty($_REQUEST['md_url']) || !empty($_REQUEST['md_xml'])) {
 
 	$t->data['xml'] = $validator->validate($xml);
 	$t->data['orig_xml'] = $xml;
-	$t->data['messages'] = $validator->getMessages();
+	$t->data['logger'] = $validator->getLogger();
 	$t->data['status'] = $validator->getStatus();
 }
 

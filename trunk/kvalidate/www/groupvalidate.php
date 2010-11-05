@@ -69,7 +69,6 @@ foreach($tag AS $k => $entity) {
 	$md_url = $entity['url'];
 	$xml = file_get_contents($md_url);
 	$t->data['entities'][$k]['xml'] = $validator->validate($xml);
-	$t->data['entities'][$k]['messages'] = $validator->getMessages();
 	$t->data['entities'][$k]['status'] = $validator->getStatus();
 	$t->data['entities'][$k]['name'] = $entity['name'];
 	$t->data['entities'][$k]['description'] = $entity['description'];
