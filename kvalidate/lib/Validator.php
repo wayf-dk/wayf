@@ -219,7 +219,13 @@ class sspmod_kvalidate_Validator
 
         if ($root_element->localName == 'EntitiesDescriptor') {
             // Validate signature on root EntitiesDescriptor element
-            $this->_vEDSignature($sigXML->documentElement);
+            if (!$this->_vEDSignature($sigXML->documentElement) && isset($this->_config['REMOVE_ENTITYDESCRIPTOR']) && $this->_config['REMOVE_ENTITYDESCRIPTOR']) {
+                $this->_logger->logError(
+                    'Signature not valid',
+                    $root_element->getLineNo()
+                );
+                return '';
+            }
             $this->_processEntitiesDescriptor($root_element);
         } else if ($root_element->localName == 'EntityDescriptor') {
             $this->_vEntityValidUntil($root_element);
@@ -1111,20 +1117,29 @@ class sspmod_kvalidate_Validator
     {
         try {
             $entity_descriptor = new SAML2_XML_md_EntitiesDescriptor($input_elm);
+            
             // Will throw an exception if signature is invalid
             $validCerts = $entity_descriptor->getValidatingCertificates();
+            if (empty($validCerts)) {
+                throw new Exception('Invalid signature on EntitiesDescriptor');
+            }
+
+            if (isset($this->_config['validateFingerprint']) && $this->_config['validateFingerprint'] !== NULL) {
+                $found = false;
+                $fingerprint = strtolower(str_replace(":", "", $this->_config['validateFingerprint']));
+                foreach ($validCerts as $cert) {
+                    $fp = strtolower(sha1(base64_decode($cert)));
+                    if ($fp === $fingerprint) {
+                        $found = true;
+                    }
+                }
+                if (!$found) {
+                    throw new Exception('Supplied fingerprint do not match the fingerprint of the signing certificate');
+                }
+            }
         } catch(Exception $e) {
             $this->_logger->logError(
                 $e->getMessage(),
-                $input_elm->getLineNo()
-            );
-            $this->_status = KV_STATUS_ERROR;
-            return false;
-        }
-
-        if (empty($validCerts)) {
-            $this->_logger->logError(
-                'Invalid signature on EntitiesDescriptor',
                 $input_elm->getLineNo()
             );
             $this->_status = KV_STATUS_ERROR;
