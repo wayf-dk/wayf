@@ -14,7 +14,7 @@ Kalmar2 metadata validator
 Documentation
 -------------
 The Kalmar2 metadata validator is documented in this document and all source
-code is documented to PHPDOC. To get an API documentation of the source code
+code is documented in PHPDOC. To get an API documentation of the source code
 please run the [phpDocumentor](http://phpdoc.org/) on the source code.
 
 A mailinglist for issues, questions and commit messages has been set up and can
@@ -30,28 +30,30 @@ Prerequisites
 Installing
 ----------
 The Kalmar2 metadata validator is a SimpleSAMLphp module that will work on
-SimpleSAMLphp version 1.6 and up. The code can be retrived from the SVN
+SimpleSAMLphp version 1.6.0 and up. The code can be retrived from the SVN
 repository located at [code.google.com/p/wayf/](http://code.google.com/p/wayf/)
 
-The easiest to get the resent version is to checkout the latest version from
+The easiest way to get the most resent version is to checkout `trunk` from
 the SVN repository
 
 	cd simplesamlphp/modules
 	svn checkout http://wayf.googlecode.com/svn/trunk/kvalidate kvalidate
 
+NOTE that all versions run at the Kalmar2 setup is taged as well.
+
 If you are using the group validation page, you should copy the config file
-from the `config-templates`directory to the SimpleSAMLphp `config` directory.
+from the `config-templates` directory to the SimpleSAMLphp `config` directory.
 
 	cp simplesamlphp/modules/kvalidate/config-templates/module_kvalidate.php simplesamlphp/config/
 	
 Configuring the Kalmar2 metadata validator
 ------------------------------------------
 The basic use of the Kalmar2 metadata validator do not need any configuration.
-The `validate.php`script will display a form where a URL for metadata can be
-provided.
+The `validate.php` script will display a form where a URL for metadata can be
+provided or the raw XML metadata.
 
 To use the `groupvalidate.php` script, you need to configure one or more tags. 
-a tag is a collection of URL's for metadata, that all will be validated at the
+a tag is a collection of URLs for metadata, that all will be validated at the
 same time and displayed. Tags has the following layout in the config file:
 
 	'tags' => array(
@@ -79,8 +81,8 @@ The first way is to call the groupvalidate.php with the query parameter tag set
 to one of the previouse defind tags in the configuration file.
 
 The second wayf is to call the validate.php script. Here you can insert an URL
-or local file path to the XML metadata document to be validated. You can also
-call the script with the following query parameters:
+or local file path to the XML metadata document or raw XML metdata to be validated.
+You can also call the script with the following query parameters:
 
  * md_url - Should be set to the URL of the metadata
  * show_warning - If set warnings fromm the validation is showen
@@ -88,8 +90,9 @@ call the script with the following query parameters:
  * show_md_url - If set the field for setting the metadata URL is shown
  * show_md_xml - If set the field for setting the XML metadata is shown
  * show_xml - If set the XML metadata is displayed in a prettyfied format
- * remove_ed - If set all EntityDescriptor's that do not validate will be
-   removed from the XML metadata.
+ * remove_ed - If set all EntityDescriptors that do not validate will be
+   removed from the XML metadata NOTE that the entire EntitiesDescriptor will
+   be removed if the validation of the signature fails.
 
 If no parameters is sent to the script, the field for inputting XML metadata is
 shown.
@@ -106,27 +109,68 @@ I the Kalmar2 interfederation setup, the Kalmar2 metadata validator is used in
 the metarefresh module, to allow validation of metadata upon the arrival of the
 metadata at the Kalmar2 servers. 
 
-The following change has been made to the metaire fresh module. The changes are
+The following change has been made to the metarefresh module. The changes are
 made in the loadSource method:
 
-    try {
-        // Removed for Kalmar2
-        //$entities =
-        //SimpleSAML_Metadata_SAMLParser::parseDescriptorsFile($source['src']);
-        
-        // Added for Kalmar2
+	public function loadSource($source) {
+		
+		$entities = array();
+		try {
+			// Removed for Kalmar2
+		    //$entities = SimpleSAML_Metadata_SAMLParser::parseDescriptorsFile($source['src']);
+            
+            // Added for Kalmar2
+			// Get metadata
+            $xml = file_get_contents($source['src']);
 
-        // Get metadata
-        $xml = file_get_contents($source['src']);
+            // Validate metadata
+            SimpleSAML_Logger::info('Validating metdata from: ' . $source['src'] . "\n");
+            $config['REMOVE_ENTITYDESCRIPTOR'] = true;
+            
+            // Set validating fingerprint if parsed in metarefresh module
+			if(array_key_exists('validateFingerprint', $source) && $source['validateFingerprint'] !== NULL) {
+                $config['validateFingerprint'] = $source['validateFingerprint'];
+            }
 
-        // Validate metadata
-        SimpleSAML_Logger::info('Validating metdata from: ' . $source['src'] . "\n");
-        $config['REMOVE_ENTITYDESCRIPTOR'] = true;
-        $validator = new sspmod_kvalidate_Validator($config);
-        $valid_xml = $validator->validate($xml);
+            $validator = new sspmod_kvalidate_Validator($config);
+            $valid_xml = $validator->validate($xml);
 
-        $entities = SimpleSAML_Metadata_SAMLParser::parseDescriptorsString($valid_xml);
-    }
+            $entities = SimpleSAML_Metadata_SAMLParser::parseDescriptorsString($valid_xml);
+            
+		} catch(Exception $e) {
+			SimpleSAML_Logger::warning('metarefresh: Failed to retrieve metadata. ' . $e->getMessage());
+		}
+		foreach($entities as $entity) {
+            // Removed for Kalmar2
+            /*
+			if(array_key_exists('validateFingerprint', $source) && $source['validateFingerprint'] !== NULL) {
+                $tmp = $entity->validateFingerprint($source['validateFingerprint']);
+				if(!$tmp) {
+					SimpleSAML_Logger::info('Skipping "' . $entity->getEntityId() . '" - could not verify signature.' . "\n");
+					continue;
+				}
+			}
+            */
+			$template = NULL;
+			if (array_key_exists('template', $source)) $template = $source['template'];
+			
+			$this->addMetadata($source['src'], $entity->getMetadata1xSP(), 'shib13-sp-remote', $template);
+			$this->addMetadata($source['src'], $entity->getMetadata1xIdP(), 'shib13-idp-remote', $template);
+			$this->addMetadata($source['src'], $entity->getMetadata20SP(), 'saml20-sp-remote', $template);
+			$this->addMetadata($source['src'], $entity->getMetadata20IdP(), 'saml20-idp-remote', $template);
+			$attributeAuthorities = $entity->getAttributeAuthorities();
+			if (!empty($attributeAuthorities)) {
+				$this->addMetadata($source['src'], $attributeAuthorities[0], 'attributeauthority-remote', $template);				
+			}
+
+		}
+	}
+
+If a validating fingerprint is supplied in the configuration of the
+metarefreesh module, the all signatures is validated against it. If the
+fingerprint do not match, the entity is removed. If the signature on the
+EntitiesDescriptor do nor match the fingerprint the entire EntitiesDescriptor
+is removed i.e. all metadata for the country is omitted.
 
 Validation
 ----------
@@ -139,7 +183,7 @@ in the following four documents:
     (SAML) V2.0. March 2005](http://docs.oasis-open.org/security/saml/v2.0/saml-metadata-2.0-os.pdf)
  2. [SAML V2.0 Metadata Interoperability Profile Version 1.0](http://docs.oasis-open.org/security/saml/Post2.0/sstc-metadata-iop-cd-01.pdf)
  3. [Interoperable SAML 2.0 Web Browser SSO Deployment profile](http://saml2int.org/profile/0.1http://www.kalmar2.org/kalmar2web/members_attchmt/2010_01_29_appendix-a_ver-1.pdf)
- 4. [Kalmar2 Appendix A](http://www.kalmar2.org/kalmar2web/members_attchmt/2010_01_29_appendix-a_ver-1.pdf)
+ 4. [Kalmar2 Appendix A](http://www.kalmar2.org/kalmar2web/members_attchmt/appendix_A_2010_10_25.pdf)
 
 ### Requirements ###
 Different steps are required in order to comply with the different requirements
@@ -168,7 +212,7 @@ in () refers to line numbers in the given document:
   4. If no <md:KeyDescriptor> is given and the AssertionConsumerService 
      location is not using SSL/HTTPS, then the metadata should be discarded.
      (131-142)
- 4. The follwoing is given:
+ 4. The follwoing is given. NOTE line numbers are not up to date:
   1. The SingleLogoutService must only be supplied if the entity supports 
      single logout. (20) 
   2. SingleLogoutService binding must be HTTP-REDIRECT. (24)
