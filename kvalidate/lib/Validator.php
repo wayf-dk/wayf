@@ -296,6 +296,16 @@ class sspmod_kvalidate_Validator
                 $this->_processEntityDescriptor($elm);
             }
         }
+        
+        if ($input_elm->hasAttribute('Name')) {
+            $id = $input_elm->getAttribute('Name');
+        } else if ($input_elm->hasAttribute('ID')) {
+            $id = $input_elm->getAttribute('ID');
+        } else {
+            $id = 'EntitiesDescriptor';
+        }
+
+        $status['vExtension'] = $this->_vExtension($input_elm, $id);
 
         return true;
     }
@@ -343,6 +353,8 @@ class sspmod_kvalidate_Validator
             $input_elm->parentNode->removeChild($input_elm);
         }
 
+        $status['vExtension']   = $this->_vExtension($input_elm, $input_elm->getAttribute('entityID'));
+        
         return !in_array(false, $status);
     }
 
@@ -370,7 +382,7 @@ class sspmod_kvalidate_Validator
         $status['vSSO']          = $this->_vSSO($input_elm);
         $status['vSLO']          = $this->_vSLO($input_elm);
         $status['vScope']        = $this->_vScope($input_elm);
-        $status['vExtension']    = $this->_vExtension($input_elm);
+        $status['vExtension']    = $this->_vExtension($input_elm, $input_elm->parentNode->getAttribute('entityID'));
         $status['vSign']         = $this->_vSign($input_elm);
         $status['vOrganization'] = $this->_vOrganization($input_elm);
 
@@ -403,7 +415,7 @@ class sspmod_kvalidate_Validator
         $status['vRequestAttr'] = $this->_vRequestAttr($input_elm);
         $status['vEnc']         = $this->_vEnc($input_elm);
         $status['vNameDesc']    = $this->_vNameDesc($input_elm);
-        $status['vExtension']   = $this->_vExtension($input_elm);
+        $status['vExtension']   = $this->_vExtension($input_elm, $input_elm->parentNode->getAttribute('entityID'));
 
         return !in_array(false, $status);
     }
@@ -762,7 +774,7 @@ class sspmod_kvalidate_Validator
      *
      * @return bool True if the check clears othervise false
      */
-    private function _vExtension(DOMElement $input_elm)
+    private function _vExtension(DOMElement $input_elm, $id)
     {
         $error = false;
 
@@ -779,7 +791,7 @@ class sspmod_kvalidate_Validator
                         $this->_logger->logError(
                             '`' . $nodeName . '`element is not allowed in the `Extension` element.',
                             $elm->getLineNo(),
-                            $input_elm->parentNode->getAttribute('entityID')
+                            $id
                         );
                         $error         = true;
                         $this->_status = KV_STATUS_ERROR;
@@ -792,7 +804,7 @@ class sspmod_kvalidate_Validator
             $this->_logger->logSuccess(
                 'vExtension check parsed',
                 $input_elm->getLineNo(),
-                $input_elm->parentNode->getAttribute('entityID')
+                $id
             );
             return true;
         }
@@ -877,6 +889,14 @@ class sspmod_kvalidate_Validator
     private function _vEntitiesValidUntil(DOMElement $input_elm)
     {
         $error = false;
+        
+        if ($input_elm->hasAttribute('Name')) {
+            $id = $input_elm->getAttribute('Name');
+        } else if ($input_elm->hasAttribute('ID')) {
+            $id = $input_elm->getAttribute('ID');
+        } else {
+            $id = 'EntitiesDescriptor';
+        }
 
         $att_validUntil = $input_elm->getAttribute('validUntil');
 
@@ -890,7 +910,8 @@ class sspmod_kvalidate_Validator
             if ( ($validTime-$minTime) < 0 ) {
                 $this->_logger->logError(
                     'validUntil MUST be at least 6 hours in the future. validUntil set to ' . $att_validUntil . '<br />MUST be at least ' . date('c', $minTime),
-                    $input_elm->getLineNo()
+                    $input_elm->getLineNo(),
+                    $id
                 );
                 $this->_status = KV_STATUS_ERROR;
                 $error         = true;
@@ -899,7 +920,8 @@ class sspmod_kvalidate_Validator
             if ( ($maxTime - $validTime) < 0 ) {
                 $this->_logger->logError(
                     'validUntil MUST not be more that 240 hours in the future. validUntil set to ' . $att_validUntil . '<br />MUST not be more than ' . date('c', $maxTime),
-                    $input_elm->getLineNo()
+                    $input_elm->getLineNo(),
+                    $id
                 );
                 $this->_status = KV_STATUS_ERROR;
                 $error         = true;
@@ -909,7 +931,8 @@ class sspmod_kvalidate_Validator
             if (!$error) {
                 $this->_logger->logSuccess(
                     'vEntitiesValidUntil check parsed',
-                    $input_elm->getLineNo()
+                    $input_elm->getLineNo(),
+                    $id
                 );
                 return true;
             }
@@ -928,7 +951,8 @@ class sspmod_kvalidate_Validator
         if (!in_array(false, $status)) {
             $this->_logger->logSuccess(
                 'vEntitiesValidUntil check parsed',
-                $input_elm->getLineNo()
+                $input_elm->getLineNo(),
+                $id
             );
             return true;
         }
@@ -1115,6 +1139,14 @@ class sspmod_kvalidate_Validator
      */
     private function _vEDSignature(DOMElement $input_elm)
     {
+        if ($input_elm->hasAttribute('Name')) {
+            $id = $input_elm->getAttribute('Name');
+        } else if ($input_elm->hasAttribute('ID')) {
+            $id = $input_elm->getAttribute('ID');
+        } else {
+            $id = 'EntitiesDescriptor';
+        }
+
         try {
             $entity_descriptor = new SAML2_XML_md_EntitiesDescriptor($input_elm);
             
@@ -1140,7 +1172,8 @@ class sspmod_kvalidate_Validator
         } catch(Exception $e) {
             $this->_logger->logError(
                 $e->getMessage(),
-                $input_elm->getLineNo()
+                $input_elm->getLineNo(),
+                $id
             );
             $this->_status = KV_STATUS_ERROR;
             return false;
@@ -1148,7 +1181,8 @@ class sspmod_kvalidate_Validator
 
         $this->_logger->logSuccess(
             'vEDSignature check parsed',
-            $input_elm->getLineNo()
+            $input_elm->getLineNo(),
+            $id
         );
         return true;
     }
@@ -1293,10 +1327,21 @@ class sspmod_kvalidate_Validator
      */
     private function _vSchema(DOMDocument $input_elm)
     {
+        $elm = $input_elm->documentElement;
+
+        if ($elm->hasAttribute('Name')) {
+            $id = $elm->getAttribute('Name');
+        } else if ($elm->hasAttribute('ID')) {
+            $id = $elm->getAttribute('ID');
+        } else {
+            $id = 'EntitiesDescriptor';
+        }
+
         if ($input_elm->schemaValidate($this->_schema)) {
             $this->_logger->logSuccess(
                 'vSchema check parsed',
-                $input_elm->getLineNo()
+                $input_elm->getLineNo(),
+                $id
             );
             return true;
         } else {
