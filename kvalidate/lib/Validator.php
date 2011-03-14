@@ -771,6 +771,7 @@ class sspmod_kvalidate_Validator
      * <md:Extensions> must not contain other elements than <shibmd:Scope>
      *
      * @param DOMElement $input_elm The element to be validated
+     * @param string     $id        Id of the parent element. Used for logging
      *
      * @return bool True if the check clears othervise false
      */
