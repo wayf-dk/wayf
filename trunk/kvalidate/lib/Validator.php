@@ -778,7 +778,16 @@ class sspmod_kvalidate_Validator
     {
         $error = false;
 
-        $allowed_elements = array('shibmd:Scope', 'DiscoveryResponse', 'mdui:UIInfo', 'mdui:DiscoHints', 'mdrpi:RegistrationInfo', 'mdrpi:RegistrationInfo', 'mdrpi:PublicationPath');
+        $allowed_elements = array(
+            'shibmd:Scope',
+            'DiscoveryResponse',
+            'mdui:UIInfo',
+            'mdui:DiscoHints',
+            'mdrpi:RegistrationInfo',
+            'mdrpi:RegistrationInfo',
+            'mdrpi:PublicationPath',
+            'mdrpi:PublicationInfo'
+        );
 
         $elms = $this->_xpath->query('md:Extensions', $input_elm);
 
