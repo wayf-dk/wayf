@@ -80,7 +80,7 @@ At the current time there is two ways to use the Kalmar2 metadata validator.
 The first way is to call the groupvalidate.php with the query parameter tag set
 to one of the previouse defind tags in the configuration file.
 
-The second wayf is to call the validate.php script. Here you can insert an URL
+The second way is to call the validate.php script. Here you can insert an URL
 or local file path to the XML metadata document or raw XML metdata to be validated.
 You can also call the script with the following query parameters:
 
@@ -102,7 +102,7 @@ Also the validator can be called directly within SimpleSAMLphp. Example.
     $validator = new sspmod_kvalidate_Validator();
     $xml = $validator->validate($xml);
 
-For a complete reference, please se the API documentation.
+For a complete reference, please see the API documentation.
 
 ### Kalmar2 specific usage ###
 I the Kalmar2 interfederation setup, the Kalmar2 metadata validator is used in
