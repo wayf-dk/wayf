@@ -60,6 +60,7 @@ $validator = new sspmod_kvalidate_Validator($config);
 ksort($tag);
 
 foreach($tag AS $k => $entity) {
+    SimpleSAML_Logger::debug('[Kvalidate] Source: ' . $entity['url']);
     /**
      * Can not be used because of bug in FILTER_VALIDATE_URL 
      * (http://bugs.php.net/bug.php?id=51192). Bug should be fixed in PHP 
