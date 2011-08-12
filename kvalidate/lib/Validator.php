@@ -117,6 +117,7 @@ class sspmod_kvalidate_Validator
      */
     public function __construct(Array $config = null)
     {
+        SimpleSAML_Logger::debug('[Kvalidate] Initializing validator');
         // Enable user error handling of XML errors
         libxml_use_internal_errors(true);
 
@@ -135,6 +136,7 @@ class sspmod_kvalidate_Validator
      */
     public function __destruct()
     {
+        SimpleSAML_Logger::debug('[Kvalidate] Destroying validator');
         // Disable user error handling of XML errors
         libxml_use_internal_errors(false);
     }
@@ -156,6 +158,7 @@ class sspmod_kvalidate_Validator
      */
     public function validate($xml)
     {
+        SimpleSAML_Logger::debug('[Kvalidate] Function: validate');
         assert('is_string($xml)');
 
         $this->_xml                     = new DOMDocument();
@@ -263,6 +266,7 @@ class sspmod_kvalidate_Validator
      */
     private function _processEntitiesDescriptor(DOMElement $input_elm)
     {
+        SimpleSAML_Logger::debug('[Kvalidate] Function: _processEntitiesDescriptor');
         // EntitiesDescriptors can be nested
         $elms = $this->_xpath->query('md:EntitiesDescriptor', $input_elm);
 
@@ -324,6 +328,7 @@ class sspmod_kvalidate_Validator
      */
     private function _processEntityDescriptor(DOMElement $input_elm)
     {
+        SimpleSAML_Logger::debug('[Kvalidate] Function: _processEntityDescriptor');
         $status = array();
 
         // Validate all IDPSSODescriptors
@@ -375,6 +380,7 @@ class sspmod_kvalidate_Validator
      */
     private function _processIDPSSODescriptor(DOMElement $input_elm)
     {
+        SimpleSAML_Logger::debug('[Kvalidate] Function: _processIDPSSODescriptor');
         $status = array();
 
         // Run checks
@@ -406,6 +412,7 @@ class sspmod_kvalidate_Validator
      */
     private function _processSPSSODescriptor(DOMElement $input_elm)
     {
+        SimpleSAML_Logger::debug('[Kvalidate] Function: _processSPSSODescriptor');
         $status = array();
 
         // Run checks
@@ -432,6 +439,7 @@ class sspmod_kvalidate_Validator
      */
     private function _vNameDesc(DOMElement $input_elm)
     {
+        SimpleSAML_Logger::debug('[Kvalidate] Function: _vNameDesc');
         $elms = $this->_xpath->query('md:AttributeConsumingService', $input_elm);
 
         $found_name = false;
@@ -495,6 +503,7 @@ class sspmod_kvalidate_Validator
      */
     private function _vOrganization(DOMElement $input_elm)
     {
+        SimpleSAML_Logger::debug('[Kvalidate] Function: vOrganization');
         $elms = $this->_xpath->query('md:Organization', $input_elm->parentNode);
 
         // The organization element must be present
@@ -598,6 +607,7 @@ class sspmod_kvalidate_Validator
      */
     private function _vEnc(DOMElement $input_elm)
     {
+        SimpleSAML_Logger::debug('[Kvalidate] Function: _vEnc');
         $kd_found = false;
         $elms     = $this->_xpath->query('md:AssertionConsumerService', $input_elm);
 
@@ -652,7 +662,8 @@ class sspmod_kvalidate_Validator
      * @return bool True if the check clears othervise false
      */
     private function _vSign(DOMElement $input_elm)
-    {
+    {   
+        SimpleSAML_Logger::debug('[Kvalidate] Function: _vSign');
         $elms = $this->_xpath->query('md:KeyDescriptor', $input_elm);
 
         foreach ($elms AS $elm) {
@@ -692,6 +703,7 @@ class sspmod_kvalidate_Validator
      */
     private function _vRequestAttr(DOMElement $input_elm)
     {
+        SimpleSAML_Logger::debug('[Kvalidate] Function: _vRequestAttr');
         $elms = $this->_xpath->query(
             'md:AttributeConsumingService/md:RequestedAttribute',
             $input_elm
@@ -777,6 +789,7 @@ class sspmod_kvalidate_Validator
      */
     private function _vExtension(DOMElement $input_elm, $id)
     {
+        SimpleSAML_Logger::debug('[Kvalidate] Function: _vExtension');
         $error = false;
 
         $allowed_elements = array(
@@ -835,6 +848,7 @@ class sspmod_kvalidate_Validator
      */
     private function _vScope(DOMElement $input_elm)
     {
+        SimpleSAML_Logger::debug('[Kvalidate] Function: _vScope');
         $error = false;
 
         $elms = $this->_xpath->query('md:Extensions/shibmd:Scope', $input_elm);
@@ -898,6 +912,7 @@ class sspmod_kvalidate_Validator
      */
     private function _vEntitiesValidUntil(DOMElement $input_elm)
     {
+        SimpleSAML_Logger::debug('[Kvalidate] Function: _vEntitiesValidateUntil');
         $error = false;
         
         if ($input_elm->hasAttribute('Name')) {
@@ -982,6 +997,7 @@ class sspmod_kvalidate_Validator
      */
     private function _vEntityValidUntil(DOMElement $input_elm)
     {
+        SimpleSAML_Logger::debug('[Kvalidate] Function: _vEntiytyValidUntil');
         $att_validUntil = $input_elm->getAttribute('validUntil');
 
         if (empty($att_validUntil)) {
@@ -1038,6 +1054,7 @@ class sspmod_kvalidate_Validator
      */
     private function _vSLO(DOMElement $input_elm)
     {
+        SimpleSAML_Logger::debug('[Kvalidate] Function: _vSLO');
         $elms = $this->_xpath->query('md:SingleLogoutService', $input_elm);
 
         if ($elms->length == 0) {
@@ -1077,6 +1094,7 @@ class sspmod_kvalidate_Validator
      */
     private function _vACS(DOMElement $input_elm)
     {
+        SimpleSAML_Logger::debug('[Kvalidate] Function: _vACS');
         $elms = $this->_xpath->query('md:AssertionConsumerService', $input_elm);
 
         foreach ($elms AS $elm) {
@@ -1113,6 +1131,7 @@ class sspmod_kvalidate_Validator
      */
     private function _vSSO(DOMElement $input_elm)
     {
+        SimpleSAML_Logger::debug('[Kvalidate] Function: _vSSO');
         $elms = $this->_xpath->query('md:SingleSignOnService', $input_elm);
 
         foreach ($elms AS $elm) {
@@ -1149,6 +1168,7 @@ class sspmod_kvalidate_Validator
      */
     private function _vEDSignature(DOMElement $input_elm)
     {
+        SimpleSAML_Logger::debug('[Kvalidate] Function: _vEDSignature');
         if ($input_elm->hasAttribute('Name')) {
             $id = $input_elm->getAttribute('Name');
         } else if ($input_elm->hasAttribute('ID')) {
@@ -1214,6 +1234,7 @@ class sspmod_kvalidate_Validator
      */
     private function _vCert(DOMElement $input_elm)
     {
+        SimpleSAML_Logger::debug('[Kvalidate] Function: _vCert');
         $error = 0;
 
         // Get all KeyDescriptors
@@ -1337,6 +1358,8 @@ class sspmod_kvalidate_Validator
      */
     private function _vSchema(DOMDocument $input_elm)
     {
+        SimpleSAML_Logger::debug('[Kvalidate] Function: _vSchema');
+
         $elm = $input_elm->documentElement;
 
         if ($elm->hasAttribute('Name')) {
@@ -1372,6 +1395,7 @@ class sspmod_kvalidate_Validator
      */
     private function _getLibxmlErrors()
     {
+        SimpleSAML_Logger::debug('[Kvalidate] Function: _getLibxmlErrors');
         $errors = libxml_get_errors();
         foreach ($errors as $error) {
             $e = array();
@@ -1409,6 +1433,7 @@ class sspmod_kvalidate_Validator
      */
     public function getStatus()
     {
+        SimpleSAML_Logger::debug('[Kvalidate] Function: getStatus');
         return $this->_status;
     }
 
@@ -1419,6 +1444,7 @@ class sspmod_kvalidate_Validator
      */
     public function getLogger()
     {
+        SimpleSAML_Logger::debug('[Kvalidate] Function: getLogger');
         return $this->_logger;
     }
 }
