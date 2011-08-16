@@ -780,7 +780,8 @@ class sspmod_kvalidate_Validator
     /**
      * vExtension check
      *
-     * <md:Extensions> must not contain other elements than <shibmd:Scope>
+     * <md:Extensions> must only contain prespecified elements. No need to 
+     * validate namespace, since the schema validation will take care of that.
      *
      * @param DOMElement $input_elm The element to be validated
      * @param string     $id        Id of the parent element. Used for logging
@@ -791,16 +792,16 @@ class sspmod_kvalidate_Validator
     {
         SimpleSAML_Logger::debug('[Kvalidate] Function: _vExtension');
         $error = false;
-
+    
         $allowed_elements = array(
-            'shibmd:Scope',
+            'Scope',
             'DiscoveryResponse',
-            'mdui:UIInfo',
-            'mdui:DiscoHints',
-            'mdrpi:RegistrationInfo',
-            'mdrpi:RegistrationInfo',
-            'mdrpi:PublicationPath',
-            'mdrpi:PublicationInfo'
+            'UIInfo',
+            'DiscoHints',
+            'RegistrationInfo',
+            'RegistrationInfo',
+            'PublicationPath',
+            'PublicationInfo'
         );
 
         $elms = $this->_xpath->query('md:Extensions', $input_elm);
@@ -809,8 +810,8 @@ class sspmod_kvalidate_Validator
             if ($elm->hasChildNodes()) {
                 $sub_elms = $elm->childNodes;
                 foreach ($sub_elms AS $sub_elm) {
-                    $nodeName = $sub_elm->nodeName;
-                    if (!in_array($nodeName, $allowed_elements)) {
+                    $nodeName = explode(':', $sub_elm->nodeName);
+                    if (!in_array(end($nodeName), $allowed_elements)) {
                         $this->_logger->logError(
                             '`' . $nodeName . '`element is not allowed in the `Extension` element.',
                             $elm->getLineNo(),
@@ -929,8 +930,8 @@ class sspmod_kvalidate_Validator
         if (!empty($att_validUntil)) {
             // Validate the timestamp
             $validTime = strtotime($att_validUntil);
-            $minTime   = time() + (60*60*6-30);
-            $maxTime   = time() + (60*60*240+30);
+            $minTime   = (int)gmdate('U') + (60*60*6-30);
+            $maxTime   = (int)gmdate('U') + (60*60*240+30);
 
             if ( ($validTime-$minTime) < 0 ) {
                 $this->_logger->logError(
@@ -1011,8 +1012,8 @@ class sspmod_kvalidate_Validator
         } else {
             // Validate the timestamp
             $validTime = strtotime($att_validUntil);
-            $minTime   = time() + (60*60*6-30);
-            $maxTime   = time() + (60*60*240+30);
+            $minTime   = (int)gmdate('U') + (60*60*6-30);
+            $maxTime   = (int)gmdate('U') + (60*60*240+30);
 
             if ( ($validTime-$minTime) < 0 ) {
                 $this->_logger->logError(
