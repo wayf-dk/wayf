@@ -291,6 +291,7 @@ class sspmod_kvalidate_Validator
 
         // Start by doing checks on the EntityDescriptor it self
         $this->_vEntitiesValidUntil($input_elm);
+        $this->_vCacheDuration($input_elm);
 
         // Validate all EntityDescriptor
         $elms = $this->_xpath->query('md:EntityDescriptor', $input_elm);
@@ -309,7 +310,7 @@ class sspmod_kvalidate_Validator
             $id = 'EntitiesDescriptor';
         }
 
-        $status['vExtension'] = $this->_vExtension($input_elm, $id);
+        $this->_vExtension($input_elm, $id);
 
         return true;
     }
@@ -358,7 +359,9 @@ class sspmod_kvalidate_Validator
             $input_elm->parentNode->removeChild($input_elm);
         }
 
-        $status['vExtension']   = $this->_vExtension($input_elm, $input_elm->getAttribute('entityID'));
+        $status['vExtension']     = $this->_vExtension($input_elm, $input_elm->getAttribute('entityID'));
+        $status['vCacheDuration'] = $this->_vCacheDuration($input_elm);
+
         
         return !in_array(false, $status);
     }
@@ -1040,6 +1043,62 @@ class sspmod_kvalidate_Validator
             'vED check parsed',
             $input_elm->getLineNo(),
             $input_elm->getAttribute('entityID')
+        );
+        return true;
+    }
+    
+    /*
+     * vCacheDuration validation check
+     *
+     * If cacheDuration is set on either an EntitiesDescriptor or an 
+     * EntityDescriptor, it must be set to atleast 6 hours.
+     * 
+     * @param DOMElement $input_elm The element to be validated
+     *
+     * @return bool True if the check clears othervise false
+     */
+    private function _vCacheDuration(DOMElement $input_elm)
+    {
+        SimpleSAML_Logger::debug('[Kvalidate] Function: _vCacheDuration');
+        
+        $att_cacheDuration = $input_elm->getAttribute('cacheDuration');
+        
+        $att_id = $input_elm->getAttribute('entityID');
+        if(empty($att_id)) {
+            if ($input_elm->hasAttribute('Name')) {
+                $att_id = $input_elm->getAttribute('Name');
+            } else if ($input_elm->hasAttribute('ID')) {
+                $att_id = $input_elm->getAttribute('ID');
+            } else {
+                $att_id = 'EntitiesDescriptor';
+            }
+        }
+
+        if (empty($att_cacheDuration)) {
+            $this->_logger->logSuccess(
+                'vCacheDuration check parsed',
+                $input_elm->getLineNo(),
+                $att_id
+            );
+            return true;
+        } else {
+            $cacheDurationInSec = SimpleSAML_Utilities::parseDuration($att_cacheDuration, 0);
+
+            if ( ($cacheDurationInSec - (60*60*6)) < 0 ) {
+                $this->_logger->logError(
+                    'cacheDuration MUST be at least 6 hours. cacheDuration set to ' . $att_cacheDuration . '<br />MUST be at least PT6H',
+                    $input_elm->getLineNo(),
+                    $att_id
+                );
+                $this->_status = KV_STATUS_ERROR;
+                return false;
+            }
+        }
+
+        $this->_logger->logSuccess(
+            'vCacheDuration check parsed',
+            $input_elm->getLineNo(),
+            $att_id
         );
         return true;
     }
