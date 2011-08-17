@@ -1040,14 +1040,14 @@ class sspmod_kvalidate_Validator
         }
 
         $this->_logger->logSuccess(
-            'vED check parsed',
+            'vEntityValidUntil check parsed',
             $input_elm->getLineNo(),
             $input_elm->getAttribute('entityID')
         );
         return true;
-    }
-    
-    /*
+    }   
+
+    /**
      * vCacheDuration validation check
      *
      * If cacheDuration is set on either an EntitiesDescriptor or an 
