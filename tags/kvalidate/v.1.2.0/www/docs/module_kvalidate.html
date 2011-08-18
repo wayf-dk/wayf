@@ -1,0 +1,247 @@
+<html>
+    <head>
+        <title>Kalmar2 metadata validator documentation</title>
+    </head>
+    <body>
+        <h1>Kalmar2 metadata validator</h1>
+
+        <!-- 
+        This file is written in Markdown syntax. 
+        For more information about how to use the Markdown syntax, read here:
+        http://daringfireball.net/projects/markdown/syntax
+        -->
+
+        <ul>
+            <li>Version: <code>$Id: module_kvalidate.txt 9 2010-08-11 08:09:46Z jach@wayf.dk $</code></li>
+        </ul>
+
+        <!-- {{TOC}} -->
+
+        <h2>Documentation</h2>
+
+        <p>The Kalmar2 metadata validator is documented in this document and all source
+        code is documented to PHPDOC. To get an API documentation of the source code
+        please run the <a href="http://phpdoc.org/">phpDocumentor</a> on the source code.</p>
+
+        <p>A mailinglist for issues, questions and commit messages has been set up and can
+        be found at <a href="http://groups.google.com/group/wayf-repo">http://groups.google.com/group/wayf-repo</a>.
+        Any questions regarding the Kalmar2 metadata validator should be stated here.</p>
+
+        <h2>Prerequisites</h2>
+
+        <ul>
+            <li>PHP version >= 5.3.0</li>
+            <li>SimpleSAMLphp version >= 1.6.0</li>
+            <li>Suppoort for the following PHP extensions: <code>date</code>, <code>dom</code>, <code>libxml</code>, <code>openssl</code></li>
+        </ul>
+
+        <h2>Installing</h2>
+
+        <p>The Kalmar2 metadata validator is a SimpleSAMLphp module that will work on
+        SimpleSAMLphp version 1.6 and up. The code can be retrived from the SVN
+        repository located at <a href="http://code.google.com/p/wayf/">code.google.com/p/wayf/</a></p>
+
+        <p>The easiest to get the resent version is to checkout the latest version from
+        the SVN repository</p>
+
+<pre><code>cd simplesamlphp/modules
+svn checkout http://wayf.googlecode.com/svn/trunk/kvalidate kvalidate
+</code></pre>
+
+        <p>If you are using the group validation page, you should copy the config file
+        from the <code>config-templates</code>directory to the SimpleSAMLphp <code>config</code> directory.</p>
+
+<pre><code>cp simplesamlphp/modules/kvalidate/config-templates/module_kvalidate.php simplesamlphp/config/
+</code></pre>
+
+        <h2>Configuring the Kalmar2 metadata validator</h2>
+
+        <p>The basic use of the Kalmar2 metadata validator do not need any configuration.
+        The <code>validate.php</code>script will display a form where a URL for metadata can be
+        provided.</p>
+
+        <p>To use the <code>groupvalidate.php</code> script, you need to configure one or more tags. 
+        a tag is a collection of URL's for metadata, that all will be validated at the
+        same time and displayed. Tags has the following layout in the config file:</p>
+
+<pre><code>'tags' =&gt; array(
+    'kalmar' =&gt; array(
+        'da' =&gt; array(
+            'url' =&gt; 'https://wayf.wayf.dk/module.php/aggregator/?id=wayfkalmarexport&amp;mimetype=application/xml',
+            'name' =&gt; 'Denmark',
+            'description' =&gt; 'Danish metadata',
+        ),
+        'no' =&gt; array(
+            'url' =&gt; 'https://kalmar.feide.no/simplesaml/module.php/aggregator/?id=feidekalmarexport',
+            'name' =&gt; 'Norway',
+            'description' =&gt; 'Norwegian metadata',
+        ),
+    ),
+),
+</code></pre>
+
+        <p>You can define multiple tags.</p>
+
+        <h2>Usage</h2>
+
+        <p>At the current time there is two ways to use the Kalmar2 metadata validator.</p>
+
+        <p>The first way is to call the groupvalidate.php with the query parameter tag set
+        to one of the previouse defind tags in the configuration file.</p>
+
+        <p>The second wayf is to call the validate.php script. Here you can insert an URL
+        or local file path to the XML metadata document to be validated. You can also
+        call the script with the following query parameters:</p>
+
+        <ul>
+            <li>md_url - Should be set to the URL of the metadata</li>
+            <li>show_warning - If set warnings fromm the validation is showen</li>
+            <li>show_success - If set all completed checks is showen</li>
+            <li>show_xml - If set the XML metadata is displayed in a prettyfied format</li>
+            <li>remove_ed - If set all EntityDescriptor's that do not validate will be
+            removed from the XML metadata.</li>
+        </ul>
+
+        <p>Also the validator can be called directly within SimpleSAMLphp. Example.</p>
+
+<pre><code>$validator = new sspmod_kvalidate_Validator();
+$xml = $validator-&gt;validate($xml);
+</code></pre>
+
+        <p>For a complete reference, please se the API documentation.</p>
+
+        <h3>Kalmar2 specific usage</h3>
+
+        <p>I the Kalmar2 interfederation setup, the Kalmar2 metadata validator is used in
+        the metarefresh module, to allow validation of metadata upon the arrival of the
+        metadata at the Kalmar2 servers. </p>
+
+        <p>The following change has been made to the metaire fresh module. The changes are
+        made in the loadSource method:</p>
+
+<pre><code>try {
+    // Removed for Kalmar2
+    //$entities =
+    //SimpleSAML_Metadata_SAMLParser::parseDescriptorsFile($source['src']);
+
+    // Added for Kalmar2
+
+    // Get metadata
+    $xml = file_get_contents($source['src']);
+
+    // Validate metadata
+    SimpleSAML_Logger::info('Validating metdata from: ' . $source['src'] . "\n");
+    $config['REMOVE_ENTITYDESCRIPTOR'] = true;
+    $validator = new sspmod_kvalidate_Validator($config);
+    $valid_xml = $validator-&gt;validate($xml);
+
+    $entities = SimpleSAML_Metadata_SAMLParser::parseDescriptorsString($valid_xml);
+}
+</code></pre>
+
+        <h2>Validation</h2>
+
+        <p>The Kalmar2 Metadata validator is used for validating metadata ment for the
+        Kalmar2 interfederation. This means that the validator conforms to the
+        requirements set in the Kalmar2 interfederation. These requirements are stated
+        in the following four documents:</p>
+
+        <ol>
+            <li><a href="http://docs.oasis-open.org/security/saml/v2.0/saml-metadata-2.0-os.pdf">OASIS Standard, Metadata for the OASIS Security Assertion Markup Language 
+                (SAML) V2.0. March 2005</a></li>
+            <li><a href="http://docs.oasis-open.org/security/saml/Post2.0/sstc-metadata-iop-cd-01.pdf">SAML V2.0 Metadata Interoperability Profile Version 1.0</a></li>
+            <li><a href="http://saml2int.org/profile/0.1http://www.kalmar2.org/kalmar2web/members_attchmt/2010_01_29_appendix-a_ver-1.pdf">Interoperable SAML 2.0 Web Browser SSO Deployment profile</a></li>
+            <li><a href="http://www.kalmar2.org/kalmar2web/members_attchmt/2010_01_29_appendix-a_ver-1.pdf">Kalmar2 Appendix A</a></li>
+        </ol>
+
+        <h3>Requirements</h3>
+
+        <p>Different steps are required in order to comply with the different requirements
+        defined in the documents above. The following requirements are given. Numbers
+        in () refers to line numbers in the given document:</p>
+
+        <ol>
+            <li>Defines the following restrictions:
+            <ol>
+                <li>Here a simple schema validation of the SAML Metadata XML is sufficient. 
+                Schema defined by OASIS 
+                <a href="http://docs.oasis-open.org/security/saml/v2.0/saml-schema-metadata-2.0.xsd">http://docs.oasis-open.org/security/saml/v2.0/saml-schema-metadata-2.0.xsd</a></li>
+            </ol></li>
+            <li>Defines the following restrictions that the metadata must adhere to
+            <ol>
+                <li>Each public key must be placed within its own <md:KeyDescriptor> element
+                and the use attribute must be set appropiate and expressed using a
+                <ds:KeyInfo>. (289-291)</li>
+                <li>One ore more of <ds:KeyValue> or <ds:X509Certificaet> must be present in 
+                the <ds:KeyInfo> element. (292-294)</li>
+                <li>Certificates should be checked to see if they are expired (metadata is 
+                not to be discarded if it is expired). (304)</li>
+                <li>Metadata obtained via unsecure channal, should be signed. (349-351)</li>
+            </ol></li>
+            <li>The following restrictions is given
+            <ol>
+                <li>The SingleSignonService must use the HTTP-REDIRECT binding. (85-86)</li>
+                <li>The AssersionConsumerService must use the HTTP-POST binding. (98)</li>
+                <li>If the AssertionConsumerservice location is not using (SSL/HTTPS) a 
+                certificate for encryption should be supplied in a <md:KeyDescriptor> 
+                with the use attribute set to encryption or omitted. (131-135)</li>
+                <li>If no <md:KeyDescriptor> is given and the AssertionConsumerService 
+                location is not using SSL/HTTPS, then the metadata should be discarded.
+                (131-142)</li>
+            </ol></li>
+            <li>The follwoing is given:
+            <ol>
+                <li>The SingleLogoutService must only be supplied if the entity supports 
+                single logout. (20) </li>
+                <li>SingleLogoutService binding must be HTTP-REDIRECT. (24)</li>
+                <li>The national metadata aggregate must be signed. (34-35)</li>
+                <li>Each <md:EntityDescriptor> must contain the validUntil attribute and set 
+                to between 6 and 96 hours. (39-41)</li>
+                <li>Metadata for IdP's must include a list of scopes. (42)</li>
+                <li>Metadata for SP's must include a list of requested attributes. (48)</li>
+                <li>Metadata for IdP's must contain a certificate for signing. (68)</li>
+                <li>Metadata for SP's must contain a certificate for encryption if endpoints 
+                are not using SSL/HTTPS. (68-69)</li>
+                <li>NameFormat for attributes must be
+                urn:oasis:names:tc:SAML:2.0:atttrname-format:uri. (95-96)</li>
+            </ol></li>
+        </ol>
+
+        <p>Each of the points above must be checked to secure the validity of the 
+        metadata. Each of the requirements apply for each <md:EntityDescriptor>.</p>
+
+        <p>The following validation functions are implemented in the Kalmar2 metadata
+        validator:</p>
+
+        <ul>
+            <li>_vSchema (1-1)<br />
+            Schema validation according to the schema given by the SAML2 spec.</li>
+            <li>_vCert (2-1, 2-2)<br />
+            Each <md:KeyDescriptor> only contains one key. <md:KeyDescriptor> contains 
+            at least one <ds:KeyValue> or one <ds:X509Data><ds:X509Certificate>. If 
+            given, the <ds:X509Certificate> contains a public key with recognized type.</li>
+            <li>_vSSO (3-1)<br />
+            <md:SingleSignOnService> must use the HTTP-REDIRECT binding.</li>
+            <li>_vASC (3-2)<br />
+            <md:AssertionConsumerService> must use the HTTP-POST binding.</li>
+            <li>_vSLO (4-2)<br />
+            <md:SingleLogoutService> must use the HTTP-REDIRECT binding.</li>
+            <li>_vED (4-4)<br />
+            <md:EntityDescriptor> must contain a validUntil attribute. The validUntil 
+            timestamp is between 6 and 96 hours in the future.</li>
+            <li>_vScope (4-5)<br />
+            <md:IDPSSOdescriptor> must contain at least <shibmd:Scope></li>
+            <li>_vRequestAttr (4-6, 4-9)<br />
+            <md:SPSSODescriptor> must contain at least one <md:RequestedAttributes>.
+            Each <md:RequestedAttributes> has the NameFormat attribute and set to
+            urn:oasis:names:tc:SAML:2.0:attrname-format:uri</li>
+            <li>_vSign (4-7)<br />
+            <md:IDPSSOdescriptor> must contain a certificate for signing</li>
+            <li>_vEnc (3-3, 4-8)<br />
+            <md:SPSSOdescriptor> must contain a certificate for encrypting if ACS 
+            endpoint is HTTP.</li>
+            <li>_vEDSignature (4-3)<br />
+            If present, the <md:EntitiesDescriptor> is signed.</li>
+        </ul>
+    </body>
+</html>
