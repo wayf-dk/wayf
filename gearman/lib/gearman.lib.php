@@ -149,6 +149,7 @@ class gearman {
         }
         socket_set_block($socket);
         socket_set_option($socket, SOL_SOCKET, SO_SNDTIMEO, array('sec' => 0, 'usec' => 0));
+		socket_set_option($socket, SOL_TCP, TCP_NODELAY, 1);
         $this->jobserver = $socket;
     }
     
