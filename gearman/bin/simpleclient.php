@@ -1,7 +1,7 @@
 <?php
-include "../lib/gearman.lib.php";
+include "../lib/WAYF/Gearman.php";
 
-$c = new \dk\wayf\gearman('127.0.0.1:4730');
+$c = new \WAYF\Gearman('127.0.0.1:4730');
 $data = '3 hej';
 $c->option_req('Exceptions');
 

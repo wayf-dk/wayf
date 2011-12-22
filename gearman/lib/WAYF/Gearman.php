@@ -1,8 +1,7 @@
 <?php
+namespace WAYF;
 
-namespace dk\wayf;
-
-class gearman {
+class Gearman {
 
 	/**
 		The gearman class provides a thin naive api on top of the gearman protocol.
@@ -128,7 +127,7 @@ class gearman {
 
     private $jobserver;
 
-    function __construct($host = '127.0.0.1:4730')
+    public function __construct($host = '127.0.0.1:4730')
     {
         $port = '';
         if (strpos($host, ':'))
@@ -153,11 +152,11 @@ class gearman {
         $this->jobserver = $socket;
     }
     
-    function __destruct() {
+    public function __destruct() {
     	@socket_clear_error($this->jobserver);
     }
 
-    function request(&$data)
+    private function request(&$data)
     {
         $len = strlen($data);
         $wassent = $sent = 0;
@@ -174,12 +173,12 @@ class gearman {
         } while ($wassent < $len);
     }
 
-    function request2($data)
+    private function request2($data)
     {
         $this->request($data);
     }
 
-    function read($size, $timeout = 0)
+    private function read($size, $timeout = 0)
     {
         $to = array('sec' => floor($timeout / 1000), 'usec' => floor($timeout % 1000) * 1000);
         socket_set_option($this->jobserver, SOL_SOCKET, SO_RCVTIMEO, $to);
@@ -197,7 +196,7 @@ class gearman {
         return $buffer;
     }
 
-    function response($timeout = 0)
+    public function response($timeout = 0)
     {
         $header = $this->read(12, $timeout);
         if (!$header) return '';
@@ -207,7 +206,7 @@ class gearman {
         return array_merge(array($resp['type']), explode(chr(0), $this->read($resp['len'], 0)));
     }
 
-    function submit_job($function, $uniqueid, &$data)
+    public function submit_job($function, $uniqueid, &$data)
     {
         $this->request2(pack('xa*NNa*xa*x', 'REQ', self::SUBMIT_JOB, strlen($function) + 1 + strlen($uniqueid) + 1 + strlen($data), $function, $uniqueid));
         $this->request($data);
@@ -217,7 +216,7 @@ class gearman {
         return $resp[1];
     }
 
-    function option_req($option = 'Exceptions')
+    public function option_req($option = 'Exceptions')
     {
         $this->request2(pack('xa*NNa*', 'REQ', self::OPTION_REQ, strlen($option), $option));
         $resp = $this->response();
@@ -226,22 +225,22 @@ class gearman {
         return $resp;
     }
 
-    function can_do($function)
+    public function can_do($function)
     {
         $this->request2(pack('xa*NNa*', 'REQ', self::CAN_DO, strlen($function), $function));
     }
 
-    function cant_do($function)
+    public function cant_do($function)
     {
         $this->request2(pack('xa*NNa*', 'REQ', self::CANT_DO, strlen($function), $function));
     }
 
-    function reset_abilities()
+    public function reset_abilities()
     {
         $this->request2(pack('xa*NN', 'REQ', self::RESET_ABILITIES, 0));
     }
 
-    function grab_job()
+    public function grab_job()
     {
         $this->request2(pack('xa*NN', 'REQ', self::GRAB_JOB, 0));
         $resp = $this->response();
@@ -250,54 +249,52 @@ class gearman {
         return $resp;
     }
 
-    function work_thing($jobhandle, $thing, &$data)
+    public function work_thing($jobhandle, $thing, &$data)
     {
         $this->request2(pack('xa*NNa*x', 'REQ', $thing, strlen($jobhandle) + 1 + strlen($data), $jobhandle));
         $this->request($data);
     }
 
-    function work_data($jobhandle, &$data)
+    public function work_data($jobhandle, &$data)
     {
         $this->work_thing($jobhandle, self::WORK_DATA, $data);
     }
 
-    function work_warning($jobhandle, &$data)
+    public function work_warning($jobhandle, &$data)
     {
         $this->work_thing($jobhandle, self::WORK_WARNING, $data);
     }
 
-    function work_exception($jobhandle, &$data)
+    public function work_exception($jobhandle, &$data)
     {
         $this->work_thing($jobhandle, self::WORK_EXCEPTION, $data);
     }
 
-    function work_complete($jobhandle, &$data)
+    public function work_complete($jobhandle, &$data)
     {
         $this->work_thing($jobhandle, self::WORK_COMPLETE, $data);
     }
 
-    function work_status($jobhandle, $numerator, $denominator)
+    public function work_status($jobhandle, $numerator, $denominator)
     {
         $datalen = strlen($jobhandle) + 1 + strlen($numerator) + 1 + strlen($denominator);
         $this->request2(pack('xa*NNa*xa*xa*', 'REQ', self::WORK_STATUS, $datalen, $jobhandle, $numerator, $denominator));
     }
 
-    function work_fail($jobhandle)
+    public function work_fail($jobhandle)
     {
         $this->request2(pack('xa*NNa*', 'REQ', self::WORK_FAIL, strlen($jobhandle), $jobhandle));
     }
 
-    function pre_sleep($timeout = 0)
+    public function pre_sleep($timeout = 0)
     {
         $this->request2(pack('xa*NN', 'REQ', self::PRE_SLEEP, 0));
         $resp = $this->response($timeout);
         return $resp;
     }
 
-    function set_client_id($id)
+    public function set_client_id($id)
     {
         $this->request2(pack('xa*NNa*', 'REQ', self::SET_CLIENT_ID, strlen($id), $id));
     }
 }
-
-?>
