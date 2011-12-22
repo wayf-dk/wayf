@@ -173,7 +173,7 @@ class Gearman {
     	@socket_clear_error($this->jobserver);
     }
 
-    private function request(&$data)
+    private function request($data)
     {
         $len = strlen($data);
         $wassent = $sent = 0;
@@ -188,11 +188,6 @@ class Gearman {
             }
             $wassent += $sent;
         } while ($wassent < $len);
-    }
-
-    private function request2($data)
-    {
-        $this->request($data);
     }
 
     private function read($size, $timeout = 0)
@@ -225,7 +220,7 @@ class Gearman {
 
     public function submit_job($function, $uniqueid, &$data)
     {
-        $this->request2(pack('xa*NNa*xa*x', 'REQ', self::SUBMIT_JOB, strlen($function) + 1 + strlen($uniqueid) + 1 + strlen($data), $function, $uniqueid));
+        $this->request(pack('xa*NNa*xa*x', 'REQ', self::SUBMIT_JOB, strlen($function) + 1 + strlen($uniqueid) + 1 + strlen($data), $function, $uniqueid));
         $this->request($data);
         $resp = $this->response();
         if ($resp[0] !== self::JOB_CREATED)
@@ -235,7 +230,7 @@ class Gearman {
 
     public function option_req($option = 'Exceptions')
     {
-        $this->request2(pack('xa*NNa*', 'REQ', self::OPTION_REQ, strlen($option), $option));
+        $this->request(pack('xa*NNa*', 'REQ', self::OPTION_REQ, strlen($option), $option));
         $resp = $this->response();
         if ($resp[0] !== self::OPTION_RES && $resp[1] != $option)
             throw new \WAYF\GearmanException("could not set option: $option: " . print_r($resp, 1));
@@ -244,22 +239,22 @@ class Gearman {
 
     public function can_do($function)
     {
-        $this->request2(pack('xa*NNa*', 'REQ', self::CAN_DO, strlen($function), $function));
+        $this->request(pack('xa*NNa*', 'REQ', self::CAN_DO, strlen($function), $function));
     }
 
     public function cant_do($function)
     {
-        $this->request2(pack('xa*NNa*', 'REQ', self::CANT_DO, strlen($function), $function));
+        $this->request(pack('xa*NNa*', 'REQ', self::CANT_DO, strlen($function), $function));
     }
 
     public function reset_abilities()
     {
-        $this->request2(pack('xa*NN', 'REQ', self::RESET_ABILITIES, 0));
+        $this->request(pack('xa*NN', 'REQ', self::RESET_ABILITIES, 0));
     }
 
     public function grab_job()
     {
-        $this->request2(pack('xa*NN', 'REQ', self::GRAB_JOB, 0));
+        $this->request(pack('xa*NN', 'REQ', self::GRAB_JOB, 0));
         $resp = $this->response();
         if ($resp[0] == self::NOOP)
             $resp = $this->response();
@@ -268,7 +263,7 @@ class Gearman {
 
     public function work_thing($jobhandle, $thing, &$data)
     {
-        $this->request2(pack('xa*NNa*x', 'REQ', $thing, strlen($jobhandle) + 1 + strlen($data), $jobhandle));
+        $this->request(pack('xa*NNa*x', 'REQ', $thing, strlen($jobhandle) + 1 + strlen($data), $jobhandle));
         $this->request($data);
     }
 
@@ -295,23 +290,23 @@ class Gearman {
     public function work_status($jobhandle, $numerator, $denominator)
     {
         $datalen = strlen($jobhandle) + 1 + strlen($numerator) + 1 + strlen($denominator);
-        $this->request2(pack('xa*NNa*xa*xa*', 'REQ', self::WORK_STATUS, $datalen, $jobhandle, $numerator, $denominator));
+        $this->request(pack('xa*NNa*xa*xa*', 'REQ', self::WORK_STATUS, $datalen, $jobhandle, $numerator, $denominator));
     }
 
     public function work_fail($jobhandle)
     {
-        $this->request2(pack('xa*NNa*', 'REQ', self::WORK_FAIL, strlen($jobhandle), $jobhandle));
+        $this->request(pack('xa*NNa*', 'REQ', self::WORK_FAIL, strlen($jobhandle), $jobhandle));
     }
 
     public function pre_sleep($timeout = 0)
     {
-        $this->request2(pack('xa*NN', 'REQ', self::PRE_SLEEP, 0));
+        $this->request(pack('xa*NN', 'REQ', self::PRE_SLEEP, 0));
         $resp = $this->response($timeout);
         return $resp;
     }
 
     public function set_client_id($id)
     {
-        $this->request2(pack('xa*NNa*', 'REQ', self::SET_CLIENT_ID, strlen($id), $id));
+        $this->request(pack('xa*NNa*', 'REQ', self::SET_CLIENT_ID, strlen($id), $id));
     }
 }
