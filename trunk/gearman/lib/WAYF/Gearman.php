@@ -1,6 +1,14 @@
 <?php
 namespace WAYF;
 
+/**
+ * Generic Gearman exception class
+ */
+class GearmanException extends \Exception {}
+
+/**
+ * Gearman library
+ */
 class Gearman {
 
 	/**
@@ -82,7 +90,10 @@ class Gearman {
 			This class does not support _BG calls.
 			
 	*/
-	
+
+    /**
+     * Gearman constants
+     */
     const CAN_DO = 1;
     const CANT_DO = 2;
     const RESET_ABILITIES = 3;
@@ -114,6 +125,9 @@ class Gearman {
     const GRAB_JOB_UNIQ = 30;
     const JOB_ASSIGN_UNIQ = 31;
 
+    /**
+     * Socket constants
+     */
     const EWOULDBLOCK = 11;
     const EAGAIN = 11;
     const SUCCESS = 0;
@@ -125,6 +139,9 @@ class Gearman {
     const numerator = 2;
     const denominator = 3;
 
+    /**
+     * Gearman Job Server
+     */
     private $jobserver;
 
     public function __construct($host = '127.0.0.1:4730')
@@ -138,13 +155,13 @@ class Gearman {
         if ($socket === false) {
             $errno = socket_last_error($socket);
             $errstr = socket_strerror($errno);
-            throw new \Exception("Can't create socket ($errno: $errstr)");
+            throw new \WAYF\GearmanException("Can't create socket ($errno: $errstr)");
         }
         $ok = @socket_connect($socket, $host, $port);
         if (!$ok) {
             $errno = socket_last_error($socket);
             $errstr = socket_strerror($errno);
-            throw new \Exception("Can't connect to jobserver $host:$port ($errno: $errstr)");
+            throw new \WAYF\GearmanException("Can't connect to jobserver $host:$port ($errno: $errstr)");
         }
         socket_set_block($socket);
         socket_set_option($socket, SOL_SOCKET, SO_SNDTIMEO, array('sec' => 0, 'usec' => 0));
@@ -166,7 +183,7 @@ class Gearman {
                 $err = socket_last_error($this->jobserver);
                 if (!in_array($err, array(SOCKET_EAGAIN, SOCKET_EWOULDBLOCK, SOCKET_EINPROGRESS))) {
                     $errstr = socket_strerror($err);
-                    throw new \Exception("Could not write command to socket ($err: $errstr)");
+                    throw new \WAYF\GearmanException("Could not write command to socket ($err: $errstr)");
                 }
             }
             $wassent += $sent;
@@ -189,7 +206,7 @@ class Gearman {
                 $err = socket_last_error($this->jobserver);
                 if ($err == self::SUCCESS || $err == self::EWOULDBLOCK) return '';
                 $errstr = socket_strerror($err);
-                throw new Exception("Could not read from socket ($err: $errstr)");
+                throw new \WAYF\GearmanException("Could not read from socket ($err: $errstr)");
             }
             $buffer .= $data;
         } while (strlen($buffer) < $size);
@@ -202,7 +219,7 @@ class Gearman {
         if (!$header) return '';
         $resp = @unpack('a4magic/Ntype/Nlen', $header);
         if ($resp['magic'] !== "\0RES")
-            throw new Exception('Not a gearman response: ' . print_r($resp, 1));
+            throw new \WAYF\GearmanException('Not a gearman response: ' . print_r($resp, 1));
         return array_merge(array($resp['type']), explode(chr(0), $this->read($resp['len'], 0)));
     }
 
@@ -212,7 +229,7 @@ class Gearman {
         $this->request($data);
         $resp = $this->response();
         if ($resp[0] !== self::JOB_CREATED)
-            throw new \Exception('Not a job_created response after submit_job: ' . print_r($resp, 1));
+            throw new \WAYF\GearmanException('Not a job_created response after submit_job: ' . print_r($resp, 1));
         return $resp[1];
     }
 
@@ -221,7 +238,7 @@ class Gearman {
         $this->request2(pack('xa*NNa*', 'REQ', self::OPTION_REQ, strlen($option), $option));
         $resp = $this->response();
         if ($resp[0] !== self::OPTION_RES && $resp[1] != $option)
-            throw new \Exception("could not set option: $option: " . print_r($resp, 1));
+            throw new \WAYF\GearmanException("could not set option: $option: " . print_r($resp, 1));
         return $resp;
     }
 
