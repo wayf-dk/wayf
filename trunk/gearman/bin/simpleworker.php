@@ -1,6 +1,6 @@
 <?php
-include "../lib/gearman.lib.php";
-$w = new \dk\wayf\gearman();
+include "../lib/WAYF/Gearman.php";
+$w = new \WAYF\Gearman();
 
 $w->set_client_id('AntonBanton');
 print_r($w->can_do('reverse'));
