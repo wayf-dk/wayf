@@ -1,0 +1,6 @@
+Kræver PHP og MySQL
+
+1. Kopier alle filer til en webroot.
+2. Opret en MySQL database med den struktur givet i bridgestat.sql
+3. Konfigurer config.php
+4. Konfigurer sporto.php
