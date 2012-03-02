@@ -1,3 +1,4 @@
+// Global variables:
 var graphType = 'l';
 var gran = 'h';
 
@@ -14,6 +15,18 @@ var datum = new Array();
 var sameShown;
 var ohersShown;
 
+
+//
+// getName
+//
+// Gets a human readable name given a entity id.
+//
+// INPUT
+//   pid - An entity id, 'total' or 'others' (string)
+//
+// OUTPUT
+//   A human-readable name.
+//
 function getName(pid) {
     if(pid == 'total')
 	return 'All';
@@ -22,21 +35,44 @@ function getName(pid) {
 
     for(var i = 0; i < otherProviders.length; i++) {
 	var p = otherProviders[i];
-	if(p.id == pid)
+	if(p.idint == pid)
 	    return p.name;
     }
     return pid;
 }
 
+//
+// timeToString
+//
+// Converts a POSIX timestamp to a readable string.
+//
+// INPUT
+//   t - A Posix timestamp (int).
+//
+// OUTPUT
+//   A string of the format 'dd/mm yyyy'.
+//
 function timeToString(t) {
     var d = new Date(t*1000);
     return d.getDate() + '/' + (d.getMonth()+1) + ' ' + d.getFullYear();
 }
 
+//
+// updateDisplayTime
+//
+// Updates the html span in the toolbar to the values of the global
+// variables start and end.
+//
 function updateDisplayTime() {
     $('#widgetField span').get(0).innerHTML = timeToString(start) + '  -  ' + timeToString(end);
 }
 
+//
+// setSelectedGrahpType
+//
+// Sets the global variable graphType to whatever radio button is
+// selected.
+//
 function setSelectedGraphType() {
     if(document.getElementById('tl').checked)
 	graphType = 'l';
@@ -50,6 +86,13 @@ function setSelectedGraphType() {
 	graphType = 'sb';
 }
 
+//
+// setBestGran
+//
+// Heuristically sets the optimal granularity given the date range.
+// The function sets the global variable gran as well as the
+// corresponding html radio button.
+//
 function setBestGran() {
     var t = end - start;
     var g;
@@ -70,14 +113,33 @@ function setBestGran() {
     gran = g;
 }
 
+//
+// graphTypeClicked
+//
+// This function is called when a graph type radio button is clicked.
+// This function may cause the graph to be repainted.
+//
+// INPUT
+//   gt - The radio button.
+//
 function graphTypeClicked(gt) {
     if(gt.value != graphType) {
 	graphType = gt.value;
-	createGraph();
+	repaintGraph();
     }
     return true;
 }
 
+//
+// granClicked
+//
+// This function is called when a granularity radio button is clicked.
+// This function may cause all data to be refetched from the database,
+// and the graph to be repainted.
+//
+// INPUT
+//   g - The radio button.
+// 
 function granClicked(g) {
     if(g.value != gran) {
 	gran = g.value;
@@ -86,7 +148,13 @@ function granClicked(g) {
     return true;
 }
 
-
+//
+// fullRefresh
+//
+// Throws away all data retreived from the database and makes a new
+// request to get all the selected histograms. This function is
+// necessary when the granularity or the date range changes.
+//
 function fullRefresh() {
     //Deallocate all previous data:
     datum = new Array();
@@ -109,6 +177,15 @@ function fullRefresh() {
     }
 }
 
+//
+// Floors a date to a given granularity.
+//
+// INPUT
+//   t - POSIX timestamp (int)
+//   g - 'h', 'D', 'M' or 'Y'
+//
+// OUTPUT
+//   A new POSIX timestamp (int).
 function floorDate(t, g) {
     var d;
     switch(g) {
@@ -145,11 +222,23 @@ function floorDate(t, g) {
     }
 }
 
-
+//
+// granularirtChanged
+//
 function granularityChanged() {
     fullRefresh();
 }
 
+//
+// more
+//
+// The function that expands an entity list in the moth view (when
+// clicking view all). The function repaints the entire moth view.
+//
+// INPUT
+//   same - The entity list is of the same type as the selected entity (boolean).
+//   left - The entity list is the left entity list in the moth view (boolean.
+//
 function more(same, left) {
     if(same) {
 	sameShown = sameProviders.length;
@@ -157,13 +246,21 @@ function more(same, left) {
     else {
 	othersShown = otherProviders.length;
     }
-    createMothView();
+    repaintMothView();
 }
 
+//
+// checkboxTotal
+//
+// This function us called when the All checkbox is checked.
+//
+// INPUT
+//   checkBox - The checkbox (d3 SVG elem)
+//
 function checkboxTotal(checkBox) {
     checkBoxCheck(checkBox);
     if(totalData.values) {
-	createGraph();
+	repaintGraph();
     }
     else {
 
@@ -173,12 +270,19 @@ function checkboxTotal(checkBox) {
     }
 }
 
-
+//
+// checkboxOthers
+//
+// This function is called when the Others checkbox is checked.
+//
+// INPUT
+//   checkBox - The checkbox (d3 SVG elem)
+//
 function checkboxOthers(checkBox) {
     checkBoxCheck(checkBox);
 
     if(othersData.values) {
-	createGraph();
+	repaintGraph();
     }
     else {
 	var o = newQueryObject();
@@ -187,14 +291,23 @@ function checkboxOthers(checkBox) {
     }
 }
 
+//
+// checkboxOthers
+//
+// This function is called when an entity checkbox is checked.
+//
+// INPUT
+//   checkBox - The checkbox (d3 SVG elem)
+//   i - The index of the entity in the global variable otherProviders
+//
 function checkboxOtherProvider(checkBox, i) {
 
     checkBoxCheck(checkBox);
 
-    var p = getOtherProvider(i);
+    var p = getOtherProviderId(i);
 
     if(hasData(p)) {
-	createGraph();
+	repaintGraph();
     }
     else {
 	var o = newQueryObject();
@@ -203,20 +316,50 @@ function checkboxOtherProvider(checkBox, i) {
     }
 }
 
+//
+// Toggles a checkbox, by either adding or removing the css class 'checked'
+//
+// INPUT
+//   checkBox - The checkbox (d3 SVG elem)
+//
 function checkBoxCheck(checkBox) {
     var s = d3.select(checkBox).select(".check");
     s.classed("checked", ! s.classed("checked"));
 }
 
+//
+// Get whether or not the Others checkbox is checked.
+//
+// OUTPUT
+//   True if the checkbox is checked. 
+//
 function othersIsSet() {
     var x = d3.select("#othersCheckbox .check");
     return x.node() && x.classed("checked");
 }
 
+//
+// Get whether or not the All checkbox is checked.
+//
+// OUTPUT
+//   True if the checkbox is checked. 
+//
+
 function totalIsSet() {
     var x = d3.select("#totalCheckbox .check");
     return x.node() && x.classed("checked");
 }
+
+//
+// Check whether the histogram data of a given entity is cached in the
+// global variable datum.
+//
+// INPUT
+//   p - Entity id (string).
+//
+// OUTPUT 
+//   True if the histogram data exists in datum.
+//
 
 function hasData(p) {
     for(var i = 0; i < datum.length; i++) {
@@ -227,29 +370,37 @@ function hasData(p) {
     return false;
 }
 
+//
+// Get the grand maximum count of all histograms in datum (maximum value on the y-axis).
+//
+// INPUT
+//   datum - The datum (list of list of objects w. 'x', 'y' and 'y0' as fields).
+//   stakced - True if the histograms are stacked (boolean).
+//
+// OUTPUT
+//   The grand max (int)
+//
 function getGrandMax(datum, stacked) {
-    var grandMax = d3.max(datum.map(function(d) {return d3.max(d.values.map(function(d){ return d.y;}))}));
-    var grandMaxStacked = d3.max(datum.map(function(d) {return d3.max(d.values.map(function(d){ return d.y + d.y0;}))}));
-    return stacked ? grandMaxStacked : grandMax;
+    if(stacked) {
+	return d3.max(datum.map(function(d) {return d3.max(d.values.map(function(d){ return d.y + d.y0;}))}));
+    }
+    else {
+	return d3.max(datum.map(function(d) {return d3.max(d.values.map(function(d){ return d.y;}))}));
+    }
 }
 
 
-//Draws or redraws the graphs
-function createGraph() {
+//
+// repaintGraph
+//
+// Draws or redraws the graphs
+//
+function repaintGraph() {
 
-    var w = CONST.graphW;
-    var h = CONST.graphH;
-    var signLineW = CONST.signatureLineW;
-    var signLineH = CONST.signatureLineH;
-    var signH = CONST.signatureSpacing;
 
     var graphDiv = d3.select("#graphDiv");
     graphDiv.select("svg").remove();
 
-
-    var g = appendSVG(w + CONST.signatureW, h, graphDiv);
-    var signG = d3.select("#graphDiv svg").append("svg:g")
-	.attr("transform", "translate("+w+", 0)");
 
 
     //Find out what graphs to plot
@@ -268,11 +419,29 @@ function createGraph() {
     if(othersIsSet()) {
 	toPlotDatum.push(othersData);
     }
-
-
-    var graphType = getGraphType();
-
     if(toPlotDatum.length > 0) {
+
+	var nBins = toPlotDatum[0].values.length;
+
+	var graphType = getGraphType();
+	var b2 = isBar(graphType);
+    
+	var w = b2 ?  CONST.graphW * ((nBins - 0.5) / (nBins)) : CONST.graphW;
+	var h = CONST.graphH;
+	var signLineW = CONST.signatureLineW;
+	var signLineH = CONST.signatureLineH;
+	var signH = CONST.signatureSpacing;
+	var svg = graphDiv.append("svg")
+	    .attr("height", h)
+	    .attr("width", CONST.graphW + CONST.signatureW);
+	var g = svg.append("svg:g")
+	    .attr("transform", "translate(0, " + h + ")");
+	var signG = svg.append("svg:g")
+	    .attr("transform", "translate("+CONST.graphW+", 0)");
+
+
+
+
 
 	//Transition moth view to make room for graph
 	d3.select("#mothDiv g")
@@ -282,18 +451,17 @@ function createGraph() {
 	    .attr("transform", "translate(0, "+(h)+")");
 	
 	var b1 = isStacked(graphType);
-	var b2 = isBar(graphType);
 
 	if(b1) {
 	    stack(toPlotDatum);
 	}
 
 	var xMargin = CONST.graphXMarg;
-	var yMargin = CONST.graphYMargFactor*(("" + getGrandMax(toPlotDatum, b1)).length + 1);
+	var yMargin = CONST.graphYMargFactor*(("" + getGrandMax(toPlotDatum, b1)).length + 1)+10;
 
 	var gran = getGran();
 
-	var barWidth = (w - 2 * yMargin) / toPlotDatum[0].values.length;
+	var barWidth = (w - 2 * yMargin) / nBins;
 
 	var scales = getScales(toPlotDatum, w, h, xMargin, yMargin, floorDate(start, gran), floorDate(end, gran), gran, barWidth);
 	var x,y,t,tFormat;
@@ -332,35 +500,37 @@ function createGraph() {
 	    .attr("transform", "translate(0, 0)");
     }
 
+    if(toPlotDatum.length > 0) {
     //Signatures
-    signG.append("svg:rect")
-	.attr("x", 0)
-	.attr("y", 0)
-	.attr("width", CONST.signatureW)
-	.attr("height", signH * toPlotDatum.length)
-	.style("stroke", "black")
-	.style("fill", "white");
+	signG.append("svg:rect")
+	    .attr("x", 0)
+	    .attr("y", 0)
+	    .attr("width", CONST.signatureW)
+	    .attr("height", signH * toPlotDatum.length)
+	    .style("stroke", "black")
+	    .style("fill", "white");
 
-    signatures = signG.selectAll("g")
-	.data(toPlotDatum)
-	.enter()
-	.append("g")
-	.attr("transform", function(d,i) {return "translate(0, " + (i * signH) + ")"; });
+	signatures = signG.selectAll("g")
+	    .data(toPlotDatum)
+	    .enter()
+	    .append("g")
+	    .attr("transform", function(d,i) {return "translate(0, " + (i * signH) + ")"; });
+	
+	signatures.append("rect")
+	    .attr("x", 5)
+	    .attr("y", signH / 2 - signLineH / 2)
+	    .attr("width", signLineW)
+	    .attr("height", signLineH)
+	    .style("stroke", function(d,i) {return d.color;})
+	    .style("fill", function(d,i) {return d.color;})
+	    .classed("signature", true);
 
-    signatures.append("rect")
-	.attr("x", 5)
-	.attr("y", signH / 2 - signLineH / 2)
-	.attr("width", signLineW)
-	.attr("height", signLineH)
-	.style("stroke", function(d,i) {return d.color;})
-	.style("fill", function(d,i) {return d.color;})
-	.classed("signature", true);
-
-
-    signatures.append("text")
-	.attr("x", signLineW + 10)
-	.attr("y", signH / 2 + 4 )
-	.text(function(d) {return getName(d.key);});
+	
+	signatures.append("text")
+	    .attr("x", signLineW + 10)
+	    .attr("y", signH / 2 + 4 )
+	    .text(function(d) {return getName(d.key);});
+    }
 
 }
 
@@ -388,24 +558,56 @@ function getGraphType() {
     return graphType;
 }
 
-
+//
+// Get the list of other entities where the checkbox is checked.
+//
+// OUTPUT
+//   A list of entity id's (list of strings)
+//
 function getSelectedGraphs() {
     var ret = new Array();
 
-    d3.selectAll('.provider .checked').each(function(i) { ret.push(getOtherProvider(i)); });
+    d3.selectAll('.provider .checked').each(function(i) { ret.push(getOtherProviderId(i)); });
     
     return  ret;
 }
 
+//
+// Get the list of other entitiy names where the checkbox is checked.
+//
+// OUTPUT
+//   A list of readable entity names (list of strings)
+//
+function getSelectedGraphNames() {
+    var ret = new Array();
+
+    d3.selectAll('.provider .checked').each(function(i) { ret.push(getOtherProviderName(i)); });
+    
+    return  ret;
+}
+
+// Javascript date object to POSIX time int.
 function dateToTimestamp(date) {
     return Math.round(date.getTime() / 1000) 
 }
 
+//
+// dateRangeChanged
+//
+// This function is called when a new range has been set in the date range picker.
+//
 function dateRangeChanged() {
     setBestGran();
     fullRefresh();
 }
 
+//
+// main
+//
+// This is the body.onload function. It will create the date range
+// picker, set the 'best' initial granularity calculate the amount of
+// entities to show in the moth view, and draw the moth view.
+//
 function main() {
 
     var now3 = new Date();
@@ -452,14 +654,28 @@ function main() {
     sameShown = Math.min(CONST.entitiesToShow, sameProviders.length);
     othersShown = Math.min(CONST.entitiesToShow, otherProviders.length);
 
-    createMothView();
+    repaintMothView();
 }
 
+//
+// Get the entity id of same provider with index i.
+//
 function getSameProvider(i) {
     return sameProviders[i].id;
 }
 
+function getSameProviderId(i) {
+    return sameProviders[i].idint;
+}
 
+
+function getOtherProviderId(i) {
+    return otherProviders[i].idint;
+}
+
+//
+// Get the entity readable name of same provider with index i.
+//
 function getSameProviderName(i) {
     var n = sameProviders[i].name;
     var max = 45;
@@ -477,15 +693,12 @@ function getOtherProviderName(i) {
     return n.length < max ? n : n.substr(0,max) + "...";
 }
 
-//Draws or redraws the moth view
-function createMothView() {
-
-    var selP = getSelectedGraphs();
-
-    var selT = totalIsSet();
-    var selO = othersIsSet();
-
-    var x, y, z;
+//
+// repaintMothView
+//
+// Draws or redraws the moth view
+//
+function repaintMothView() {
 
     var boxW = CONST.providerBoxW;
     var wayfW = CONST.wayfBoxW;
@@ -493,10 +706,35 @@ function createMothView() {
 
     var colGap = CONST.colGap;
     var rowGap = CONST.rowGap;
-    var w = wayfW + 2 * boxW + 2*colGap + 2;
-    var h = CONST.graphH + Math.max(othersShown+2, sameShown+1) * (boxH + rowGap) - rowGap + 2;
+
     var wayfX = boxW + colGap;
     var wayfY = (CONST.wayfY) * (boxH + rowGap) - rowGap;
+
+    var sameOffsetY, othersOffestY;
+
+    var wayfH = Math.max(CONST.wayfHFactor * Math.max(othersShown, sameShown), boxH);
+
+    if(sameShown < CONST.entitiesToShow) {
+	sameOffsetY = wayfY + wayfH/2 - boxH/2 - ((sameShown - 1) / 2 * (rowGap + boxH));
+    }
+    else {
+	sameOffsetY = 0;
+    }
+    if(othersShown < CONST.entitiesToShow) {
+	othersOffsetY = wayfY + wayfH/2 - boxH/2 - ((othersShown) / 2 * (rowGap + boxH));
+    }
+    else {
+	othersOffsetY = 0;
+    }
+    var selP = getSelectedGraphs();
+
+    var selT = totalIsSet();
+    var selO = othersIsSet();
+
+    var x, y, z;
+
+    var w = wayfW + 2 * boxW + 2*colGap + 2;
+    var h = CONST.graphH + Math.max(sameOffsetY, othersOffsetY) + Math.max(othersShown+2, sameShown+1) * (boxH + rowGap) - rowGap + 2;
 
 
     var mothDiv = d3.select("#mothDiv");
@@ -536,15 +774,6 @@ function createMothView() {
 	gSame = gLeft; gOthers = gRight;
 	lRange = sameRange; rRange = othersRange;
     }
-    
-    if(sameShown < CONST.entitiesToShow) {
-	sameOffsetY = wayfY - ((sameShown - 1) / 2 * (rowGap + boxH));
-    }
-    else {
-	sameOffsetY = 0;
-    }
-    othersOffsetY = 0;
-
 
     //Grouping structure
     gSame.selectAll("g")
@@ -607,19 +836,20 @@ function createMothView() {
 	.attr("height", boxH);
     
     gMid.select(".mothbox rect")
-	.attr("width", wayfW);
+	.attr("width", wayfW)
+	.attr("height", wayfH);
     
     //Text
     x = gSame.selectAll(".provider");
 	
     x.append("svg:a")
-	.attr("xlink:href", function(i) {return "?" + (idpMode ? "idp" : "sp") + "=" + getSameProvider(i);})
+	.attr("xlink:href", function(i) {return "?" + (idpMode ? "idp" : "sp") + "=" + getSameProviderId(i);})
 	.append("text")
 	.attr("x", CONST.boxTextXSame)
 	.attr("y",  CONST.boxTextY)
 	.text(getSameProviderName);
     
-    x.classed("selected", function(i) {return getSameProvider(i) == mainProvider;});
+    x.classed("selected", function(i) {return getSameProviderId(i) == mainProvider;});
     
     gOthers.selectAll(".provider")
 	.classed("owned", function(i) {return otherProviders[i].own;})
@@ -634,7 +864,7 @@ function createMothView() {
     
     gOthers.selectAll(".owned")
 	.append("svg:a")
-	.attr("xlink:href", function(i) {return "?" + (idpMode ? "sp" : "idp") + "=" + getOtherProvider(i);})
+	.attr("xlink:href", function(i) {return "?" + (idpMode ? "sp" : "idp") + "=" + getOtherProviderId(i);})
 	.append("text")
 	.attr("x", CONST.boxTextXOthers)
 	.attr("y",  CONST.boxTextY)
@@ -642,10 +872,10 @@ function createMothView() {
     
 
     x = gMid.append("text")
-	.attr("y",  CONST.boxTextY)
 	.text("WAYF");
 
     x.attr("x", wayfW / 2 - (x.node().getBBox().width / 2));
+    x.attr("y", wayfH / 2 - (x.node().getBBox().height / 2) + 12);
 
     x = gOthers.select(".total");
 
@@ -806,13 +1036,25 @@ function createMothView() {
     }
 
     //Lines
-/*
+
     var offsetLeft = !idpMode ? sameOffsetY : othersOffsetY;
+    var offsetRight = idpMode ? sameOffsetY : othersOffsetY;
+    var leftShown = !idpMode ? sameShown : othersShown;
+    var rightShown = idpMode ? sameShown : othersShown;
+
+    x = idpMode ? 1 : 0;
 
     var diagonal = d3.svg.diagonal()
-	.projection(function(d) { return d;})
-	.source([wayfX, wayfY + boxH / 2])
-	.target(function(i) {return [boxW, offsetLeft + boxH / 2 + (i+1)*(boxH + rowGap)];});
+	.projection(function(d) { return [d.y, d.x];})
+
+	.target(function(i) {return { y: boxW, x :  offsetLeft + boxH / 2 + (i + x)*(boxH + rowGap)};});
+
+    if(leftShown == 1) {
+	diagonal.source({y : wayfX, x : wayfY + wayfH / 2});
+    }
+    else {
+	diagonal.source(function(i) {return {y : wayfX, x : wayfY + CONST.boxCornerRadius +(wayfH-2*CONST.boxCornerRadius) * i / (leftShown-1) };})
+    }
 
 
     gLeft.selectAll("path.link")
@@ -820,8 +1062,28 @@ function createMothView() {
 	.enter().append("path")
 	.attr("class", "link")
 	.attr("d", diagonal);
-*/
 
+    diagonal = d3.svg.diagonal()
+	.projection(function(d) { return [d.y, d.x];})
+//	.source({y :  -colGap, x : wayfY + boxH / 2})
+	.target(function(i) {return { y: 0, x :  offsetRight + boxH / 2 + (i + 1 - x)*(boxH + rowGap)};});
+
+    if(rightShown == 1) {
+	diagonal.source({y : -colGap, x : wayfY + wayfH / 2});
+    }
+    else {
+	diagonal.source(function(i) {return {y : -colGap, x : wayfY + CONST.boxCornerRadius +(wayfH-2*CONST.boxCornerRadius) * i / (rightShown-1) };})
+    }
+
+
+
+    gRight.selectAll("path.link")
+	.data(rRange)
+	.enter().append("path")
+	.attr("class", "link")
+	.attr("d", diagonal);
+
+    /*
     gLeft.selectAll("line")
 	.data(lRange)
 	.enter().append("line")
@@ -841,10 +1103,19 @@ function createMothView() {
 
     gSame.selectAll("line")
 	.attr("y1", function(i) {return sameOffsetY + boxH / 2 + i*(boxH + rowGap);})
-
+*/
     return;
 }
 
+//
+// Get a color given an identifier
+//
+// INPUT
+//   p - A entity id, 'total' or 'others' (string)
+//
+// OUTPUT
+//   A color (string).
+//
 function newColor(p) {
 
     if(colorMap[p]) 

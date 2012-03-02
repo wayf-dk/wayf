@@ -31,34 +31,47 @@ $L = $language[$lang];
 if(isset($_GET['idp'])) {
   $provider = $_GET['idp'];
   $idpMode = true;
-  $mainProviderStringShort = 'idp';
-  $otherProviderStringShort = 'sp';
+  $mainProviderStringShort = 'idp_id';
+  $otherProviderStringShort = 'sp_id';
 }
 else if(isset($_GET['sp'])) {
   $provider = $_GET['sp'];
   $idpMode = false;
-  $mainProviderStringShort = 'sp';
-  $otherProviderStringShort = 'idp';
+  $mainProviderStringShort = 'sp_id';
+  $otherProviderStringShort = 'idp_id';
 }
 else {
 
   $idpMode = true;
-  $mainProviderStringShort = 'idp';
-  $otherProviderStringShort = 'sp';
+  $mainProviderStringShort = 'idp_id';
+  $otherProviderStringShort = 'sp_id';
 
   $provider = false;
 }
 
 $sameProviders = getSameProviders($lang, $eppn);
 if(!$provider)
-  $provider = $sameProviders[0]['id'];
+  $provider = $sameProviders[0]['idint'];
 $role = getRole($eppn, $provider);
 $otherProviders = getOtherProviders($lang, $eppn, $provider);
 $dateRange = getMaxDateRange($provider);
 dbClose();
 
+//
+// getMaxDateRange
+//
+// Get the smallest and largest date from the database.
+// INPUT: 
+//   $provider - Not used
+// OUTPUT: 
+//   Start and end date as POSIX timestamps in an array with two elements.
+//
 function getMaxDateRange($provider) {
-  $sql = 'SELECT MIN(UNIX_TIMESTAMP(date)), MAX(UNIX_TIMESTAMP(date)) FROM log';
+  $sql = <<<EOD
+    SELECT MIN(UNIX_TIMESTAMP(date)), MAX(UNIX_TIMESTAMP(date))
+    FROM log
+EOD;
+
   $dbResult = dbQuery($sql);
 
   $row = mysql_fetch_array($dbResult, MYSQL_NUM);
@@ -73,10 +86,25 @@ function getMaxDateRange($provider) {
   }
 }
 
+//
+// getSameProviders
+//
+// Get a list of entities that the user is allowed to view of the same
+// type (sp or idp) as the selected entity from the database.
+// INPUT: 
+//   $lang - prefferedLanguage SAML attribute (string)
+//   $eppn - eduPersonPrincipalName SAML attribute (string)
+// OUTPUT: 
+//   A list of entities. Each entity is an associative array with a mapping for 'id' and 'name'.
+//
 function getSameProviders($lang, $eppn) {
   global $mainProviderStringShort;
   $p = $mainProviderStringShort;
-  $sql = "SELECT l.$p, e.$lang FROM log l JOIN access a on a.eid = l.$p LEFT JOIN entitytoname e ON l.$p = e.entityid WHERE a.eppn = '$eppn' GROUP BY l.$p";
+  $sql = <<<EOD
+    SELECT e.entityid, e.$lang, l.$p
+    FROM log l JOIN access a on a.eid = l.$p LEFT JOIN entities e ON l.$p = e.id
+    WHERE a.eppn = '$eppn' GROUP BY l.$p
+EOD;
 
   $dbResult = dbQuery($sql);
 
@@ -85,17 +113,38 @@ function getSameProviders($lang, $eppn) {
     if(is_null($row[1]))
 	$row[1] = $row[0];
 
-    $ret[] = array('id' => $row[0], 'name' => $row[1]);
+    $ret[] = array('id' => $row[0], 'idint' => $row[2], 'name' => $row[1]);
   }
   return $ret;
 }
 
+//
+// getOtherProviders
+//
+// Get a list of entities that the user is allowed to view of the
+// opposite type (sp or idp) as the selected entity from the database.
+// INPUT: 
+//   $lang - prefferedLanguage SAML attribute (string)
+//   $eppn - eduPersonPrincipalName SAML attribute (string)
+//   $provider - the entityId of the selected entity (string)
+// OUTPUT: 
+//   A list of entities. Each entity is an associative array with a
+//   mapping for 'id', 'name', 'own' and 'count'.
+//   'id' is the entityId.
+//   'name' is a human readable name in the given language.
+//   'own' is a boolean that indicates if the user is allowed to select this entity (he has viewer or admin role).
+//   'count' is the total count of logins for this entity.
+//
 function getOtherProviders($lang, $eppn, $provider) {
   global $otherProviderStringShort, $mainProviderStringShort;
   $sp = $otherProviderStringShort;
   $idp = $mainProviderStringShort;
-  $sql = "SELECT l.$sp, COUNT(*), e.$lang, a.role FROM log l LEFT JOIN access a ON l.$sp = a.eid LEFT JOIN entitytoname e ON l.$sp = e.entityid GROUP BY $sp ORDER BY COUNT(*) DESC;";
-  //  $sql = "SELECT l.$sp, COUNT(*), e.$lang FROM log l LEFT JOIN access a on a.eid = l.$sp LEFT JOIN entitytoname e ON l.$sp = e.entityid WHERE l.$idp='$provider' AND a.eppn = '$eppn' GROUP BY l.$sp ORDER BY COUNT(*) DESC";
+  $sql = <<<EOD
+    SELECT e.entityid, COUNT(*), e.$lang, a.role, l.$sp
+    FROM log l LEFT JOIN access a ON l.$sp = a.eid LEFT JOIN entities e ON l.$sp = e.id 
+    WHERE l.$idp = '$provider'
+    GROUP BY $sp ORDER BY COUNT(*) DESC;
+EOD;
 
   $dbResult = dbQuery($sql);
 
@@ -103,7 +152,7 @@ function getOtherProviders($lang, $eppn, $provider) {
   while ($row = mysql_fetch_array($dbResult, MYSQL_NUM)) {
     if(is_null($row[2]))
       $row[2] = $row[0];
-    $ret[] = array('id' => $row[0], 'own' => isset($row[3]), 'count' => $row[1], 'name' => $row[2] );
+    $ret[] = array('id' => $row[0], 'own' => isset($row[3]), 'count' => $row[1], 'name' => $row[2], 'idint' => $row[4] );
   }
   return $ret;
 }
@@ -136,7 +185,6 @@ var otherProviders = JSON.parse('<?echo json_encode($otherProviders,  JSON_HEX_A
 var sameProviders = JSON.parse('<?echo json_encode($sameProviders,  JSON_HEX_APOS);?>');
 var mainProvider = '<?echo $provider?>';
 var role = '<?echo $role?>';
-var delegated = JSON.parse('<?echo json_encode($delegated,  JSON_HEX_APOS);?>');
 var start = <?echo $dateRange[0]?>;
 var end = <?echo $dateRange[1]?>;
 
@@ -149,7 +197,8 @@ providerBoxW : 350
 , colGap : 200
 , rowGap : 3
 , wayfY : 5 
-, entitiesToShow : 10
+, wayfHFactor : 3
+, entitiesToShow : 20
 , boxTextY : 17
 , boxTextXSame : 5
 , boxTextXOthers : 25
@@ -162,12 +211,14 @@ providerBoxW : 350
 , graphH : 400
 , graphW : 1000
 , graphXMarg : 80
-, graphYMargFactor : 8
+, graphYMargFactor : 12
 , signatureLineW : 50
 , signatureLineH : 2
 , signatureW : 200
 , signatureSpacing : 20
 , transitionDuration : 1000
+, BarsOuterPad : 4
+, BarsInnerPad : -2
 };
 
     </script>

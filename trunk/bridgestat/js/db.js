@@ -1,6 +1,15 @@
 
-
-//Database query callback function. Pushes new data and calls createGraph().
+//
+// receiveDatum
+//
+// Database query callback function. Pushes new data and calls repaintGraph().
+//
+// INPUT
+//   ps - A list of strings representing the expected data to receive.
+//        Allowed values are entity id's as well as 'total' and 'others.
+//
+// OUTPUT
+//   A function that can be used as a callback for the request(..) function.
 function receiveDatum(ps) {
     return function(newDatum) {
 	assert(ps.length == newDatum.length);
@@ -18,11 +27,22 @@ function receiveDatum(ps) {
 		datum.push({key : p, values : newDatum[i], color : newColor(p)});
 	    }
 	}
-	createGraph(); 
+	repaintGraph(); 
     };
 }
 
-
+//
+// buildQueryProvider
+//
+// Takes a query object and appends a query for specific other entity.
+//
+// INPUT
+//   p - A entity id (string)
+//   o - A query object (see newQueryObject(..) function)
+//
+// OUTPUT
+//   Nothing, but input argument o will be modified.
+//
 function buildQueryProvider(p, o) {
     o.ps.push(p);
     o.spes.push(0);
@@ -39,6 +59,17 @@ function buildQueryProvider(p, o) {
     }
 }
 
+//
+// buildQueryTotal
+//
+// Takes a query object and appends a query for a total grouping.
+//
+// INPUT
+//   o - A query object (see newQueryObject(..) function)
+//
+// OUTPUT
+//   Nothing, but input argument o will be modified.
+//
 function buildQueryTotal(o) {
     o.ps.push('total');
     o.idpes.push(0);
@@ -53,6 +84,18 @@ function buildQueryTotal(o) {
 	o.idpss.push([]);
     }
 }
+
+//
+// buildQueryOthers
+//
+// Takes a query object and appends a query for the others grouping.
+//
+// INPUT
+//   o - A query object (see newQueryObject(..) function)
+//
+// OUTPUT
+//   Nothing, but input argument o will be modified.
+//
 
 function buildQueryOthers(o) {
     o.ps.push('others');
@@ -84,11 +127,39 @@ function buildQueryOthers(o) {
     }
 }
 
+
+//
+// sendQuery
+//
+// Takes a query object and constructs a callback function and send it
+// using the request(..) function.
+//
+// INPUT
+//   o - A query object (see newQueryObject(..) function)
+//
+// OUTPUT
+//   Nothing, but a query will be sent.
+//
 function sendQuery(o) {
     o.callback = receiveDatum(o.ps);
     request(o);
 }
 
+//
+// newQueryObject
+//
+// Constructs an empty query object.
+//
+// OUTPUT
+//   An object with the fields gran, start, end, idpss, idpes, spss, spes, ps where
+//     start is a start time POSIX timestamp (int).
+//     end is an end time POSIX timestamp (int).
+//     gran is a granularity ('h', 'D', 'M' or 'Y').
+//     idpss is a list of idp's for each histogram (list of list of strings).
+//     spss is a list of sp's for each histogram (list of list of strings).
+//     idpExclusions is boolean for each histogram  (list of strings). If '1', use complement of idps.
+//     spExclusions is similar to above (list of string).
+//     ps is a list of strings where each string is either an entity id or 'total' or 'others'.
 function newQueryObject() {
     var o =  
 	{     gran     : getGran()
@@ -103,8 +174,17 @@ function newQueryObject() {
     return o;
 }
 
-
-
+//
+// request
+// 
+// Send a AJAX request.
+//
+// INPUT
+//   o - A query object (see newQueryObject(..) function)
+//
+// OUTPUT
+//   Nothing, but a request will be sent.
+//
 function request(o) {
     var xmlhttp;
     try{
@@ -142,6 +222,19 @@ function request(o) {
     }
 }
 
+//
+// handleResponse
+//
+// JSON decodes the response text of a given xml http object
+// and passes the result to a given callback function
+//
+// INPUT
+//   xmlhttp - The XML HTTP object.
+//   callback - The callback function.
+//
+// OUTPUT
+//   Nothing, but the callback function will be called.
+//
 function handleResponse(xmlhttp, callback)  {
     return function() {
 	try{
