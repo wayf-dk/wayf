@@ -70,6 +70,10 @@ mysql_close($dbConnection);
 <html>
 <head>
 <script type = "text/javascript">
+  // Sets html input tags so a submit will delete the given eduPersonPrincipalName.
+  // And submit.
+  // INPUT
+  //   eppn - eduPersonPrincipalName (string)
   function del(eppn) {
     document.getElementById('action').value = 'del';
     document.getElementById('arg').value = eppn;

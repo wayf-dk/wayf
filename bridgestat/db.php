@@ -1,6 +1,9 @@
 <?php
 
 require_once('config.php');
+require_once('prelude.php');
+//global $dbConnection;
+//unset($dbConnection);
 
 //TODO use value from config
 $MAX_NUMBER_OF_BINS = 10000;
@@ -81,19 +84,32 @@ if(count($spss) != $nHists || count($spExclusions) != $nHists || count($idpExclu
 //main('h', '1328911238', '1328997599', array(), array());
 main($gran, $start, $end, $timezone, $idpss, $spss, $idpExclusions, $spExclusions, $nHists);
 
-//Rename to something else than the function in prelude.php
-function dbQuery($start, $end, $gran, $timezone, $idps, $sps, $idpe, $spe) {
+//TODO: Rename to something else than the function in prelude.php
 
-  global $config;
+
+//
+// dbHistogram
+//
+// Get histogram data from database.
+//
+// INPUT: 
+//   $start - Start time POSIX timestamp (string).
+//   $end - End time POSIX timestamp (string).
+//   $gran - Granularity ('h', 'D', 'M' or 'Y').
+//   $timezone - Timezone ('+/-xx:yy').
+//   $idps - List of entity ids (string) refering to idps (empty list means all).
+//   $sps - List of entity ids (string) refering to sps (empty list means all).
+//   $idpe - Exclusive selection for idp's ('1' or '0'). If $idpe = '1' then the query will select all dates where idp is NOT in $idps.
+//   $spe - Exclusive selection for sp's.
+// OUTPUT: 
+//   A handle to the result (mysql php api). The result will contain one
+//   row for each histogram bin and two columns. The first column is an
+//   arbitrary date in the bin, and the second column is a count.
+//
+function dbHistogram($start, $end, $gran, $timezone, $idps, $sps, $idpe, $spe) {
 
   $idpe = $idpe == '1';
   $spe = $spe == '1';
-
-  $connection = mysql_connect($config['dbHost'], $config['dbUser'], $config['dbPwd']);
-  if (!$connection)  {
-    internalError("Failed to connect to database ".mysql_error());
-  }
-  mysql_select_db($config['dbName'], $connection);
 
   $select = 'SELECT UNIX_TIMESTAMP(date), COUNT(*) FROM log ';
 
@@ -104,12 +120,12 @@ function dbQuery($start, $end, $gran, $timezone, $idps, $sps, $idpe, $spe) {
   if(count($idps) > 0) {
     $idpstr = implode('\',\'', $idps);
     $in = $idpe ? 'NOT IN' : 'IN'; 
-    $w.= " AND idp $in ('$idpstr')";
+    $w.= " AND idp_id $in ('$idpstr')";
   }
   if(count($sps) > 0) {
     $spstr = implode('\',\'', $sps);
     $in = $spe ? 'NOT IN' : 'IN'; 
-    $w .= " AND sp $in ('$spstr')";
+    $w .= " AND sp_id $in ('$spstr')";
   }
 
   $date = "CONVERT_TZ(date, 'SYSTEM', '$timezone')";
@@ -138,22 +154,26 @@ function dbQuery($start, $end, $gran, $timezone, $idps, $sps, $idpe, $spe) {
 
   $sql= $select . $w. $gb;
 
-  $fh = fopen('/var/www/stat/log/sql.log', 'a');
-
-  fwrite($fh, $sql);
-  fwrite($fh, "\n\n");
-
-  fclose($fh);
-
-  $dbResult = mysql_query($sql);
-
-  mysql_close($connection);
-
+  $dbResult = dbQuery($sql);
   return $dbResult;
 }
 
 // Make bins using group by query
 
+//
+// histogram
+//
+// Given a database result handle, create histogram data and output it using echo.
+//
+// INPUT:
+//   $gran Granularity.
+//   $start Start time.
+//   $end End time.
+//   $timezoneOffset time offset in seconds (int).
+//   $dbResult Database result hanlde.
+// OUTPUT: 
+//   Nothing is returned. Output is echoed.
+//
 function histogram($gran, $start, $end, $timezoneOffset, $dbResult) {
   switch ($gran) {
   case 's' :
@@ -172,10 +192,32 @@ function histogram($gran, $start, $end, $timezoneOffset, $dbResult) {
   internalError("Invalid parameter granularity. Parameter 'g' must be set to either 's', 'm', 'h', 'D', 'M' 'Y'.");
 }
 
+//
+// main
+//
+// main function for this script. Outputs JSON encoded histogram data.
+//
+// INPUT:
+//   $gran - Granularity.
+//   $start - Start time.
+//   $end - End time.
+//   $timezone - Timezone string.
+//   $idpss - A list of idp's for each histogram (list of list of strings).
+//   $spss - A list of sp's for each histogram (list of list of strings).
+//   $idpExclusions - A boolean for each histogram  (list of strings). If '1', use complement of idps.
+//   $spExclusions - Similar to above (list of string).
+//   $nHists - The number of histograms (int). This number must be equal to the length of $idpss, $spss, $idpExclusions and $spExclusions.
+// OUTPUT: 
+//   Nothing is returned. Output is echoed. JSON encoded list of list of ints (eg [[1,4,3,4], [40,10,0,32]]).
+//
+// EXAMPLE:
+//   main('d', 1000, 2000, '+10:30', [['a'], ['a', 'b']], [['x'], ['y']], ['0', '1'], ['0', '0'], 2)
+//   
+//   request of two histograms from time(1000) to time(2000) grouped by days using the timezone '+10:30'.
+//   The first histogram should count dates for sp IN {'a'} and idp IN {'x'}.
+//   The second histogram should count dates for sp NOT IN {'a', 'b'} and idp IN {'y'}.
+//
 function main($gran, $start, $end, $timezone, $idpss, $spss, $idpExclusions, $spExclusions, $nHists) {
-
-
-
   $t = explode(':', $timezone);
 
   $timezoneOffset = intval(substr($t[0], 1)*60*60) + intval($t[1])*60;
@@ -192,7 +234,7 @@ function main($gran, $start, $end, $timezone, $idpss, $spss, $idpExclusions, $sp
     $idpe = $idpExclusions[0];
     $spe = $spExclusions[0];
     //Get data from db:
-    $dbResult = dbQuery($start, $end, $gran, $timezone, $idps, $sps, $idpe, $spe);
+    $dbResult = dbHistogram($start, $end, $gran, $timezone, $idps, $sps, $idpe, $spe);
     //Include count 0 bins:
     $hist = histogram($gran, $start, $end, $timezoneOffset, $dbResult);
     //Send data to output:
@@ -206,27 +248,62 @@ function main($gran, $start, $end, $timezone, $idpss, $spss, $idpExclusions, $sp
       $sps = $spss[$i];
       $idpe = $idpExclusions[$i];
       $spe = $spExclusions[$i];
-      $dbResult = dbQuery($start, $end, $gran, $timezone, $idps, $sps, $idpe, $spe);
+      $dbResult = dbHistogram($start, $end, $gran, $timezone, $idps, $sps, $idpe, $spe);
       $hist = histogram($gran, $start, $end, $timezoneOffset, $dbResult);
       outputArray($hist);
       echo "\n";
     }
     echo ']';
   }
+  dbClose();
 }
 
+//
+// nBins
+//
+// Calculates a number of bins required.
+//
+// INPUT
+//   $dt - Delta time. The size of each bin in seconds (int).
+//   $start - The start time in POSIX timestamp (int).
+//   $end - The end time in POSIX timestamp (int).
+//
+// OUTPUT
+//   The number of bins (int).
 function nBins($dt, $start, $end) {
   return ceil(($end - $start) / $dt);
 }
 
+//
+// dateToBin
+//
+// Converts a POSIX timestamp to a bin index.
+//
+// INPUT
+//   $date - Posix timestamp (int).
+//   $dt - Delta time. The size of each bin in seconds (int).
+//   $start - The start time in POSIX timestamp (int).
+//   $timezoneOffset - The timezone offset in seconds (int).
+//
+// OUTPUT
+//   The number of bins (int).
 function dateToBin($date, $dt, $start, $timezoneOffset) {
   $date1 = $date;
   $date = $date - ($date + $timezoneOffset) % $dt;
   $d = getdate($date);
-  //error_log(date('c', $date1) .'  '.date('c', $date) .'  ' . (($date1 + 2*60*60) % $dt) );
   return floor(($date - $start) / $dt);
 }
 
+//
+// outputArray
+//
+// Print an array using echo.
+//
+// INPUT
+//   $arr - The array
+//
+// OUTPUT
+//   Nothing. Output is echoed.
 function outputArray($arr) {
   $n = count($arr);
   if($n == 0)
@@ -241,6 +318,17 @@ function outputArray($arr) {
   }
 }
 
+//
+// checkNumberOfBins
+//
+// Check if number of bins required is below the maximum allowed
+// number of bins.
+//
+// INPUT
+//   $nBins - The number of bins required (int).
+//
+// OUTPUT
+//   Nothing, but the script may throw an internal error.
 function checkNumberOfBins($nBins) {
   global $MAX_NUMBER_OF_BINS;
   if($nBins > $MAX_NUMBER_OF_BINS) {
@@ -248,13 +336,20 @@ function checkNumberOfBins($nBins) {
   }
 }
 
-function internalError($errMsg) {
-  $protocol = (isset($_SERVER['SERVER_PROTOCOL']) ? $_SERVER['SERVER_PROTOCOL'] : 'HTTP/1.0');
-  header("$protocol 500 Internal Server Error");
-  echo("ERR: $errMsg");
-  exit(0);
-}
-
+//
+// equalBins
+//
+// Compute histogram data using equal bin sizes.
+//
+// INPUT
+//   $dt - Bin size (int).
+//   $start - Start time (int).
+//   $end - End time (int). 
+//   $timezoneOffset - Timezone offset in seconds (int).
+//   $dbResult - MySQL result handle.
+//
+// OUTPUT
+//   Bins (array of ints). 
 function equalBins($dt, $start, $end, $timezoneOffset, $dbResult) {
   $bins = array();
   $start = $start - ($start  + $timezoneOffset) % $dt;
@@ -282,6 +377,19 @@ function equalBins($dt, $start, $end, $timezoneOffset, $dbResult) {
 
 }
 
+
+//
+// monthBins
+//
+// Compute histogram data using month-sized bins.
+//
+// INPUT
+//   $start - Start time (int).
+//   $end - End time (int). 
+//   $dbResult - MySQL result handle.
+//
+// OUTPUT
+//   Bins (array of ints). 
 function monthBins($start, $end, $dbResult) {
 
   checkNumberOfBins(nBins(2629744, $start, $end));
@@ -295,6 +403,19 @@ function monthBins($start, $end, $dbResult) {
   return histBins($binBounds, $nBins, $dbResult);
 }
 
+
+//
+// yearBins
+//
+// Compute histogram data using year-sized bins.
+//
+// INPUT
+//   $start - Start time (int).
+//   $end - End time (int). 
+//   $dbResult - MySQL result handle.
+//
+// OUTPUT
+//   Bins (array of ints). 
 function yearBins($start, $end, $dbResult) {
 
   checkNumberOfBins(nBins(31556926, $start, $end));
@@ -308,6 +429,19 @@ function yearBins($start, $end, $dbResult) {
   return histBins($binBounds, $nBins, $dbResult);
 }
 
+
+//
+// histBins
+//
+// Compute histogram data given and array of bin boundaries.
+//
+// INPUT
+//   $binBounds - Bin boundaries given in POSIX timestamps (array of int).
+//   $nBins - Number of bins (int).
+//   $dbResult - MySQL result handle.
+//
+// OUTPUT
+//   Bins (array of ints).
 function histBins($binBounds, $nBins, $dbResult) {
   $bins = array();
 
@@ -317,13 +451,25 @@ function histBins($binBounds, $nBins, $dbResult) {
 
   $index = 0;
   while ($row = mysql_fetch_array($dbResult, MYSQL_NUM)) {
-    error_log(print_r($row, true));
     $index = timestampToBin($row[0], $binBounds, $index, $nBins);
     $bins[$index] += $row[1];
   }
   return $bins;
 }
 
+//
+// timestampToBin
+//
+// Converts a timestamp to a bin index given an array of bin boundaries.
+//
+// INPUT
+//   $time - Timestamp (int).
+//   $bins - Bin boundaries (array of ints). 
+//   $startIndex - Perform the seach by starting at this index (used for optimization).
+//   $nBins - Number of bins
+//
+// OUTPUT
+//   Bins (array of ints). 
 function timestampToBin($time, $bins, $startIndex, $nBins) {
   $index = $startIndex;
   while(true) {
@@ -337,16 +483,51 @@ function timestampToBin($time, $bins, $startIndex, $nBins) {
   }
 }
 
+//
+// floorMonth
+//
+// Takes a timestamp and floors the value to the nearest month by
+// setting hours, minutes and seconds to 0, and setting the day of the
+// month to 1.
+//
+// INPUT
+//   $d - POSIX timestamp (int).
+//
+// OUTPUT
+//   A floored timestamp (int).
 function floorMonth($d) {
   $date = getdate($d);
   return mktime(0, 0, 0, $date['mon'], 1, $date['year']);
 }
 
+
+//
+// ceilMonth
+//
+// Takes a timestamp and ceils the value to the nearest month by
+// setting hours, minutes and seconds to 0, and setting the day of the
+// month to 1 and possibly adding one month.
+//
+// INPUT
+//   $d - POSIX timestamp (int).
+//
+// OUTPUT
+//   A ceiled timestamp (int).
 function ceilMonth($d) {
   $fd = floorMonth($d);
   return $d == $fd ? $fd : incMonth($fd);
 }
 
+//
+// incMonth
+//
+// Add one month to a unix timestamp.
+//
+// INPUT
+//   $d - POSIX timestamp (int).
+//
+// OUTPUT
+//   A new timestamp (int).
 function incMonth($d) {
   $date = getdate($d);
   if($date['mon'] == 12) {
@@ -357,16 +538,19 @@ function incMonth($d) {
   }
 }
 
+//Similar to floorMonth.
 function floorYear($d) {
   $date = getdate($d);
   return mktime(0, 0, 0, 1, 1, $date['year']);
 }
 
+//Similar to ceilMonth.
 function ceilYear($d) {
   $fd = floorYear($d);
   return $d == $fd ? $fd : incYear($fd);
 }
 
+//Similar to incMonth.
 function incYear($d) {
   $date = getdate($d);
   return mktime(0, 0, 0, 1, 1, $date['year'] + 1);

@@ -5,22 +5,34 @@ AssertException.prototype.toString = function () {
   return 'AssertException: ' + this.message;
 }
 
+//
+// assert
+//
+// Assert a given epxression is true. If not, throw an exception
+//
+// INPUT
+//   exp - The expression (boolean).
+//   message - A message for the exception (string).
+//
+// OUTPUT
+//   None, but may throw an exception.
 function assert(exp, message) {
   if (!exp) {
     throw new AssertException(message);
   }
 }
 
-//Append SVG element for graph
-function appendSVG(w, h, div) {
-    var svg = div.append("svg")
-	.attr("height", h)
-	.attr("width", w);
-    var g = svg.append("svg:g")
-	.attr("transform", "translate(0, " + h + ")");
-    return g;
-}
-
+//
+// Transform the data into a format that d3 better can work with.
+//
+// INPUT
+//   datum - Plain histogram data for several histograms. A list of list of integers.
+//
+// OUTPUT
+//   The transformed datum. Each integer in the input list is transformed to
+//   an object with the fields x, y and y0. x is the bin index, y is the bin count
+//   and y0 is a baseline value initiated to 0 used for stacked graphs.
+//
 function transformDatum(datum) {
     var transformedDatum = new Array();
     var n = datum.length;
@@ -40,6 +52,31 @@ function transformDatum(datum) {
     return transformedDatum;
 }
 
+//
+// getScales
+//
+// Compute scales used to map bin indeces and counts to screen coordinates.
+//
+// INPUT
+//   datum - Histogram data (list of list of objects w. fields x, y and y0)
+//   w - Desired width of the graph in screen coord. (int)
+//   h - Desired height of the graph in screen coord. (int)
+//   xMargin - Extra space below the x-axis (int)
+//   yMargin - Extra space left of y-axis (int)
+//   start - Start date as a POSIX timestamp (int)
+//   end - End date as a POSIX timestamp (int)
+//   gran - Granularity ('h', 'D', 'M', 'Y')
+//   barWidth - Width of bars used for bar diagrams (int).
+//
+// OUTPUT
+//   A list of values [x, y, yStacked, t, tFormat, tTicks] where
+//    x is a scale mapping bin indeces to screen X-coordinate (d3 scale)
+//    y is a scale mapping bin counts to screen Y-coordinate (d3 scale)
+//    yStacked is the same as y but where the domain uses stacked counts (d3 scale)
+//    t us a scale mapping dates to screen X-coordinates (d3 scale)
+//    tFormat is a time format string usable by d3 (string).
+//    tTick is a heuristic optimal number of ticks along the x-axis (int).
+//
 function getScales(datum, w, h, xMargin, yMargin, start, end, gran, barWidth) {
     var data0 = datum[0].values;
     var grandMax = d3.max(datum.map(function(d) {return d3.max(d.values.map(function(d){ return d.y;}))}));
@@ -75,6 +112,18 @@ function getScales(datum, w, h, xMargin, yMargin, start, end, gran, barWidth) {
     return [x, y, yStacked, time, d3.time.format(format), tTicks];
 }
 
+//
+// plotLine
+//
+// INPUT
+//   data - The data to plot (list of objects w. x and y fields).
+//   x - The x scale (d3 scale).
+//   y - The y scale (d3 scale).
+//   parentElem - The parent element of the graph (d3 SVG elem)
+//
+// OUTPUT
+//   Nothing, but the graph will be added as a child to parentElem.
+//
 function plotLine(data, x, y, parentElem) {
     var color = data.color;
 
@@ -86,7 +135,11 @@ function plotLine(data, x, y, parentElem) {
         .style("stroke", color)
 }
 
-
+//
+// plotArea
+//
+// Similar to plotLine
+//
 function plotArea(data, x, y, parentElem) {
 
     var color = data.color;
@@ -105,7 +158,11 @@ function plotArea(data, x, y, parentElem) {
 	.style("stroke-opacity", 0.5);
 }
 
-
+//
+// plotStackedArea
+//
+// Similar to plotLine
+//
 function plotStackedArea(data, x, y, parentElem) {
 
     var color = data.color;
@@ -124,6 +181,55 @@ function plotStackedArea(data, x, y, parentElem) {
 	.style("stroke-opacity", 1);
 }
 
+//
+// plotBars
+//
+// INPUT
+//   data - The data to plot (list of objects w. x and y fields).
+//   x - The x scale (d3 scale).
+//   y - The y scale (d3 scale).
+//   xMargin - The spacing below the x-axis (int).
+//   index - The histogram index (int).
+//   N - The total number of histograms (int).
+//   barWidth - The computed bar width (int).
+//   parentElem - The parent element of the graph (d3 SVG elem)
+//
+// OUTPUT
+//   Nothing, but the graph will be added as a child to parentElem.
+//
+function plotBars(data, x, y, xMargin, index, N, barWidth, parentElem) {
+
+    var color = data.color;
+
+    var outerPad = CONST.BarsOuterPad;
+    var innerPad = CONST.BarsInnerPad;
+
+    parentElem.append("svg:g").selectAll("rect")
+	.data(data.values)
+	.enter().append("rect")
+	.attr("x", function(d) { return outerPad + innerPad + (barWidth-2*outerPad) * index / N + x(d.x); })
+	.attr("y", function(d) {return -1 * y(d.y);})
+	.attr("height", function(d) {return y(d.y)-xMargin;})
+	.attr("width", (barWidth - 2*outerPad) / N - (2*innerPad)) 
+	.style("stroke", "rgb(0,0,0)")
+        .style("fill", color)
+        .style("fill-opacity", 1);
+}
+
+//
+// plotBars
+//
+// INPUT
+//   data - The data to plot (list of objects w. x and y fields).
+//   x - The x scale (d3 scale).
+//   y - The y scale (d3 scale).
+//   xMargin - The spacing below the x-axis (int).
+//   barWidth - The computed bar width (int).
+//   parentElem - The parent element of the graph (d3 SVG elem)
+//
+// OUTPUT
+//   Nothing, but the graph will be added as a child to parentElem.
+//
 function plotStackedBars(data, x, y, xMargin, barWidth, parentElem) {
 
     var color = data.color;
@@ -141,25 +247,26 @@ function plotStackedBars(data, x, y, xMargin, barWidth, parentElem) {
 
 }
 
-function plotBars(data, x, y, xMargin, index, N, barWidth, parentElem) {
 
-    var color = data.color;
-
-    var outerPad = 4;
-    var innerPad = -2;
-
-    parentElem.append("svg:g").selectAll("rect")
-	.data(data.values)
-	.enter().append("rect")
-	.attr("x", function(d) { return outerPad + innerPad + (barWidth-2*outerPad) * index / N + x(d.x); })
-	.attr("y", function(d) {return -1 * y(d.y);})
-	.attr("height", function(d) {return y(d.y)-xMargin;})
-	.attr("width", (barWidth - 2*outerPad) / N - (2*innerPad)) 
-	.style("stroke", "rgb(0,0,0)")
-        .style("fill", color)
-        .style("fill-opacity", 1);
-}
-
+//
+// plot
+//
+// Plots a graph
+//
+// INPUT
+//   data - The data to plot (list of objects w. x and y fields).
+//   x - The x scale (d3 scale).
+//   y - The y scale (d3 scale).
+//   xMargin - The spacing below the x-axis (int).
+//   index - The histogram index (int).
+//   N - The total number of histograms (int).
+//   barWidth - The computed bar width (int).
+//   parentElem - The parent element of the graph (d3 SVG elem)
+//   type - The graph type ('l', 'a', 'sa', 'gb', 'sb').
+//
+// OUTPUT
+//   Nothing, but the graph will be added as a child to parentElem.
+//
 function plot(data, x, y, xMargin, index, N, barWidth, parentElem, type) {
     switch(type) {
     case 'l' : plotLine(data, x, y, parentElem); break;
@@ -170,15 +277,34 @@ function plot(data, x, y, xMargin, index, N, barWidth, parentElem, type) {
     }
 }
 
-function grid(x, xTicks, y, xMargin, yMargin, barWidth, w, h, parentElem) {
+//
+// grid
+//
+// Add an underlying grid to a graph
+//
+// INPUT
+//   t - A scale from dates to screen X-coordinates (d3 scale).
+//   tTicks - The desired number of ticks on the x-axis (int).
+//   y - A scale from counts to screen Y-coordinates (d3 scale).
+//   xMargin -int
+//   yMargin - int
+//   barWidth - int
+//   w - int
+//   h - int
+//   parentElem - The SVG element where the grid should be appended (d3 SVG elem)
+//
+// OUTPUT
+//   Nothing, but grid will be appended to parentElem.
+// 
+function grid(t, tTicks, y, xMargin, yMargin, barWidth, w, h, parentElem) {
     var rules = parentElem.selectAll("g.xRule")
-	.data(x.ticks(xTicks))
+	.data(t.ticks(tTicks))
 	.enter().append("g")
 	.attr("class", "xRule");
     
     rules.append("line")
-	.attr("x1", x)
-	.attr("x2", x)
+	.attr("x1", t)
+	.attr("x2", t)
 	.attr("y1", - xMargin)
 	.attr("y2", xMargin - h);
 
@@ -194,6 +320,10 @@ function grid(x, xTicks, y, xMargin, yMargin, barWidth, w, h, parentElem) {
 	.attr("x2", w - yMargin);
 }
 
+// 
+// gridBar
+//
+// same as grid.
 function gridBar(y, yMargin, w, barWidth, parentElem) {
     rules = parentElem.selectAll("g.yRule")
 	.data(y.ticks(10))
@@ -207,7 +337,21 @@ function gridBar(y, yMargin, w, barWidth, parentElem) {
 	.attr("x2", w - yMargin + barWidth);
 }
 
-
+//
+// axis
+//
+// Add axis to a graph.
+//
+// INPUT
+//   x - d3 scale
+//   y - d3 scale
+//   t - d3 scale
+//   tFormat - int
+//   tTicks - int
+//   yMargin - int
+//   barWidth - int
+//   lbl - Label for the y-axis (string).
+//   parentElem - d3 SVG elem.
 function axis(x, y, t, tFormat, tTicks, yMargin, barWidth, lbl, parentElem) {
     parentElem.append("svg:line")
 	.attr("x1", x(0))
@@ -264,7 +408,10 @@ function axis(x, y, t, tFormat, tTicks, yMargin, barWidth, lbl, parentElem) {
 	.attr("x2", x(0));
 }
 
-
+//
+// axisBars
+//
+// see axis
 function axisBars(x, y, t, tFormat, tTicks, yMargin, barWidth, lbl, parentElem) {
 
     var barWidth2 = barWidth / 2;
@@ -326,7 +473,16 @@ function axisBars(x, y, t, tFormat, tTicks, yMargin, barWidth, lbl, parentElem) 
 	.attr("x2", x(0))
 }
 
-
+//
+// stack
+//
+// stack computes the baseline values (y0) for a set of histograms.
+//
+// INPUT
+//   datum - List of list of objects w fields x, y and y0.
+//
+// OUTPUT
+//   None, but datum may change.
 function stack(datum) {
     var stack = d3.layout.stack()
 	.values(function(d) { return d.values; })

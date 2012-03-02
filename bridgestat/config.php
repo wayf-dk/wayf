@@ -8,7 +8,7 @@ $config = array(
 		
 		//Database information
 		'dbHost' => '127.0.0.1',
-		'dbName' => 'logstat2',
+		'dbName' => 'logstat3',
 		'dbUser' => 'root',
 		'dbPwd' => 'sdflkj',
 		
