@@ -1,0 +1,25 @@
+line {
+    stroke: #000000;
+}
+
+text {
+    font-family: verdana;
+    font-size: 9pt;
+    font-weight: normal;
+    font-style: normal;
+    fill: #006600;
+    stroke: none;
+}
+
+.check {
+    opacity : 0;
+}
+
+.checked {
+    opacity : 1;
+}
+
+.mothbox {
+    stroke : #006600;
+    fill: #EEEEEE;
+}
