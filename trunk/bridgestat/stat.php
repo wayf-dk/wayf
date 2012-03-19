@@ -18,14 +18,10 @@ if($config['requireAuth']) {
   }
   $lang = getAttribute('preferredLanguage', 'en', array('en', 'da'));
   $eppn = getAttribute('eduPersonPrincipalName', false, false);
-}
-else {
-  $lang = 'en';
-  $eppn = 'fmma@itu.dk';
+  $eppn = $eppn[0];
 }
 
 $L = $language[$lang];
-
 
 //Get GET variables
 if(isset($_GET['idp'])) {
@@ -50,6 +46,9 @@ else {
 }
 
 $sameProviders = getSameProviders($lang, $eppn);
+if (empty($sameProviders)) {
+    die('You do not have access to this entity');
+}
 if(!$provider)
   $provider = $sameProviders[0]['idint'];
 $role = getRole($eppn, $provider);
@@ -68,7 +67,7 @@ dbClose();
 //
 function getMaxDateRange($provider) {
   $sql = <<<EOD
-    SELECT MIN(UNIX_TIMESTAMP(date)), MAX(UNIX_TIMESTAMP(date))
+    SELECT MIN(date), MAX(date)
     FROM log
 EOD;
 
@@ -79,8 +78,8 @@ EOD;
     internalError("Failed to retrieve date range: ".mysql_error());
   }
   else{
-    $s = $row[0];
-    $e = $row[1];
+    $s = strtotime($row[0]);
+    $e = strtotime($row[1]);
     $ret = array($s, $e);
     return $ret;
   }
