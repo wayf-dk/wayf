@@ -31,7 +31,6 @@ if (!$dbhandle) die ($error);
 
 //Sanitize, use PDO prepared statements.
 $query = "SELECT * FROM Tabs WHERE tabid IN (SELECT tabid FROM Access where (iid = '$iid' OR iid IS NULL) AND (role = '$role' OR role IS NULL) AND (uid = '$uid' OR uid IS NULL));";
-$query = "SELECT * FROM Tabs;";
 
 $result = sqlite_query($dbhandle, $query);
 if (!$result) die("Cannot execute query.");
