@@ -712,7 +712,8 @@ function repaintMothView() {
 
     var sameOffsetY, othersOffestY;
 
-    var wayfH = Math.max(CONST.wayfHFactor * Math.max(othersShown, sameShown), boxH);
+    //var wayfH = Math.max(CONST.wayfHFactor * Math.max(othersShown, sameShown), boxH);
+    var wayfH = CONST.providerBoxH;
 
     if(sameShown < CONST.entitiesToShow) {
 	sameOffsetY = wayfY + wayfH/2 - boxH/2 - ((sameShown - 1) / 2 * (rowGap + boxH));
@@ -1043,7 +1044,7 @@ function repaintMothView() {
     var rightShown = idpMode ? sameShown : othersShown;
 
     x = idpMode ? 1 : 0;
-
+/*
     var diagonal = d3.svg.diagonal()
 	.projection(function(d) { return [d.y, d.x];})
 
@@ -1082,8 +1083,7 @@ function repaintMothView() {
 	.enter().append("path")
 	.attr("class", "link")
 	.attr("d", diagonal);
-
-    /*
+*/
     gLeft.selectAll("line")
 	.data(lRange)
 	.enter().append("line")
@@ -1103,7 +1103,6 @@ function repaintMothView() {
 
     gSame.selectAll("line")
 	.attr("y1", function(i) {return sameOffsetY + boxH / 2 + i*(boxH + rowGap);})
-*/
     return;
 }
 
