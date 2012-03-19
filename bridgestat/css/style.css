@@ -1,3 +1,6 @@
+html {
+    font-family: verdana;
+}
 
 .area {
   fill: lightsteelblue;
@@ -11,7 +14,7 @@ path {
 }
  
 line {
-    stroke: black;
+    stroke: #060;
 }
 
 h1 {
@@ -59,6 +62,7 @@ text {
     background: #eee;
     color: #060;
     border: 1px solid #ccc;
+    font-size: 12px;
 }
 
 #graphDiv {
@@ -125,7 +129,7 @@ div {
 }
 #widgetField span	{
 	font-size: 12px;
-	color: #000;
+	color: #060;
 	position: absolute;
 	top: 0;
 	height: 26px;
@@ -296,7 +300,7 @@ td.datepickerNotInMonth a {
 	color: #000;
 }
 tbody.datepickerDays td.datepickerSelected{
-	background: #fff;
+	background: #CCCCFF;
 }
 tbody.datepickerDays td.datepickerNotInMonth.datepickerSelected {
 	background: #fff;
