@@ -45,7 +45,7 @@ function internalError($errMsg) {
 // OUTPUT
 //   Nothing.
 function logSQL($sql) {
-  $fh = fopen('/var/www/stat/log/sql.log', 'a');
+  $fh = fopen('/home/test/newstat/www/log/sql.log', 'a');
 
   if($fh) {
 
@@ -218,6 +218,3 @@ EOD;
   }
   return $ret;
 }
-
-
-?>
