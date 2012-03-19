@@ -111,7 +111,7 @@ function dbHistogram($start, $end, $gran, $timezone, $idps, $sps, $idpe, $spe) {
   $idpe = $idpe == '1';
   $spe = $spe == '1';
 
-  $select = 'SELECT UNIX_TIMESTAMP(date), COUNT(*) FROM log ';
+  $select = 'SELECT date, COUNT(*) FROM log ';
 
   // Make a selection over a date range
   $w = " WHERE date BETWEEN FROM_UNIXTIME($start) AND FROM_UNIXTIME($end)";
@@ -366,7 +366,7 @@ function equalBins($dt, $start, $end, $timezoneOffset, $dbResult) {
   $index = 0;
   $binerr = 0;
   while ($row = mysql_fetch_array($dbResult, MYSQL_NUM)) {
-    $index = dateToBin($row[0], $dt, $start, $timezoneOffset);
+    $index = dateToBin(strtotime($row[0]), $dt, $start, $timezoneOffset);
     if($bins[$index] != 0) {
       $binerr++;
     }
@@ -451,7 +451,7 @@ function histBins($binBounds, $nBins, $dbResult) {
 
   $index = 0;
   while ($row = mysql_fetch_array($dbResult, MYSQL_NUM)) {
-    $index = timestampToBin($row[0], $binBounds, $index, $nBins);
+    $index = timestampToBin(strtotime($row[0]), $binBounds, $index, $nBins);
     $bins[$index] += $row[1];
   }
   return $bins;
