@@ -9,13 +9,13 @@ html {
 
 path {
     stroke: #060;
-    stroke-width: 1px;
+    stroke-width: 3px;
     fill: none;
 }
  
 line {
     stroke: #060;
-    stroke-width: 2px;
+    stroke-width: 1px;
 }
 
 h1 {
