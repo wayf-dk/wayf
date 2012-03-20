@@ -19,6 +19,7 @@ if($config['requireAuth']) {
   }
   $lang = getAttribute('preferredLanguage', 'en', array('en', 'da'));
   $eppn = getAttribute('eduPersonPrincipalName', false, false);
+  $eppn = $eppn[0];
 }
 else {
   $lang = 'da';
