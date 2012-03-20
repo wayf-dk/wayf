@@ -15,6 +15,7 @@ path {
  
 line {
     stroke: #060;
+    stroke-width: 2px;
 }
 
 h1 {
