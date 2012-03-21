@@ -1,15 +1,10 @@
 <?php
-
-require_once('config.php');
-require_once('sporto.php');
-require_once('language.php');
-require_once('prelude.php');
-
-global $config;
-global $language;
+require_once('../../config/config.php');
+require_once('../../lib/sporto.php');
+require_once('../../lib/language.php');
+require_once('../../lib/prelude.php');
 
 session_start();
-
 
 if($config['requireAuth']) {
   if(!isset($_SESSION['SAML'])) {
@@ -20,10 +15,6 @@ if($config['requireAuth']) {
   $lang = getAttribute('preferredLanguage', 'en', array('en', 'da'));
   $eppn = getAttribute('eduPersonPrincipalName', false, false);
   $eppn = $eppn[0];
-}
-else {
-  $lang = 'da';
-  $eppn = 'fmma@itu.dk';
 }
 
 $L = $language[$lang];
@@ -64,10 +55,7 @@ else {
 }
 
 mysql_close($dbConnection);
-
-
 ?>
-
 <html>
 <head>
 <script type = "text/javascript">
