@@ -1,5 +1,4 @@
 <?php
-
 //
 // accessDenied
 //
@@ -11,10 +10,10 @@
 // OUTPUT
 //   Nothing.
 function accessDenied($errMsg) {
-  $protocol = (isset($_SERVER['SERVER_PROTOCOL']) ? $_SERVER['SERVER_PROTOCOL'] : 'HTTP/1.0');
-  header("$protocol 401 Access Denied");
-  echo("Access Denied: $errMsg");
-  exit(0);
+    $protocol = (isset($_SERVER['SERVER_PROTOCOL']) ? $_SERVER['SERVER_PROTOCOL'] : 'HTTP/1.0');
+    header("$protocol 401 Access Denied");
+    echo("Access Denied: $errMsg");
+    exit(0);
 }
 
 //
@@ -28,10 +27,10 @@ function accessDenied($errMsg) {
 // OUTPUT
 //   Nothing.
 function internalError($errMsg) {
-  $protocol = (isset($_SERVER['SERVER_PROTOCOL']) ? $_SERVER['SERVER_PROTOCOL'] : 'HTTP/1.0');
-  header("$protocol 500 Internal Server Error");
-  echo("ERR: $errMsg");
-  exit(0);
+    $protocol = (isset($_SERVER['SERVER_PROTOCOL']) ? $_SERVER['SERVER_PROTOCOL'] : 'HTTP/1.0');
+    header("$protocol 500 Internal Server Error");
+    echo("ERR: $errMsg");
+    exit(0);
 }
 
 //
@@ -45,15 +44,15 @@ function internalError($errMsg) {
 // OUTPUT
 //   Nothing.
 function logSQL($sql) {
-  $fh = fopen('/home/test/newstat/log/sql.log', 'a');
+    $fh = fopen('/home/test/newstat/log/sql.log', 'a');
 
-  if($fh) {
+    if($fh) {
 
-    fwrite($fh, $sql);
-    fwrite($fh, "\n\n");
-    
-    fclose($fh);
-  }
+        fwrite($fh, $sql);
+        fwrite($fh, "\n\n");
+
+        fclose($fh);
+    }
 }
 
 //
@@ -64,14 +63,14 @@ function logSQL($sql) {
 // $dbConnection.
 //
 function dbConnect() {
-  global $config, $dbConnection;
+    global $config, $dbConnection;
 
-  $dbConnection = mysql_connect($config['dbHost'], $config['dbUser'], $config['dbPwd']);
-  if (!$dbConnection)  {
-    internalError("Failed to connect to database: ".mysql_error());
-  }
+    $dbConnection = mysql_connect($config['dbHost'], $config['dbUser'], $config['dbPwd']);
+    if (!$dbConnection)  {
+        internalError("Failed to connect to database: ".mysql_error());
+    }
 
-  mysql_select_db($config['dbName'], $dbConnection);
+    mysql_select_db($config['dbName'], $dbConnection);
 }
 
 //
@@ -79,10 +78,10 @@ function dbConnect() {
 // $dbConnection, but only if it has been opened.
 //
 function dbClose() {
-  global $dbConnection;
-  
-  if($dbConnection)
-    mysql_close($dbConnection);
+    global $dbConnection;
+
+    if($dbConnection)
+        mysql_close($dbConnection);
 }
 
 //
@@ -98,25 +97,25 @@ function dbClose() {
 //
 function dbQuery($sql) {
 
-  //TODO sanitize sql.
-  // Use PDO, prepared statements
+    //TODO sanitize sql.
+    // Use PDO, prepared statements
 
-  global $dbConnection;
+    global $dbConnection;
 
-  if(!$dbConnection){
-    error_log("connect!");
-    dbConnect();
-  }
+    if(!$dbConnection){
+        error_log("connect!");
+        dbConnect();
+    }
 
-  logSQL($sql);
+    logSQL($sql);
 
-  $dbResult = mysql_query($sql);
-  if($dbResult) {
-    return $dbResult;
-  }
-  else {
-    internalError("Database query failed. Query: $sql \n mysql_error(): " . mysql_error());
-  }
+    $dbResult = mysql_query($sql);
+    if($dbResult) {
+        return $dbResult;
+    }
+    else {
+        internalError("Database query failed. Query: $sql \n mysql_error(): " . mysql_error());
+    }
 }
 
 //
@@ -135,32 +134,32 @@ function dbQuery($sql) {
 // OUTPUT
 //   A SAML attribute value (string)
 function getAttribute($key, $default, $allowedValues) {
-  $saml = $_SESSION['SAML'];
-  if(isset($saml[$key])) {
-    $ret = $saml[$key];
-    if($allowedValues) {
-      if(in_array($ret, $allowedValues)) {
-	return $ret;
-      }
-      else {
-	if($default) {
-	  return $default;
-	}
-	else {
-	  internalError("Attribute value not allowed $key => $value");
-	}
-      }
+    $saml = $_SESSION['SAML'];
+    if(isset($saml[$key])) {
+        $ret = $saml[$key];
+        if($allowedValues) {
+            if(in_array($ret, $allowedValues)) {
+                return $ret;
+            }
+            else {
+                if($default) {
+                    return $default;
+                }
+                else {
+                    internalError("Attribute value not allowed $key => $value");
+                }
+            }
+        }
+        else {
+            return $ret;
+        }
+    }
+    if($default) {
+        return $default;
     }
     else {
-      return $ret;
+        internalError("Missing attribute " . $key);
     }
-  }
-  if($default) {
-    return $default;
-  }
-  else {
-    internalError("Missing attribute " . $key);
-  }
 }
 
 //
@@ -175,21 +174,21 @@ function getAttribute($key, $default, $allowedValues) {
 // 
 function getRole($eppn, $provider) {
 
-  $sql = <<<EOD
+    $sql = <<<EOD
     SELECT role 
     FROM access
     WHERE eppn = '$eppn' AND eid = '$provider'
 EOD;
 
-  $dbResult = dbQuery($sql);
-  
-  $row = mysql_fetch_array($dbResult, MYSQL_NUM);
-  if(!$row) {
-    accessDenied("You are not authorized to view this entity.");
-  }
-  else {
-    return $row[0];
-  }
+    $dbResult = dbQuery($sql);
+
+    $row = mysql_fetch_array($dbResult, MYSQL_NUM);
+    if(!$row) {
+        accessDenied("You are not authorized to view this entity.");
+    }
+    else {
+        return $row[0];
+    }
 }
 
 //
@@ -205,16 +204,16 @@ EOD;
 //   and the second is a role ('admin' or 'viewer').
 // 
 function getDelegatedEntities($entity) {
-  $sql = <<<EOD
+    $sql = <<<EOD
     SELECT eppn, role
     FROM access
     WHERE eid = '$entity'
 EOD;
-  $dbResult = dbQuery($sql);
+    $dbResult = dbQuery($sql);
 
-  $ret = array();
-  while($row = mysql_fetch_array($dbResult, MYSQL_NUM)) {
-    $ret[] = $row;
-  }
-  return $ret;
+    $ret = array();
+    while($row = mysql_fetch_array($dbResult, MYSQL_NUM)) {
+        $ret[] = $row;
+    }
+    return $ret;
 }
