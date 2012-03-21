@@ -1017,7 +1017,7 @@ function repaintMothView() {
 	x = gSame.select(".selected");
 	
 	y = x.append('svg:a')
-	    .attr('xlink:href', 'admin.php?eid=' + mainProvider)
+	    .attr('xlink:href', 'admin/index.php?eid=' + mainProvider)
 	    .attr('target', '_blank')
 	    .append('svg:text')
 	    .attr('y', CONST.boxTextY)

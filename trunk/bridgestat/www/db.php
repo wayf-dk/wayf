@@ -1,9 +1,6 @@
 <?php
-
-require_once('config.php');
-require_once('prelude.php');
-//global $dbConnection;
-//unset($dbConnection);
+require_once('../config/config.php');
+require_once('../lib/prelude.php');
 
 //TODO use value from config
 $MAX_NUMBER_OF_BINS = 10000;

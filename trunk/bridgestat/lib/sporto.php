@@ -1,5 +1,4 @@
 <?php
-
 /**
  * sporto.php is a minimal sp php implementation for use in a hub federation as wayf.dk.
  * It 'embeds' the information needed to:
@@ -47,7 +46,6 @@ function sporto($config, $providerids = array()) {
     	$xp->registerNamespace('ds', 'http://www.w3.org/2000/09/xmldsig#');
     	$xp->registerNamespace('samlp', 'urn:oasis:names:tc:SAML:2.0:protocol');
     	$xp->registerNamespace('saml', 'urn:oasis:names:tc:SAML:2.0:assertion');
-		#verifySignature($config->idp_certificate, $xp, false);
 		verifySignature($config->idp_certificate, $xp, true);
 		verifyTimingEtc($config, $xp);
 		return extractAttributes($xp);
@@ -112,12 +110,10 @@ function verifySignature($publicKey, $xp, $assertion = true)
 	if ($assertion) $context = $xp->query('/samlp:Response/saml:Assertion')->item(0);
 	else $context = $xp->query('/samlp:Response')->item(0);
 
-
 	//validateElement($context);
 
     $signatureValue = base64_decode($xp->query('ds:Signature/ds:SignatureValue', $context)->item(0)->textContent);
     $digestValue    = base64_decode($xp->query('ds:Signature/ds:SignedInfo/ds:Reference/ds:DigestValue', $context)->item(0)->textContent);
-    #print_r(base64_encode($signatureValue)); exit;
 	$id = $xp->query('@ID', $context)->item(0)->value;
 
     $signedElement  = $context;
@@ -125,7 +121,6 @@ function verifySignature($publicKey, $xp, $assertion = true)
     $signedInfo     = $xp->query("ds:SignedInfo", $signature)->item(0)->C14N(true, false);
     $signature->parentNode->removeChild($signature);
     $canonicalXml = $signedElement->C14N(true, false);
-    #print_r($canonicalXml); exit;
 
     $publicKey = openssl_get_publickey("-----BEGIN CERTIFICATE-----\n" . chunk_split($publicKey, 64) . "-----END CERTIFICATE-----");
 

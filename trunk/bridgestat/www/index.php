@@ -1,8 +1,8 @@
 <?php
-require_once('config.php');
-require_once('sporto.php');
-require_once('language.php');
-require_once('prelude.php');
+require_once('../config/config.php');
+require_once('../lib/sporto.php');
+require_once('../lib/language.php');
+require_once('../lib/prelude.php');
 
 global $config;
 global $language;
