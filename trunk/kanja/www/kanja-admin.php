@@ -49,7 +49,6 @@ $msg = '';
 if ($action == 'add') {
 	$query = "INSERT INTO Tabs VALUES ('$id', '$name', '$url')";
 	$result = sqlite_query($dbhandle, $query);
-    var_dump(sqlite_error_string(sqlite_last_error($dbhandle)));
 	if (!$result) {
 		$err = true;
 	}
