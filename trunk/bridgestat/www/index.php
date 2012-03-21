@@ -4,9 +4,6 @@ require_once('../lib/sporto.php');
 require_once('../lib/language.php');
 require_once('../lib/prelude.php');
 
-global $config;
-global $language;
-
 session_start();
 
 //Perform authentication and get SAML attributes
@@ -157,8 +154,6 @@ EOD;
 }
 
 ?>
-
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html>
 
@@ -219,11 +214,8 @@ providerBoxW : 350
 , BarsOuterPad : 4
 , BarsInnerPad : -2
 };
-
     </script>
-    
   </head>
-  
   <body onload="main();">
   <h1> WAYF Statitistics </h1>
     <div id = "toolsDiv">
@@ -266,5 +258,4 @@ providerBoxW : 350
     <div id='mothDiv'>
     </div>
   </body>
-  
 </html>
