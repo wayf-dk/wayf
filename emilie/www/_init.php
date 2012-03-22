@@ -9,7 +9,7 @@ define('STATUS', 'development');
 
 // Set error logging
 ini_set('log_errors', TRUE);
-ini_set('error_log', LOGROOT . 'catapillar_error.log');
+ini_set('error_log', LOGROOT . 'emilie_error.log');
 ini_set('error_reporting', -1);
 
 // Disable magic_quotes_*
@@ -42,18 +42,7 @@ include ROOT . 'lib' . DIRECTORY_SEPARATOR . 'WAYF' . DIRECTORY_SEPARATOR . 'Aut
 $classLoader = new \WAYF\AutoLoader('WAYF', ROOT . 'lib');
 $classLoader->register();
 
-//$jakob_config = \WAYF\Configuration::getConfig();
-//$logger = \WAYF\LoggerFactory::createInstance($jakob_config['logger']);
-//$template = new \WAYF\Template();
-
-// Set exception handler
-//$exceptionHandler = new \WAYF\ExceptionHandler();
-//$exceptionHandler->setLogger($logger);
-//set_exception_handler(array($exceptionHandler, 'handleException'));
-
-// Set error handler
-//$errorHandler = new \WAYF\ErrorHandler();
-//set_error_handler(array($errorHandler, 'handleError'));
+include CONFIGROOT . 'config.php';
 
 // Start session
 session_start();

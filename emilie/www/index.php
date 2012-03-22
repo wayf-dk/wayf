@@ -1,11 +1,16 @@
 <?php
 include '_init.php';
 
-$orderby = "name_en";
+// Get order field
+$allowed_order = array('name_en', 'name_da');
+$order = "name_en";
 if (isset($_GET['o'])) {
-    $orderby = $_GET['o'];
+    if (in_array($_GET['o'], $allowed_order)) {
+        $order = $_GET['o'];
+    }
 }
 
+// Get operating mode SP og IdP
 $rElmData = array(array('id' => 'newidp', 'name' => 'New Service'));
 $type = 'sp';
 if (isset($_GET['t'])) {
@@ -20,11 +25,12 @@ if (isset($_GET['t'])) {
     }
 }
 
+// Get data from database
 try {
-    $db = new \WAYF\DB('mysql:dbname=butterfly;host=127.0.0.1', 'butterfly', 'Veh19My28');
+    $db = new \WAYF\DB($emilie_config['database']['dsn'], $emilie_config['database']['user'], $emilie_config['database']['pass']);
 
-    $query = "select * from entities where sporidp = '" . $type . "' ORDER BY " . $orderby;
-    $res = $db->fetch_all($query);
+    $query = "SELECT * FROM `" . $emilie_config['database']['table'] . "` WHERE `sporidp` = :type ORDER BY `" . $order . "`;";
+    $res = $db->fetch_all($query, array(':type' => $type));
 
     $data = array();
     foreach ($res AS $key => $val) {
@@ -35,11 +41,11 @@ try {
         }
     }
     foreach ($res AS $key => $val) {
-        $val->name = $val->name_en . " [" . $val->integration_costs . "]";
+        $val->name = $val->{$order} . " [" . $val->integration_costs . "]";
     }
 } catch (\PDOException $e) {
-    var_dump($e);
-    exit;
+    // Something went horrible wrong
+    die('Something went wrong. Try again or contact system administrator');
 }
 ?>
 <!DOCTYPE html>
