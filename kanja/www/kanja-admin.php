@@ -109,18 +109,39 @@ sqlite_close($dbhandle);
                 $('#action').val('addAccess');
             }
         </script>
+        <style type="text/css">
+            body { 
+                font-family: Arial;
+                font-size: 13px;
+                color: #006600;
+            }
+            h3 {
+                color: #006600;
+            }
+            th {
+                text-align: left;
+                border-bottom: 2px solid #006600;
+            }
+            table {
+                border: 1px solid #006600;
+                border-spacing:0px;
+            }
+            td {
+                border-bottom: 1px solid #006600;
+            }
+        </style>
     </head>
     <body>
         <form method="post">
             <input type="hidden" name="action" id="action" />
             <input type="hidden" name="arg" id="arg" />
             <h3> Tabs </h3>
-            <table>
+            <table cellspacing="0">
                 <tr>
-                    <th> ID </th>
-                    <th> Name </th>
+                    <th> Tab-ID </th>
+                    <th> Tab title </th>
                     <th> URL </th>
-                    <th> Delete </th>
+                    <th></th>
                 </tr>
                 <?foreach($tapas as $tab) {?>
                 <tr>
@@ -130,6 +151,7 @@ sqlite_close($dbhandle);
                     <td> <button onClick="del('<?echo $tab[0];?>');"> Delete </button> </td>
                 </tr>
                 <?}?>
+                <tr><td colspan="4" style="height: 10px;"></td></tr>
                 <tr>
                     <td> <input name="id" value="<?echo $id;?>" /> </td>
                     <td> <input name="name" value="<?echo $name;?>" /> </td>
@@ -140,11 +162,11 @@ sqlite_close($dbhandle);
             <h3> Access Rights </h3>
             <table>
                 <tr>
-                    <th> Institution </th>
-                    <th> Role </th>
-                    <th> Username </th>
-                    <th> Tab ID </th>
-                    <th> Delete </th>
+                    <th> Institution<br />(schacHomeOrganization)</th>
+                    <th> Role<br />(primaryAffiliation)</th>
+                    <th> Username<br />(eduPersonPrincipalName)</th>
+                    <th> Tab-ID </th>
+                    <th> </th>
                 </tr>
                 <?foreach($access as $row) {?>
                 <tr>
@@ -155,6 +177,7 @@ sqlite_close($dbhandle);
                     <td> <button onClick="delAccess(<?echo $row[4];?>);"> Delete </button> </td>
                 </tr>
                 <?}?>
+                <tr><td colspan="5" style="height: 10px;"></td></tr>
                 <tr>
                     <td> <input name="iid" value="<?echo $iid;?>" /> </td>
                     <td> <input name="role" value="<?echo $role;?>" /> </td>
