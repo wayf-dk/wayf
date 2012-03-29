@@ -11,17 +11,18 @@ if (isset($_GET['o'])) {
 }
 
 // Get operating mode SP og IdP
-$rElmData = array(array('id' => 'newidp', 'name' => 'New Service'));
+$rElmData = array(array('id' => 'newidp', 'name' => 'New Institution'));
 $type = 'sp';
 if (isset($_GET['t'])) {
     switch ($_GET['t']) {
+    case 'sp':
+        $type = 'idp';
+        $rElmData = array(array('id' => 'newidp', 'name' => 'New Service'));
+        break;
     case 'idp':
+    default:
         $type = 'sp';
         $rElmData = array(array('id' => 'newidp', 'name' => 'New Institution'));
-        break;
-    case 'sp':
-    default:
-        $type = 'idp';
     }
 }
 
