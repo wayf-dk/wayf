@@ -70,7 +70,9 @@ try {
             // Config
             var mothconfig = {
                 boxW : 450,
-                wayfY: 5
+                wayfY: 5,
+                leftLink: false,
+                rightLink: false
             };
 
             var calcCost = function() {
