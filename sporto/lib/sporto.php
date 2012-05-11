@@ -111,7 +111,7 @@ eof;
         $signature->parentNode->removeChild($signature);
         $canonicalXml = $signedElement->C14N(true, false);
 
-        $publicKey = openssl_get_publickey("-----BEGIN CERTIFICATE-----\n" . chunk_split($this->idp_certificate, 64) . "-----END CERTIFICATE-----");
+        $publicKey = openssl_get_publickey("-----BEGIN CERTIFICATE-----\n" . chunk_split($this->config['idp_certificate'], 64) . "-----END CERTIFICATE-----");
 
         // Verify signature
         if (!((sha1($canonicalXml, TRUE) == $digestValue) && openssl_verify($signedInfo, $signatureValue, $publicKey) == 1)) {
