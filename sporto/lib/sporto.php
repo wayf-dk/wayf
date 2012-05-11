@@ -114,8 +114,8 @@ eof;
         $publicKey = openssl_get_publickey("-----BEGIN CERTIFICATE-----\n" . chunk_split($this->config['idp_certificate'], 64) . "-----END CERTIFICATE-----");
 
         // Verify signature
-        if (!((sha1($canonicalXml, TRUE) == $digestValue) && openssl_verify($signedInfo, $signatureValue, $publicKey) == 1)) {
-            throw new Exception('Error verifying incoming SAMLResponse' . PHP_EOL . openssl_error_string() . PHP_EOL . 'SAMLResponse: ' . print_r(htmlspecialchars($canonicalXml), 1));
+        if (!((sha1($canonicalXml, TRUE) == $digestValue) && @openssl_verify($signedInfo, $signatureValue, $publicKey) == 1)) {
+            throw new Exception('Error verifying incoming SAMLResponse');
         }
     }
 
