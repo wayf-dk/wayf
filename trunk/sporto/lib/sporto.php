@@ -62,10 +62,17 @@ class SPorto
 </samlp:AuthnRequest>
 eof;
 
-            // Sign request
+            // Construct request
             $queryString = "SAMLRequest=" . urlencode(base64_encode(gzdeflate($request)));;
             $queryString .= '&SigAlg=' . urlencode('http://www.w3.org/2000/09/xmldsig#rsa-sha1');
+            
+            // Get private key
             $key = openssl_pkey_get_private("-----BEGIN RSA PRIVATE KEY-----\n" . chunk_split($this->config['private_key'], 64) ."-----END RSA PRIVATE KEY-----");
+            if (!$key) {           
+                throw new Exception('Invalid private key used');                                                                             
+            }
+
+            // Sign the request
             $signature = "";
             openssl_sign($queryString, $signature, $key, OPENSSL_ALGO_SHA1);
             openssl_free_key($key);
