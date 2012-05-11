@@ -13,7 +13,7 @@ class SPorto
 {
     private $config = array();
 
-    public __construct($config) {
+    public function __construct($config) {
         $this->config = $config;
     }
     public function authenticate($providerids = array()) {
