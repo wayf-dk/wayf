@@ -71,7 +71,7 @@ eof;
             openssl_free_key($key);
 
             // Send request 
-            header('Location: ' .  $config['sso'] . "?" . $queryString . '&Signature=' . urlencode(base64_encode($signature)));
+            header('Location: ' .  $this->config['sso'] . "?" . $queryString . '&Signature=' . urlencode(base64_encode($signature)));
             exit;
         }
     }
