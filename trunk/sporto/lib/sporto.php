@@ -65,7 +65,7 @@ eof;
             // Sign request
             $queryString = "SAMLRequest=" . urlencode(base64_encode(gzdeflate($request)));;
             $queryString .= '&SigAlg=' . urlencode('http://www.w3.org/2000/09/xmldsig#rsa-sha1');
-            $key = openssl_pkey_get_private("-----BEGIN RSA PRIVATE KEY-----\n" . chunk_split($config['private_key'], 64) ."-----END RSA PRIVATE KEY-----");
+            $key = openssl_pkey_get_private("-----BEGIN RSA PRIVATE KEY-----\n" . chunk_split($this->config['private_key'], 64) ."-----END RSA PRIVATE KEY-----");
             $signature = "";
             openssl_sign($queryString, $signature, $key, OPENSSL_ALGO_SHA1);
             openssl_free_key($key);
