@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <style>
+    body { margin: 0 auto; width: 800px; } 
+    section { display: block; }
+    section#articles { width: 630px; float: left; padding: 10px; background-color: #fbf0cc; }
+    article > header { text-decoration: underline; margin-bottom: 10px; }
+    aside { float: left; width: 130px; padding: 10px; }
+    footer { overflow: hidden; clear: both; text-align: center; padding: 20px; }
+    nav li { float: left; width: 80px; text-align:center; padding: 10px; color: #fff; }
+    nav ul { list-style: none; overflow: hidden; padding: 0; margin: 0; background-color: #424242; }
+    a { color: #65ac1c; }
+    nav li a { color: #fff; }
+    pre {border: 1px solid #AAA; background-color: #FAFAFA; padding: 10px;}
+  </style>
+  </head>
+  <body style="font: 75% Lucida Grande, Trebuchet MS">
+    <header>
+      <hgroup>
+        <h1>SPorto - Simple SAML 2.0 Service Provider</h1>
+      </hgroup>
+    </header>
+    <nav>
+      <ul>
+        <li><a href="#about">About</a></li>
+        <li><a href="#download">Download</a></li>
+        <li><a href="#example">Example</a></li>
+        <li><a href="#config">Config</a></li>
+        <li><a href="#session">Sessions</a></li>
+      </ul>
+    </nav>
+    <section id="articles">
+      <article>
+        <header>
+          <h2><a href="#about" name="about">About</a></h2>
+        </header>
+        <section>
+            <p>SPorto is a minimal SAML Service Provider implemented in PHP for
+            use in a hub'n'spoke federation like WAYF.</p>
+            <p>Core functionallity is:</p>
+            <ul>
+                <li>Send a signed AuthnRequest to an IdP - Only one IdP supported</li>
+                <li>Receive and verify a signed SAMLResponse</li>
+                <li>Accept an optional list of IdP entityID's used for scoping</li>
+            </ul>
+            <p>It returns an array of the attributes in the AttributeStatement of the response.</p>
+        </section>
+      </article>
+      <article>
+        <header>
+          <h2><a href="#download" name="download">Download</a></h2>
+        </header>
+        <section>
+            <p>SPorto can be downloaded from Google Project Hosting via
+            SVN.</p>
+            <pre>svn export http://wayf.googlecode.com/svn/trunk/sporto</pre>
+        </section>
+      </article>
+      <article>
+        <header>
+          <h2><a href="#example" name="example">Example</a></h2>
+        </header>
+        <section>
+            <p>Configuration for SPorto can be placed in a seperate file or in
+            the sporto.php file itself to make SPorto self-contained. in the
+            example below the configuration is placed in a seperate file.</p>
+            <pre>&lt;?php
+session_start();
+include_once('lib/sporto.php');
+include_once('config/sporto_config.php');
+if(!isset($_SESSION['SAML'])) {
+    try {
+        $sporto = new SPorto($sporto_config);
+        $_SESSION['SAML'] = $sporto->authenticate();
+    } catch (Exception $e) {
+        echo $e->getMessage();
+        exit;
+    }
+}</pre>
+        </section>
+      </article>
+      <article>
+        <header>
+          <h2><a href="#config" name="config">Configuration</a></h2>
+        </header>
+        <section>
+            <p>Configuration of SPorto is done by putting the required options
+            into a simple PHP array.</p>
+            <p>The following is a list of all options and they are all
+            required.</p>
+            <ul>
+                <li>idp_certificate - Certificate from IdP</li>
+                <li>sso - SingleSignoOnService URL for IdP</li>
+                <li>private_key - Private key used for signing requests</li>
+                <li>acs -  AssertionConsumerService URL for the SP (SHOULD point to a
+                script that invokes SPorto)</li>
+                <li>entityid - entityId for the SP</li>
+            </ul>
+            <article>
+                <header>
+                <h3><a href="#configexample" name="configexample">Example configuration</a></h3>
+                </header>
+                <section>
+                    <pre>$sporto_config = array(
+    'idp_certificate' => '...',
+    'sso' => '...',
+    'private_key' => '...',
+    'asc' => '...',
+    'entityid' => '...',
+);</pre>
+                </section>
+            </article>
+        </section>
+      </article>
+      <article>
+        <header>
+          <h2><a href="#session" name="session">Session management</a></h2>
+        </header>
+        <section>
+            <p>SPorto does not contain any session management. It is up to the
+            containig application to handle this.
+        </section>
+      </article>
+    </section>
+    <aside>
+      <h2>Links</h2>
+      <ul>
+        <li><a ref="external" target="_blank" href="http://saml.xml.org/saml-specifications">SAML 2.0 Spec</a></li>
+        <li><a ref="external" target="_blank" href="http://code.google.com/p/wayf/">SPorto</a></li>
+        <li><a ref="external" target="_blank" href="http://www.php.net/">PHP</a></li>
+        <li><a ref="external" target="_blank" href="http://www.wayf.dk/">WAYF</a></li>
+      </ul>
+    </aside>
+    <footer>
+      Copyright &copy; 2012 WAYF
+    </footer>
+  </body>
+</html>
