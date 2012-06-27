@@ -1,0 +1,35 @@
+body {
+    background-color: #FFFFFF;
+    font-family: verdana, tahoma, arial, helvetica, sans-serif;
+    font-size: 12px;
+    color: #000000;
+}
+
+div#header {
+    background: url('/images/logo.gif') no-repeat;
+    height: 96px;
+}
+
+div#main {
+    border: 1px solid #7BB84A;
+    padding: 10px;
+    /* For older Firefox */
+    -moz-border-radius: 15px;
+    border-radius: 15px;
+    width: 878px;
+}
+
+.colofon {
+    color: #006600;
+    font-size: 12px;
+    font-style: normal;
+    margin-left: 10px;
+    margin-top: 20px;
+}
+
+.colofonline {
+    background-color: #7BB84A;
+    width: 100px;
+    height: 3px;
+    margin-left: 10px;
+}
