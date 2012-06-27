@@ -41,10 +41,10 @@ include ROOT . 'lib' . DIRECTORY_SEPARATOR . 'WAYF' . DIRECTORY_SEPARATOR . 'Aut
 $classLoader = new \WAYF\AutoLoader('WAYF', ROOT . 'lib');
 $classLoader->register();
 
-
+// Get SPorto configuration
+$sporto_config = \WAYF\Configuration::getConfig('sporto_config.php');
 
 /*
-$jakob_config = \WAYF\Configuration::getConfig();
 $template = new \WAYF\Template();
 try {
     $logger = \WAYF\LoggerFactory::createInstance($jakob_config['logger']);
