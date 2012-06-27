@@ -43,14 +43,16 @@ $classLoader->register();
 
 // Get SPorto configuration
 $sporto_config = \WAYF\Configuration::getConfig('sporto_config.php');
+$config = \WAYF\Configuration::getConfig();
 
-/*
+// Make a template object available
 $template = new \WAYF\Template();
+
 try {
-    $logger = \WAYF\LoggerFactory::createInstance($jakob_config['logger']);
+    $logger = \WAYF\LoggerFactory::createInstance($config['logger']);
 } catch (\WAYF\LoggerException $e) {
-   $data = array('errortitle' => 'Logger could not be initiated', 'errormsg' => $e->getMessage());
-   $template->setTemplate('error')->setData($data)->render();
+    $data = array('errortitle' => 'Logger could not be initiated', 'errormsg' => $e->getMessage());
+    $template->setTemplate('error')->setData($data)->render();
 }
 
 // Set exception handler
@@ -69,14 +71,13 @@ function shutdown() {
     if (!is_null($e)) {
         // Instiansiate all objects to be able to log FATAL errors
         $jakob_config = \WAYF\Configuration::getConfig();
-        $logger = \WAYF\LoggerFactory::createInstance($jakob_config['logger']);
+        $logger = \WAYF\LoggerFactory::createInstance($config['logger']);
         $exceptionHandler = new \WAYF\ExceptionHandler();
         $exceptionHandler->setLogger($logger);
         $exception = new \ErrorException($e['message'], 0, $e['type'], $e['file'], $e['line']);
         $exceptionHandler->handleException($exception);
     }
 }
- */
 
 // Start session
 session_start();

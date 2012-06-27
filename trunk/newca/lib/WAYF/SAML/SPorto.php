@@ -178,7 +178,7 @@ eof;
         }
 
         if (!empty($issues)) {
-            throw new \Exception\SPortoException('Problems detected with response. ' . PHP_EOL. 'Issues: ' . PHP_EOL . implode(PHP_EOL, $issues));
+            throw new \WAYF\Exceptions\SPortoException('Problems detected with response. ' . PHP_EOL. 'Issues: ' . PHP_EOL . implode(PHP_EOL, $issues));
         }
     }
 }
