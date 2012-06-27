@@ -9,6 +9,12 @@
  * 
  * It returns an array of the attributes in the AttributeStatement of the response
  */
+
+/**
+ * @namespace
+ */
+namespace WAYF\SAML;
+
 class SPorto
 {
     private $config = array();
@@ -20,9 +26,9 @@ class SPorto
         if (isset($_POST['SAMLResponse'])) {
             // Handle SAML response
             $message = base64_decode($_POST['SAMLResponse']);
-            $document = new DOMDocument();
+            $document = new \DOMDocument();
             $document->loadXML($message);
-            $xp = new DomXPath($document);
+            $xp = new \DomXPath($document);
             $xp->registerNamespace('ds', 'http://www.w3.org/2000/09/xmldsig#');
             $xp->registerNamespace('samlp', 'urn:oasis:names:tc:SAML:2.0:protocol');
             $xp->registerNamespace('saml', 'urn:oasis:names:tc:SAML:2.0:assertion');
@@ -69,7 +75,7 @@ eof;
             // Get private key
             $key = openssl_pkey_get_private("-----BEGIN RSA PRIVATE KEY-----\n" . chunk_split($this->config['private_key'], 64) ."-----END RSA PRIVATE KEY-----");
             if (!$key) {           
-                throw new Exception('Invalid private key used');                                                                             
+                throw new \Exception\SPortoException('Invalid private key used');                                                                             
             }
 
             // Sign the request
@@ -121,12 +127,12 @@ eof;
         // Get IdP certificate
         $publicKey = openssl_get_publickey("-----BEGIN CERTIFICATE-----\n" . chunk_split($this->config['idp_certificate'], 64) . "-----END CERTIFICATE-----");
         if (!$publicKey) {           
-            throw new Exception('Invalid public key used');                                                                             
+            throw new \Exception\SPortoException('Invalid public key used');                                                                             
         }
 
         // Verify signature
         if (!((sha1($canonicalXml, TRUE) == $digestValue) && @openssl_verify($signedInfo, $signatureValue, $publicKey) == 1)) {
-            throw new Exception('Error verifying incoming SAMLResponse');
+            throw new \Exception\SPortoException('Error verifying incoming SAMLResponse');
         }
     }
 
@@ -172,7 +178,7 @@ eof;
         }
 
         if (!empty($issues)) {
-            throw new Exception('Problems detected with response. ' . PHP_EOL. 'Issues: ' . PHP_EOL . implode(PHP_EOL, $issues));
+            throw new \Exception\SPortoException('Problems detected with response. ' . PHP_EOL. 'Issues: ' . PHP_EOL . implode(PHP_EOL, $issues));
         }
     }
 }
