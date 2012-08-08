@@ -22,6 +22,7 @@ class SPorto
     public function __construct($config) {
         $this->config = $config;
     }
+    
     public function authenticate($providerids = array()) {
         if (isset($_POST['SAMLResponse'])) {
             // Handle SAML response
@@ -34,7 +35,12 @@ class SPorto
             $xp->registerNamespace('saml', 'urn:oasis:names:tc:SAML:2.0:assertion');
             $this->verifySignature($xp, true);
             $this->validateResponse($xp);
-            return $this->extractAttributes($xp);
+
+            // @TODO Add IdP, Authtime??
+            return array(
+                'attributes' => $this->extractAttributes($xp),
+                'response' => $message,
+            );
         } else {
             // Handle SAML request
             $id =  '_' . sha1(uniqid(mt_rand(), true));

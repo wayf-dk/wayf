@@ -41,16 +41,16 @@ foreach ($sps AS $entityid => $data) {
     if ($spconsent) {
         // Services with consent
         $consentservices[$entityid] = array(
-            'name' => $data['name'][$_SESSION['lang']],
-            'description' => $data['description'][$_SESSION['lang']],
+            'name' => $data['name']['da'],
+            'description' => $data['description']['da'],
             'consent' => $spconsent,
             'serviceid' => $consent->getServiceId($entityid),
         );
     } else {
         // Services without consent
         $noconsentservices[$entityid] = array(
-            'name' => $data['name'][$_SESSION['lang']],
-            'description' => $data['description'][$_SESSION['lang']],
+            'name' => $data['name']['da'],
+            'description' => $data['description']['da'],
             'consent' => $spconsent,
             'serviceid' => $consent->getServiceId($entityid),
         );
@@ -67,8 +67,6 @@ uasort($noconsentservices, 'cmpService');
 // Set data to template
 $data['consentservice'] = $consentservices;
 $data['noconsentservice'] = $noconsentservices;
-$data['trans'] = $t;
-$data['lang'] = $_SESSION['lang'];
 
 // Generate output
 $template->setTemplate('consentadmin')->setData($data)->render();

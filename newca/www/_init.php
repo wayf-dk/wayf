@@ -42,7 +42,7 @@ $classLoader = new \WAYF\AutoLoader('WAYF', ROOT . 'lib');
 $classLoader->register();
 
 // Get SPorto configuration
-$sporto_config = \WAYF\Configuration::getConfig('sporto_config.php');
+$sporto_config = \WAYF\Configuration::getConfig('config_sporto.php');
 $config = \WAYF\Configuration::getConfig();
 
 // Make a template object available
@@ -85,13 +85,32 @@ session_start();
 // Protection against session fixation attacks
 session_regenerate_id(true);
 
-// Authenticate user
-if(!isset($_SESSION['SAML'])) {
+// Authenticate user (Session duration is 30 min. hard coded)
+if(!isset($_SESSION['SAML']) || (($_SESSION['SAML']['AuthTime']+1800) < time())) {
+    unset($_SESSION['SAML']);
     try {
         $sporto = new \WAYF\SAML\SPorto($sporto_config);
         $_SESSION['SAML'] = $sporto->authenticate();
+        $_SESSION['SAML']['AuthTime'] = time(); 
     } catch (Exception $e) {
         echo $e->getMessage();
         exit;
     }
+}
+
+// Handle translation
+if (isset($_REQUEST['lang']) && in_array($_REQUEST['lang'], $config['languages'])) {
+    $_SESSION['lang'] = $_REQUEST['lang'];
+} else if (!isset($_SESSION['lang'])) {
+    $_SESSION['lang'] = 'en';
+}
+$t = new \WAYF\Translation($_SESSION['lang']);
+
+
+// For debug purpose ONLY. Delete in production
+function debug($var)
+{
+    echo "<pre>";
+    var_dump($var);
+    echo "</pre>";
 }

@@ -12,5 +12,7 @@
         <link href="/style/main.css" rel="stylesheet" type="text/css" />
     </head>
     <body>
-        <div id="header"></div>
+        <div id="header">
+            <div id="languagebar"><a href="?lang=da">Dansk</a>|<a href="?lang=en">English</a></div>
+        </div>
         <div id="main">
