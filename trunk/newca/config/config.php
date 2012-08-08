@@ -7,13 +7,26 @@
  * @author     Jacob Christiansen <jach@wayf.dk>
  * @copyright  Copyright (c) 2011 Jacob Christiansen, WAYF (http://www.wayf.dk)
  * @license    http://www.opensource.org/licenses/mit-license.php MIT License
- * @version    $Id: config.php 199 2012-01-19 12:14:01Z jach@wayf.dk $
- * @link       $URL: https://jakob.googlecode.com/svn/trunk/config/config.php $
+ * @version    $Id$
+ * @link       $URL$
  */
 $config = array(
+    // Database configuration
+    'database' => array(
+        'dsn'      => 'mysql:host=HOST;dbname=DATABASE',
+        'username' => 'USERNAME',
+        'password' => 'PASSWORD',
+    ),
+
     // Logger configuration
     'logger' => array(
         'type' => 'File',  
         'options' => array('file' => 'newca.log'),
     ),
+
+    // Consent configuration
+    'consent.salt' => 'SECRETSALT',
+
+    // Allowed languages
+    'languages' => array('en', 'da'),
 );

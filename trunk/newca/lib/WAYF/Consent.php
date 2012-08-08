@@ -29,62 +29,150 @@ class Consent {
     private $userid;
     private $salt;
     private $source;
-    private $destination;
     private $attributes; 
+    private $database;
+    private $consents = null;
 
     public function __construct(array $options)
     {
-        foreach (get_class_vars(get_class($this)) AS $key => $val) {
-            if (!isset($options[$key])) {
-                throw new \WAYF\Exceptions\ConsentException($key . ' is not set');
+        $this->userid     = $options['userid'];
+        $this->salt       = $options['salt'];
+        $this->source     = $options['source'];
+        $this->attributes = $options['attributes']; 
+        $this->database   = $options['database'];
+    }
+
+    private function fetchAllUserConsents()
+    {
+        // Grab all user consents from database
+        $query = "SELECT * FROM `consent` WHERE `hashed_user_id` = :user;";
+        $params = array(
+            'user' => $this->getHashedUserID(),
+        );
+        try {
+            $consents = $this->database->fetchAll($query, $params);
+        } catch (\PDOException $e) {
+            throw new \WAYF\Exceptions\ConsentException('Consents could not be loaded from the database'); 
+        }
+
+        $this->consents = array();
+        foreach ($consents AS $consent) {
+            $this->consents[$consent->service_id] = $consent;
+        }
+    }
+    
+    public function haveServiceConsent($destination)
+    {
+        if (is_null($this->consents) || !is_array($this->consents)) {
+            $this->fetchAllUserConsents();
+        }
+
+        $service_id = $this->getServiceId($destination);
+
+        if (isset($this->consents[$service_id])) {
+            return $this->consents[$service_id];
+        }
+
+        return false;
+    }
+
+    public function haveFullConsent($destination, array $subset)
+    { 
+        $hashAttributes = array();
+        foreach ($subset AS $attr) {
+            if (isset($this->attributes[$attr])) {
+                $hashAttributes[$attr] = $this->attributes[$attr];
             }
         }
-        /*
-        if (!isset($options['userid'])) {
-            throw new \WAYF\Exception\ConsentException('User ID is mising');
-        }
-        $this->userid = $options['userid'];
-        if (!isset($options['salt'])) {
-            throw new \WAYF\Exception\ConsentException('Salt is mising');
-        }
-        $this->salt = $options['salt'];
-        if (!isset($options['useris'])) {
-            throw new \WAYF\Exception\ConsentException('User ID is mising');
-        }
-        $this->userid = $options['userid'];
-        if (!isset($options['useris'])) {
-            throw new \WAYF\Exception\ConsentException('User ID is mising');
-        }
-        $this->userid = $options['userid'];
-        if (!isset($options['useris'])) {
-            throw new \WAYF\Exception\ConsentException('User ID is mising');
-        }
-        $this->userid = $options['userid'];
-        
-        
-        
-        $userid, $salt, $source, $destination, $attributes)
-         */
+
+        $query = "SELECT * FROM `consent` WHERE `hashed_user_id` = :user AND `service_id` = :service AND `attribute` = :attribute;";
+
+        $params = array(
+            'user' => $this->getHashedUserID(),
+            'service' => $this->getServiceId($destination),
+            'attribute' => $this->getAttributeHash($subset, TRUE)
+        );
+        $consent = $this->database->fetchOne($query, $params);
+
+        ksort($hashAttributes);
+
+        $data = array(
+            'consent' => $consent,    
+            'attributes' => $hashAttributes,
+        );
+
+        return $data;
     }
 
-    public static function getHashedUserID($userid, $source)
+    public function addConsent($destination, array $subset)
     {
-        return hash('sha1', $userid . '|' . SimpleSAML_Utilities::getSecretSalt() . '|' . $source);
+        $hashAttributes = array();
+        foreach ($subset AS $attr) {
+            if (isset($this->attributes[$attr])) {
+                $hashAttributes[$attr] = $this->attributes[$attr];
+            }
+        }
+
+        $query = "INSERT INTO `consent` (`consent_date`, `usage_date`, `hashed_user_id`, `service_id`, `attribute`) VALUES (NOW(), NOW(), :user, :service, :attribute)";
+
+        $params = array(
+            'user' => $this->getHashedUserID(),
+            'service' => $this->getServiceId($destination),
+            'attribute' => $this->getAttributeHash($subset, TRUE)
+        );
+        $consent = $this->database->insert($query, $params);
+
+        return true;
     }
 
-    public static function getTargetedID($userid, $source, $destination)
+    public function removeConsent($destination)
     {
-        return hash('sha1', $userid . '|' . SimpleSAML_Utilities::getSecretSalt() . '|' . $source . '|' . $destination);
+        $query = "DELETE FROM `consent` WHERE `hashed_user_id` = :user AND `service_id` = :service;";
+
+        $params = array(
+            'user' => $this->getHashedUserID(),
+            'service' => $this->getServiceId($destination),
+        );
+
+        $res = $this->database->modify($query, $params);
+
+        return $res;
     }
 
-    public static function getAttributeHash($attributes, $includeValues = false)
+    public function setAttribute(array $attr) {
+        foreach ($attr AS $key => $val) {
+            $this->attributes[$key] = $val;
+        }
+    }
+
+    public function getHashedUserID()
     {
+        return hash('sha1', $this->userid . '|' . $this->salt . '|' . $this->source);
+    }
+
+    public function getServiceId($destination)
+    {
+        return hash('sha1', $this->userid . '|' . $this->salt . '|' . $this->source . '|saml20-sp-remote|'  . $destination);
+    }
+
+    public function getAttributeHash(array $subset, $includeValues = false)
+    {
+        $hashAttributes = array();
+        foreach ($subset AS $attr) {
+            if (isset($this->attributes[$attr])) {
+                $hashAttributes[$attr] = $this->attributes[$attr];
+            }
+        }
+
         $hashBase = null;
         if ($includeValues) {
-            ksort($attributes);
-            $hashBase = serialize($attributes);
+            foreach ($hashAttributes AS &$values) {
+                sort($values);
+            }
+            ksort($hashAttributes);
+            $hashBase = serialize($hashAttributes);
         } else {
-            $names = array_keys($attributes);
+            $names = array_keys($hashAttributes);
             sort($names);
             $hashBase = implode('|', $names);
         }
