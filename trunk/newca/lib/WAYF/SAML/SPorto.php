@@ -81,7 +81,7 @@ eof;
             // Get private key
             $key = openssl_pkey_get_private("-----BEGIN RSA PRIVATE KEY-----\n" . chunk_split($this->config['private_key'], 64) ."-----END RSA PRIVATE KEY-----");
             if (!$key) {           
-                throw new \Exception\SPortoException('Invalid private key used');                                                                             
+                throw new \WAYF\Exceptions\SPortoException('Invalid private key used');                                                                             
             }
 
             // Sign the request
@@ -133,12 +133,12 @@ eof;
         // Get IdP certificate
         $publicKey = openssl_get_publickey("-----BEGIN CERTIFICATE-----\n" . chunk_split($this->config['idp_certificate'], 64) . "-----END CERTIFICATE-----");
         if (!$publicKey) {           
-            throw new \Exception\SPortoException('Invalid public key used');                                                                             
+            throw new \WAYF\Exceptions\SPortoException('Invalid public key used');                                                                             
         }
 
         // Verify signature
         if (!((sha1($canonicalXml, TRUE) == $digestValue) && @openssl_verify($signedInfo, $signatureValue, $publicKey) == 1)) {
-            throw new \Exception\SPortoException('Error verifying incoming SAMLResponse');
+            throw new \WAYF\Exceptions\SPortoException('Error verifying incoming SAMLResponse');
         }
     }
 
