@@ -7,5 +7,8 @@ var lang = {
     'WITHDRAWCONSENT' : 'Withdraw consent',
     'NOSERVICE' : 'You have not given consent to any service',
     'CANCEL' : 'Cancel',
-    'NOATTRIBUTES' : 'No attributes'
+    'NOATTRIBUTES' : 'No attributes',
+    'SESSIONTIMEOUT' : 'Your session have ended. Please re-authenticate.',
+    'AJAXERROR' : 'An error have happend: ERROR. Please re-authenticate.',
+    'REAUTH' : 'Re-authenticate'
 }

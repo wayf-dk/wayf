@@ -41,8 +41,7 @@ include ROOT . 'lib' . DIRECTORY_SEPARATOR . 'WAYF' . DIRECTORY_SEPARATOR . 'Aut
 $classLoader = new \WAYF\AutoLoader('WAYF', ROOT . 'lib');
 $classLoader->register();
 
-// Get SPorto configuration
-$sporto_config = \WAYF\Configuration::getConfig('config_sporto.php');
+// Get configuration
 $config = \WAYF\Configuration::getConfig();
 
 // Make a template object available
@@ -84,20 +83,6 @@ session_start();
 
 // Protection against session fixation attacks
 session_regenerate_id(true);
-
-// Authenticate user (Session duration is 30 min. hard coded)
-if(!isset($_SESSION['SAML']) || (($_SESSION['SAML']['AuthTime']+$config['session.duration']) < time())) {
-    unset($_SESSION['SAML']);
-    try {
-        $sporto = new \WAYF\SAML\SPorto($sporto_config);
-        $_SESSION['SAML'] = $sporto->authenticate();
-        $_SESSION['SAML']['AuthTime'] = time(); 
-        header("Location: /");
-    } catch (Exception $e) {
-        echo $e->getMessage();
-        exit;
-    }
-}
 
 // Handle translation
 if (isset($_REQUEST['lang']) && in_array($_REQUEST['lang'], $config['languages'])) {

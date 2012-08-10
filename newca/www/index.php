@@ -1,6 +1,12 @@
 <?php
 include '_init.php';
 
+// Authentication
+$auth = new \WAYF\SAML\Authentication();
+if (!$auth->isAuthenticated()) {
+    $auth->authenticate();
+}
+
 // Grab attributes from authentication
 $attributes = $_SESSION['SAML']['attributes'];
 

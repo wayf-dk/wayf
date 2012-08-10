@@ -1,6 +1,14 @@
 <?php
 include('_init.php');
 
+// Authentication
+$auth = new \WAYF\SAML\Authentication();
+if (!$auth->isAuthenticated()) {
+   header("HTTP/1.1 401 Unauthorized"); 
+   header("WWW-Authenticate: SAML realm=\"NEWCA\" location=\"/\"");
+   exit();
+}
+
 // Get input parameter
 // @TODO Sanitize
 $entityid = $_GET['id'];
