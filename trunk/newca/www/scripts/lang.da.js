@@ -7,5 +7,8 @@ var lang = {
     'WITHDRAWCONSENT' : 'Slet samtykke',
     'NOSERVICE' : 'Du har ikke givet samtykke to nogle tjenester',
     'CANCEL' : 'Annuller',
-    'NOATTRIBUTES' : 'Ingen attributter'
+    'NOATTRIBUTES' : 'Ingen attributter',
+    'SESSIONTIMEOUT' : 'Din session er udløbet. Venligst log ind igen.',
+    'AJAXERROR' : 'Der er sket en fejl: ERROR. Venligst log ind igen.',
+    'REAUTH' : 'Log ind igen'
 }

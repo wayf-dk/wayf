@@ -70,6 +70,30 @@ wayf.layout.init = function () {
             div.append(loaderimg);
             wrapper.append(div);
             $('body').append(wrapper);
+    
+            // Generic handler for AJAX errors
+            $(wrapper).ajaxError(function(event, request, settings, error) {
+                var reauthbutton;
+
+                // Remove ESC keyup event
+                $(document).off('keyup')
+                
+                // Remove popup box content
+                div.html('');
+
+                if (request.status === 401) {
+                    div.append('<h2>' + lang.SESSIONTIMEOUT + '</h2>');
+                } else {
+                    div.append('<h2>' + lang.AJAXERROR.replace('ERROR', error) + '</h2>');
+                }
+                // Add reauth button
+                reauthbutton = $('<div class="button"></div>');
+                reauthbutton.append(lang.REAUTH);
+                reauthbutton.click(wrapper, function () {
+                    window.location = '/';
+                });
+                div.append(reauthbutton);
+            });
 
             // Grab consent info
             $.getJSON('/getconsentinfo.php', {id: $(this).attr('id')}, function (data) {
