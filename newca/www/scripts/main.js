@@ -77,8 +77,6 @@ wayf.layout.init = function () {
                     consentbutton,
                     cancelbutton;
 
-                console.debug(data);
-
                 // Remove loader image
                 loaderimg.remove();
 
@@ -166,7 +164,7 @@ wayf.consent = {};
 // Concent click function
 wayf.consent.clickfunc = function (e) {
     var data = $(e.currentTarget).data("consent");
-    console.debug(data);
+    
     if (data.consent === false) {
         $.getJSON('/addconsent.php', {id: data.entityid}, function (data2) {
             var elm, elm2;
@@ -192,8 +190,9 @@ wayf.consent.clickfunc = function (e) {
  * Insert table row in correct place after concent have been given or withdrawn
  */
 wayf.consent.insertIntoConsentTable = function (elmid, tableid) {
-    var elm = $("#" + elmid).detach();
-    origitem = elm.find('td').text().toLowerCase();
+    var elm = $("#" + elmid).detach(),
+        len = $("#" + tableid + " tr").length,
+        origitem = elm.find('td').text().toLowerCase();
 
     $("#" + tableid + " tr").each(function (i, val) {
         curitem = $(val).find('td');
@@ -202,6 +201,11 @@ wayf.consent.insertIntoConsentTable = function (elmid, tableid) {
             $("#consentpopup").remove();
             $('#cover').css('display', 'none');
             return false;
+        }
+        if (i+1 >= len) {
+            $(val).after(elm);
+            $("#consentpopup").remove();
+            $('#cover').css('display', 'none'); 
         }
     });
 };
