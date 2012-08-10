@@ -86,12 +86,13 @@ session_start();
 session_regenerate_id(true);
 
 // Authenticate user (Session duration is 30 min. hard coded)
-if(!isset($_SESSION['SAML']) || (($_SESSION['SAML']['AuthTime']+1800) < time())) {
+if(!isset($_SESSION['SAML']) || (($_SESSION['SAML']['AuthTime']+$config['session.duration']) < time())) {
     unset($_SESSION['SAML']);
     try {
         $sporto = new \WAYF\SAML\SPorto($sporto_config);
         $_SESSION['SAML'] = $sporto->authenticate();
         $_SESSION['SAML']['AuthTime'] = time(); 
+        header("Location: /");
     } catch (Exception $e) {
         echo $e->getMessage();
         exit;
@@ -105,12 +106,3 @@ if (isset($_REQUEST['lang']) && in_array($_REQUEST['lang'], $config['languages']
     $_SESSION['lang'] = 'en';
 }
 $t = new \WAYF\Translation($_SESSION['lang']);
-
-
-// For debug purpose ONLY. Delete in production
-function debug($var)
-{
-    echo "<pre>";
-    var_dump($var);
-    echo "</pre>";
-}
