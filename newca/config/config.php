@@ -16,9 +16,9 @@ $config = array(
 
     // Database configuration
     'database' => array(
-        'dsn'      => 'mysql:host=test.wayf.dk;dbname=jach_db',
-        'username' => 'jach',
-        'password' => 'Jacob82NG',
+        'dsn'      => 'mysql:host=HOST;dbname=DATABASE',
+        'username' => 'USERNAME',
+        'password' => 'PASSWORD',
     ),
 
     // Logger configuration
@@ -28,7 +28,7 @@ $config = array(
     ),
 
     // Consent configuration
-    'consent.salt' => 'defaultsdfsdfsecretsalt',
+    'consent.salt' => 'SECRETSALT',
 
     // Allowed languages
     'languages' => array('en', 'da'),
