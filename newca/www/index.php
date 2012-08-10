@@ -29,6 +29,9 @@ $consent = new \WAYF\Consent(
 // Grab the list of SPs
 $sps = \WAYF\Configuration::getConfig('metadata/metadata-sp.php');
 
+// Get Attribute quarry config
+$attrquarry_config = \WAYF\Configuration::getConfig('config_attibutequarry.php');
+
 // Process all services
 $noconsentservices = array();
 $consentservices = array();
@@ -39,13 +42,66 @@ foreach ($sps AS $entityid => $data) {
     $spconsent = $consent->haveServiceConsent($entityid);
 
     if ($spconsent) {
-        // Services with consent
-        $consentservices[$entityid] = array(
-            'name' => $data['name'][$_SESSION['lang']],
-            'description' => $data['description'][$_SESSION['lang']],
-            'consent' => $spconsent,
-            'serviceid' => $consent->getServiceId($entityid),
-        );
+        /**
+         * Consent found
+         *
+         * Verify that consent is correct else delete it
+         */
+        // Run all configured AttributreQuarries
+        foreach ($attrquarry_config AS $aqid => $aqconfig) {
+            // Create AttributeQuarry object
+            $classname = 'WAYF\\AttributeQuarry\\' . $aqconfig['class'];
+            $aq = new $classname(
+                array(
+                    'options' => $aqconfig['options'],
+                    'idp' => $idp, 
+                    'attributes' => $attributes,
+                )
+            );
+
+            // Run setup
+            $aq->setup();
+
+            // Run AttributeQuarry
+            $res = $aq->mine(array(
+                'sp' => $entityid,
+                'attributes' => $data['attributes'], 
+            ));
+
+            // Only set new attributes
+            if (!is_null($res)) {
+                $consent->setAttribute($res);
+            }
+
+            // Destroy AttributeQuarry ect to prevent memory leak
+            unset($aq);
+        } 
+
+        // Check consent
+        $spconsent = $consent->haveFullConsent($entityid, $data['attributes']);
+        
+        if ($spconsent['consent']) {
+            // Full consent found
+            // Services with consent
+            $consentservices[$entityid] = array(
+                'name' => $data['name'][$_SESSION['lang']],
+                'description' => $data['description'][$_SESSION['lang']],
+                'consent' => $spconsent,
+                'serviceid' => $consent->getServiceId($entityid),
+            );
+        } else {
+            $logger->log(JAKOB_INFO, 'Delete consent : ' . $entityid);
+            // Full consent not found
+            // Services without consent
+            $noconsentservices[$entityid] = array(
+                'name' => $data['name'][$_SESSION['lang']],
+                'description' => $data['description'][$_SESSION['lang']],
+                'consent' => $spconsent,
+                'serviceid' => $consent->getServiceId($entityid),
+            );
+            // Delete  not full consent
+            $consent->removeConsent($entityid);
+        }
     } else {
         // Services without consent
         $noconsentservices[$entityid] = array(
