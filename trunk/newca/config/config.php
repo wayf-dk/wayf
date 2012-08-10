@@ -11,6 +11,9 @@
  * @link       $URL$
  */
 $config = array(
+    // Session duration in seconds (1800 sec. = 30 min.)
+    'session.duration' => 1800,
+
     // Database configuration
     'database' => array(
         'dsn'      => 'mysql:host=HOST;dbname=DATABASE',
