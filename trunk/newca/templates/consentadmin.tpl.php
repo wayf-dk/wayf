@@ -1,7 +1,14 @@
 <?php
+// Session information - NOT shown to user
+echo '<div style="display: none;">';
+echo '<p>Authentication time: ' . date('c', $_SESSION['SAML']['AuthTime']) . '</p>';
+echo '</div>';
+
+// Page head
 echo $trans->t('HEADLINE');
 echo $trans->t('INFOTEXT');
 
+// Consent table
 echo '<div id="leftcol">';
 echo $trans->t('SUBHEADLINE_CONSENT');
 echo $trans->t('CONSENT_INFOTEXT');
@@ -20,6 +27,7 @@ foreach ($consentservice AS $entityid => $data) {
 echo '</table>';
 echo '</div>';
 
+// No consent table
 echo '<div id="rightcol">';
 echo $trans->t('SUBHEADLINE_NOCONSENT');
 echo $trans->t('NOCONSENT_INFOTEXT');
