@@ -268,7 +268,7 @@ moth.draw = function(target, leftElements, rightElements, config) {
             .classed("check", true);
 
         // Check left checkbox if clicked
-        gLeft.selectAll(".mothbox .checkbox")
+        gLeft.selectAll(".mothbox")
             .on("click.checkbox", function() {checkBoxCheck(this);})
             .on("click.userfunc", this.config.checkboxLeftFunction);
 
@@ -313,7 +313,7 @@ moth.draw = function(target, leftElements, rightElements, config) {
             .classed("check", true);
 
         // Check left checkbox if clicked
-        gRight.selectAll(".mothbox .checkbox")
+        gRight.selectAll(".mothbox")
             .on("click.checkbox", function() {checkBoxCheck(this);})
             .on("click.userfunc", this.config.checkboxRightFunction);
         

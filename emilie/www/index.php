@@ -104,7 +104,7 @@ try {
                 echo "mothconfig.checkboxRight = false;\n";
                 echo "mothconfig.checkboxLeftFunction = function () {
                     // Set new color on click
-                    var tmp = d3.select(this.parentNode);
+                    var tmp = d3.select(this);
                     tmp.classed('mark', !tmp.classed('mark'));
 
                     // Calc new cost
@@ -119,7 +119,7 @@ try {
                 echo "mothconfig.checkboxRight = true;\n";
                 echo "mothconfig.checkboxRightFunction = function () {
                     // Set new color on click
-                    var tmp = d3.select(this.parentNode);
+                    var tmp = d3.select(this);
                     tmp.classed('mark', !tmp.classed('mark'));
 
                     // Calc new cost
