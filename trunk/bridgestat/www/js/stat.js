@@ -695,6 +695,9 @@ function getOtherProvider(i) {
 function getOtherProviderName(i) {
     var n = otherProviders[i].name;
     var max = 40;
+    if (n == null) {
+        return otherProviders[i].id;
+    }
     return n.length < max ? n : n.substr(0,max) + "...";
 }
 
