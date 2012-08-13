@@ -173,6 +173,7 @@ function fullRefresh() {
 	buildQueryOthers(o);
     }
     if(o.ps.length > 0) {
+        $('#loader').css('visibility', 'visible');
 	sendQuery(o);
     }
 }
@@ -263,7 +264,7 @@ function checkboxTotal(checkBox) {
 	repaintGraph();
     }
     else {
-
+$('#loader').css('visibility', 'visible');
 	var o = newQueryObject();
 	buildQueryTotal(o);
 	sendQuery(o);
@@ -285,6 +286,7 @@ function checkboxOthers(checkBox) {
 	repaintGraph();
     }
     else {
+        $('#loader').css('visibility', 'visible');
 	var o = newQueryObject();
 	buildQueryOthers(o);
 	sendQuery(o);
@@ -310,6 +312,7 @@ function checkboxOtherProvider(checkBox, i) {
 	repaintGraph();
     }
     else {
+    $('#loader').css('visibility', 'visible');
 	var o = newQueryObject();
 	buildQueryProvider(p, o);
 	sendQuery(o);
@@ -323,7 +326,9 @@ function checkboxOtherProvider(checkBox, i) {
 //   checkBox - The checkbox (d3 SVG elem)
 //
 function checkBoxCheck(checkBox) {
-    var s = d3.select(checkBox).select(".check");
+    var s = d3.select(checkBox).select(".check"),
+        tmp = d3.select(checkBox);
+    tmp.classed('mark', !tmp.classed('mark'));
     s.classed("checked", ! s.classed("checked"));
 }
 
@@ -865,7 +870,12 @@ function repaintMothView() {
     
     gOthers.selectAll(".owned")
 	.append("svg:a")
-	.attr("xlink:href", function(i) {return "?" + (idpMode ? "sp" : "idp") + "=" + getOtherProviderId(i);})
+	.attr("xlink:href", "#")
+    .on("click.link", function(i) {
+        var mode = idpMode ? "sp" : "idp",
+            id = getOtherProviderId(i);
+        window.location = "/?" + mode + "=" + id;
+    })
 	.append("text")
 	.attr("x", CONST.boxTextXOthers)
 	.attr("y",  CONST.boxTextY)
@@ -1004,8 +1014,9 @@ function repaintMothView() {
 	    .classed("checked", true);
     }
 
-    gOthers.selectAll(".provider .checkbox")
-	.attr("onclick", function(d, i) {return "checkboxOtherProvider(this, "+d+"); return false;";});
+    gOthers.selectAll(".provider").attr("onclick", function (d, i) {
+        return "checkboxOtherProvider(this, "+d+"); return false;";
+    });
 
     if(selP.length > 0) {
 	gOthers.selectAll(".provider .check")

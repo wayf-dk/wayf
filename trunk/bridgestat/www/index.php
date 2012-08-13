@@ -217,7 +217,15 @@ providerBoxW : 350
     </script>
   </head>
   <body onload="main();">
-  <h1> WAYF Statitistics </h1>
+    <div id="loader" style="z-index: 100; position: absolute; width: 100%; height: 100%; background-color:#EEEEEE;
+  filter:alpha(opacity=50);
+  -moz-opacity: 0.50;
+  opacity: 0.50; visibility: hidden;">
+        <img src="images/249.gif" title="Loading" style="display: block;
+    margin-left: auto;
+    margin-right: auto; margin-top: 150px;" />
+    </div>
+  <div style="float: left; padding-right: 10px; height: 28px; line-height: 30px; font-size: 26px; color: #006600;">WAYF Statitistics</div>
     <div id = "toolsDiv">
   <table id = "toolBar">
   <tr>

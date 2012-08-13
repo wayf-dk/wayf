@@ -358,3 +358,7 @@ td.datepickerSpecial a {
 td.datepickerSpecial.datepickerSelected a {
 	background: #a00;
 }
+.mark {
+    stroke : #006600;
+    fill: #DDFFDD;
+}
