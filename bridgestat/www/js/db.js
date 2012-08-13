@@ -28,6 +28,7 @@ function receiveDatum(ps) {
 	    }
 	}
 	repaintGraph(); 
+    $('#loader').css('visibility', 'hidden');
     };
 }
 
