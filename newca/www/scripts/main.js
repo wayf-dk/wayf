@@ -76,7 +76,7 @@ wayf.layout.init = function () {
                 var reauthbutton;
 
                 // Remove ESC keyup event
-                $(document).off('keyup')
+                $(document).off('keyup');
                 
                 // Remove popup box content
                 div.html('');
