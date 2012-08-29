@@ -41,16 +41,16 @@ class Template
         extract($this->data);
 
         // Include the template file
-        $templetefile = $this->_templatepath . $this->_template.'.tpl.php'; 
+        $templatefile = $this->_templatepath . $this->_template.'.tpl.php'; 
 
-        if (file_exists($templetefile)) {
+        if (file_exists($templatefile)) {
             // Include default header
             if ($this->_defaultheaders) {
                 include $this->_templatepath . 'header.tpl.php';
             }
 
             // Include template file
-            include $templetefile;
+            include $templatefile;
 
             // Include default footer
             if ($this->_defaultheaders) {
