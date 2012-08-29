@@ -26,14 +26,6 @@ namespace WAYF;
  */
 class Configuration
 {
-
-    /**
-     * Holds the configuration options
-     *
-     * @var array|NULL
-     */
-    protected $_configuration = NULL;
-
     /**
      * Loads a parsed configuration
      *
