@@ -75,7 +75,6 @@ class Jakob implements \WAYF\AttributeQuarry
             $params['attributes']   = json_encode($this->options['attributes']);
             $params['returnURL']    = 'dddddd';
             $params['returnMethod'] = 'raw';
-            //$params['returnParams'] = json_encode(array('StateId' => SimpleSAML_Auth_State::saveState($state, 'jakob:request')));
             $joburl                 = $this->options['options']['joburl'];
             $jakoburl               = $joburl . $jobid;
 
@@ -83,10 +82,18 @@ class Jakob implements \WAYF\AttributeQuarry
             $this->setUp2($this->options['options']['consumersecret'], $params);
             $params['consumerkey'] = $this->options['options']['consumerkey'];
             $params['signature'] = $this->sign();
-            
-            $tmp = file_get_contents($jakoburl . "/?" . http_build_query($params));
+
+            // SSL context so certs are validated
+            $context = stream_context_create(array(
+                'ssl' => array(
+                    'verify_peer' => true,
+                    'cafile' => '/etc/ssl/certs' 
+                )    
+            ));
+
+            $tmp = file_get_contents($jakoburl . "/?" . http_build_query($params), false, $context);
             $tmp = json_decode($tmp, TRUE);
-            
+
             $attributes = array();
             foreach ($tmp AS $name => $values) {
                 foreach ($values AS $val) {
