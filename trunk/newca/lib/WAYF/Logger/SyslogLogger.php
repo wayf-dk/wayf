@@ -41,7 +41,10 @@ class SyslogLogger implements Logger
 
     public function __construct($config)
     {
-        openlog('JAKOB', LOG_PID, LOG_LOCAL0);
+        $facility = isset($config['facility']) ? $config['facility'] : LOG_USER);
+        $processname = isset($config['processname']) ? $config['processname'] : 'NEWCA');
+
+        openlog($processname, LOG_PID, $facility);
     }
 
     /**
