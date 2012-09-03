@@ -26,6 +26,15 @@ $config = array(
         'type' => 'File',  
         'options' => array('file' => 'newca.log'),
     ),
+    /* Syslog logger config example
+    'logger' => array(
+        'type' => 'Syslog',
+        'options' => array(
+            'facility' => '',
+            'processname' => 'NEWCA',
+        ),
+    ),
+     */
 
     // Consent configuration
     'consent.salt' => 'SECRETSALT',
