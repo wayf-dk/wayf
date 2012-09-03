@@ -27,6 +27,7 @@ div#header {
     position: relative;
     float: right;
     top: 70px;
+    right: 230px;
 }
 
 div#main {
