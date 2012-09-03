@@ -87,7 +87,7 @@ class Jakob implements \WAYF\AttributeQuarry
             $context = stream_context_create(array(
                 'ssl' => array(
                     'verify_peer' => true,
-                    'cafile' => '/etc/ssl/certs' 
+                    'capath' => '/etc/ssl/certs/' 
                 )    
             ));
 
