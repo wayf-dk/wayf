@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <title>NEWCA - Consent Administartion by WAYF</title>
+        <title><?= $trans->t('TITLE'); ?></title>
         <meta charset="utf-8" />
         <meta name="application-name" content="NEWCA" />
         <meta http-equiv="Cache-Control" content="no-cache" />

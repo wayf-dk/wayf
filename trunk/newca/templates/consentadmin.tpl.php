@@ -5,7 +5,6 @@ echo '<p>Authentication time: ' . date('c', $_SESSION['SAML']['AuthTime']) . '</
 echo '</div>';
 
 // Page head
-echo $trans->t('HEADLINE');
 echo $trans->t('INFOTEXT');
 
 // Consent table
