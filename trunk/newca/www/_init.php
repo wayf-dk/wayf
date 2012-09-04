@@ -88,6 +88,6 @@ session_regenerate_id(true);
 if (isset($_REQUEST['lang']) && in_array($_REQUEST['lang'], $config['languages'])) {
     $_SESSION['lang'] = $_REQUEST['lang'];
 } else if (!isset($_SESSION['lang'])) {
-    $_SESSION['lang'] = 'en';
+    $_SESSION['lang'] = 'da';
 }
 $t = new \WAYF\Translation($_SESSION['lang']);
