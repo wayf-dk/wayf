@@ -220,7 +220,7 @@ wayf.consent.insertIntoConsentTable = function (elmid, tableid) {
 
     $("#" + tableid + " tr").each(function (i, val) {
         curitem = $(val).find('td');
-        if (curitem.text().toLowerCase().localeCompare(origitem) > 0) {
+        if (wayf.consent.caseInsensitiveCompare(curitem.text(), origitem) > 0) {
             $(val).before(elm);
             $("#consentpopup").remove();
             $('#cover').css('display', 'none');
@@ -232,4 +232,17 @@ wayf.consent.insertIntoConsentTable = function (elmid, tableid) {
             $('#cover').css('display', 'none'); 
         }
     });
+};
+
+wayf.consent.caseInsensitiveCompare = function(str1, str2) {
+    var test1 = String(str1).toLowerCase();
+    var test2 = String(str2).toLowerCase();
+
+    if (test1 < test2) {
+        return -1;
+    } else if (test1 == test2) {
+        return 0;
+    } else {
+        return 1;
+    }
 };
