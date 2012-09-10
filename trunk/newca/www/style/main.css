@@ -70,21 +70,15 @@ div#main {
 }
 
 /* Consent popupbox */
-.consentboxwrapper, .consentbox {
-/*    height: 500px;*/
-    width: 550px;
-}
-
 .consentboxwrapper {
-    bottom: 50%;
-    right: 50%;
-    position: fixed;
 }
 
 .consentbox {
+    top: 10%;
     left: 50%;
-    position: relative;
-    top: 50%;
+    position: fixed;
+    margin-left: -291px;
+    width: 550px;
     border: 1px solid #000000;
     background-color: #FFF;
     z-index: 100;
@@ -92,7 +86,6 @@ div#main {
     /* For older Firefox */
     -moz-border-radius: 10px;
     border-radius: 10px;
-    padding-bottom: 30px;
 }
 
 #cover {
