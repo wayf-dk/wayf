@@ -35,6 +35,10 @@ $translation = array(
         'en' => 'You have not given consent to any servics.',
         'da' => 'Du her ikke givet samtykke til nogle tjenester.',
     ),    
+    'LANGUAGESELECTLINK' => array(
+        'en' => '<a href="?lang=da">Dansk</a>',
+        'da' => '<a href="?lang=en">English</a>',    
+    ),    
     '__TEMPLATE' => array(
         'en' => '',
         'da' => '',    
