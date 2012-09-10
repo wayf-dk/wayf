@@ -64,15 +64,14 @@ wayf.layout.init = function () {
             $('#cover').css('height', $('html').height());
 
             // Display popupbox
-            var wrapper = $('<div></div>').addClass('consentboxwrapper').attr('id', 'consentpopup'),
-                div = $('<div></div>').addClass('consentbox'),
+            var div = $('<div></div>').addClass('consentbox').attr('id', 'consentpopup'),
                 loaderimg = $('<img src="/images/loader.gif" alt="Loading" id="loaderimg"/>');
+            
             div.append(loaderimg);
-            wrapper.append(div);
-            $('body').append(wrapper);
+            $('body').append(div);
     
             // Generic handler for AJAX errors
-            $(wrapper).ajaxError(function(event, request, settings, error) {
+            $(div).ajaxError(function(event, request, settings, error) {
                 var reauthbutton;
 
                 // Remove ESC keyup event
@@ -89,7 +88,7 @@ wayf.layout.init = function () {
                 // Add reauth button
                 reauthbutton = $('<div class="button"></div>');
                 reauthbutton.append(lang.REAUTH);
-                reauthbutton.click(wrapper, function () {
+                reauthbutton.click(div, function () {
                     window.location = '/';
                 });
                 div.append(reauthbutton);
@@ -157,25 +156,25 @@ wayf.layout.init = function () {
                 // Cancel button
                 cancelbutton = $('<div class="button"></div>');
                 cancelbutton.append(lang.CANCEL);
-                cancelbutton.click(wrapper, function () {
-                    wrapper.unbind('click');
-                    wrapper.remove();
+                cancelbutton.click(div, function () {
+                    div.unbind('click');
+                    div.remove();
                     $('#cover').css('display', 'none');
                 });
                 div.append(cancelbutton);
 
                 // Register ESC key to remove box
-                $(document).keyup(wrapper, function (e) {
+                $(document).keyup(div, function (e) {
                     if (e.keyCode === 27) {
-                        wrapper.unbind('keyup');
-                        wrapper.remove();
+                        div.unbind('keyup');
+                        div.remove();
                         $('#cover').css('display', 'none');
                     }
                 });
                 // Close icon in top right corner
-                $("#close").click(wrapper, function () {
-                    wrapper.unbind('click');
-                    wrapper.remove();
+                $("#close").click(div, function () {
+                    div.unbind('click');
+                    div.remove();
                     $('#cover').css('display', 'none');
                 });
             });
