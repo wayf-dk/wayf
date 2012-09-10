@@ -13,6 +13,6 @@
     </head>
     <body>
         <div id="header">
-            <div id="languagebar"><a href="?lang=da">Dansk</a>|<a href="?lang=en">English</a></div>
+            <div id="languagebar"><?= $trans->t('LANGUAGESELECTLINK'); ?></div>
         </div>
         <div id="main">
