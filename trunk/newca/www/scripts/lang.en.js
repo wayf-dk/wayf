@@ -10,5 +10,21 @@ var lang = {
     'NOATTRIBUTES' : 'No attributes',
     'SESSIONTIMEOUT' : 'Your session have ended. Please re-authenticate.',
     'AJAXERROR' : 'An error have happend: ERROR. Please re-authenticate.',
-    'REAUTH' : 'Re-authenticate'
+    'REAUTH' : 'Re-authenticate',
+    'schacHomeOrganization' : 'Domain name of the institution',
+    'eduPersonAssurance' : 'Level of Assurance',
+    'eduPersonTargetedID' : 'Your service specific pseudonym',
+    'cn' : 'Nick name',
+    'eduPersonEntitlement' : 'Entitlements',
+    'eduPersonPrimaryAffiliation' : 'Primary affiliation',
+    'eduPersonPrincipalName' : 'User ID',
+    'eduPersonScopedAffiliation' : 'Group membership',
+    'gn' : 'First name',
+    'mail' : 'E-mail',
+    'norEduPersonLIN' : 'Local user number at institution',
+    'norEduPersonNIN' : 'Identity number assigned by public authorities',
+    'organizationName' : 'The organisation\'s nickname',
+    'preferredLanguage' : 'Preferred language',
+    'schacPersonalUniqueID' : 'National ID number',
+    'sn' : 'Last name'
 }

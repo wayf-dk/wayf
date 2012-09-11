@@ -10,5 +10,21 @@ var lang = {
     'NOATTRIBUTES' : 'Ingen attributter',
     'SESSIONTIMEOUT' : 'Din session er udløbet. Venligst log ind igen.',
     'AJAXERROR' : 'Der er sket en fejl: ERROR. Venligst log ind igen.',
-    'REAUTH' : 'Log ind igen'
+    'REAUTH' : 'Log ind igen',
+    'schacHomeOrganization' : 'Institutionens domænenavn',
+    'eduPersonAssurance' : 'Niveau af Autentitetssikring',
+    'eduPersonTargetedID' : 'Dit tjenestespecifikke pseudonym',
+    'cn' : 'Kaldenavn',
+    'eduPersonEntitlement' : 'Dit tjenestespecifikke pseudonym',
+    'eduPersonPrimaryAffiliation' : 'Primær tilknytning',
+    'eduPersonPrincipalName' : 'Bruger-ID',
+    'eduPersonScopedAffiliation' : 'Gruppemedlemskab',
+    'gn' : 'Fornavn',
+    'mail' : 'Emailadresse',
+    'norEduPersonLIN' : 'Institutionsspecifikt brugernummer',
+    'norEduPersonNIN' : 'CPR-nummer',
+    'organizationName' : 'Organisationens Kaldenavn',
+    'preferredLanguage' : 'Foretrukkent sprog',
+    'schacPersonalUniqueID' : 'Nationalt ID-nummer',
+    'sn' : 'Efternavn'
 }
