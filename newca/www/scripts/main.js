@@ -128,9 +128,9 @@ wayf.layout.init = function () {
                         $.each(val, function (i, val2) {
                             attributevals.append($('<li>' + val2 + '</li>'));
                         });
-                        attribute.text(i).append(attributevals);
+                        attribute.text(lang[i]).append(attributevals);
                     } else {
-                        attribute.text(i + ': ' + val);
+                        attribute.text(lang[i] + ': ' + val);
                     }
 
                     attributecontainer.append(attribute);
