@@ -104,7 +104,6 @@ wayf.layout.init = function () {
                 loaderimg.remove();
 
                 // Display consent info
-                div.append('<img src="/images/x-mark2.png" alt="Close" id="close"/>');
                 div.append('<h1>' + data.name + '</h1>');
                 div.append(lang.PURPOSE.replace('SPNAME', data.name).replace('SPDESC', data.description));
                 if (data.consent !== false) {
@@ -170,12 +169,6 @@ wayf.layout.init = function () {
                         div.remove();
                         $('#cover').css('display', 'none');
                     }
-                });
-                // Close icon in top right corner
-                $("#close").click(div, function () {
-                    div.unbind('click');
-                    div.remove();
-                    $('#cover').css('display', 'none');
                 });
             });
         });
