@@ -12,7 +12,7 @@ class MDfilter
     {
         $this->accepted = $accepted;
         if (isset($config['removeChangedEntities'])) {
-            $this->removechanged = (bool)$removechanged;
+            $this->removechanged = (bool)$config['removeChangedEntities'];
         }
     }
 
