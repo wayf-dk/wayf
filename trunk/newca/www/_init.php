@@ -5,7 +5,7 @@ define('CONFIGROOT', ROOT . 'config' . DIRECTORY_SEPARATOR);
 define('LOGROOT', ROOT . 'log' . DIRECTORY_SEPARATOR);
 
 // System status
-define('STATUS', 'development');
+define('STATUS', 'production');
 
 // Set error logging
 ini_set('log_errors', TRUE);
