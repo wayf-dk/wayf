@@ -40,8 +40,22 @@ if (isset($feed_config['validate.signature']) && $feed_config['validate.signatur
 }
 
 // Filter metadata feed
-$mdp = new \WAYF\MDFilter($im);
-$filteredxml = $mdp->filter($xml, $feed_config);
+$mdfilter = new \WAYF\MDFilter($im, $feed_config);
+$filteredxml = $mdfilter->filter($xml);
+
+if (!empty($mdfilter->changedentities)) {
+    $message = "The following entities have changed since they was last approved:\n\n";
+    foreach ($mdfilter->changedentities AS $ce) {
+        $message .= " - {$ce->entityid} : {$ce->name}\n";
+    }
+    $event = new \WAYF\Event();
+    $event->message = $message;
+    $event->title = "Entities changed";
+    $event->user = "SYSTEM";
+    $event->time = date('c');
+    $ml = new \WAYF\MailLogger($feed_config);
+    $ml->log($event);
+}
 
 // Output filtered metadata
 header('Content-type: application/xml');
