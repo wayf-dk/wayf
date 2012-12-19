@@ -63,21 +63,6 @@ set_exception_handler(array($exceptionHandler, 'handleException'));
 $errorHandler = new \WAYF\ErrorHandler();
 set_error_handler(array($errorHandler, 'handleError'));
 
-register_shutdown_function('shutdown');
-
-function shutdown() {
-    $e = error_get_last();
-    if (!is_null($e)) {
-        // Instiansiate all objects to be able to log FATAL errors
-        $jakob_config = \WAYF\Configuration::getConfig();
-        $logger = \WAYF\LoggerFactory::createInstance($config['logger']);
-        $exceptionHandler = new \WAYF\ExceptionHandler();
-        $exceptionHandler->setLogger($logger);
-        $exception = new \ErrorException($e['message'], 0, $e['type'], $e['file'], $e['line']);
-        $exceptionHandler->handleException($exception);
-    }
-}
-
 // Start session
 session_start();
 
