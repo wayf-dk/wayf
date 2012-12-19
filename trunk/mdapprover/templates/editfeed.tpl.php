@@ -39,7 +39,7 @@ foreach ($accepted AS $entity) {
     echo "<td>" . $entity['entity']->user . "</td>";
     echo '<td><i class="icon-minus-sign mdapp-removeentity" id="' . base64_encode ($entity['entity']->entityid) . '"></i>';
     if (!$entity['same']) {
-        echo '<span class="label label-important">Important</span>';
+        echo '<span class="label label-important">Has changed</span>';
     }
     echo '</td>';
     echo "</tr>";

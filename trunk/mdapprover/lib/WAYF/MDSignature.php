@@ -42,7 +42,7 @@ class MDSignature
             $canonicalXml = $signedElement->C14N(false, false);
         } else {
             $canonicalXml = $signedElement->C14N(true, false);
-        }; 
+        } 
 
         // Get IdP certificate
         $publicKey = openssl_get_publickey("-----BEGIN CERTIFICATE-----\n" . chunk_split($certificate, 64) . "-----END CERTIFICATE-----");
