@@ -21,8 +21,8 @@
 	<div id="section">
 		<div id="content">
 <h2>Welcome to Kanja - WAYFs selfservice portalino for partners</h2>
-<p>Kanja offers a range of tools for our partners - most of them require specific entitlements an therefore a login from your institution. If they can't 
-be provided by your institution we offer a Kanja Virtual Organisation which allows an administrator from the institution to give other users access to the Kanja tools.
+<p>Kanja offers a range of tools for our partners - most of them require specific entitlements and thus a login from your institution. If they can't 
+be provided by your institution we offer a Kanja Virtual Organisation which allows a designated administrator from your institution to give other users access to the Kanja tools.
 </p>
 
 <a href="https://rasmus.wayf.dk" target=_blank>Rasmus - Statistics and Graphs for your institution</a> - [requires eduPersonEntitlement: http://wayf.dk/rasmus/view]
