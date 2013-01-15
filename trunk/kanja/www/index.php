@@ -24,9 +24,14 @@
 <p>Kanja offers a range of tools for our partners - most of them require specific entitlements and thus a login from your institution. If they can't 
 be provided by your institution we offer a Kanja Virtual Organisation which allows a designated administrator from your institution to give other users access to the Kanja tools.
 </p>
-
-<a href="https://rasmus.wayf.dk" target=_blank>Rasmus - Statistics and Graphs for your institution</a> - [requires eduPersonEntitlement: http://wayf.dk/rasmus/view]
-
+<p><a href="https://rasmus.wayf.dk" target=_blank>Rasmus - Statistics and Graphs for your institution</a> - [requires eduPersonEntitlement: http://wayf.dk/rasmus/view]
+<p><a href="https://janus.wayf.dk/saml" target=_blank>Janus - Selfservice for Metadata</a> [login via SAML]
+<p><a href="https://janus.wayf.dk/" target=_blank>Janus - Selfservice for Metadata</a> [login via mailtoken]
+<p><a href="http://help.test.wayf.dk/#kontakt" target=_blank>How to handle Errors</a>
+<h2>Generel Services for all users</h2>
+<p><a href="https://consentmgt.wayf.dk/" target=_blank>Consent Administration</a>
+<p><a href="https://kanja.wayf.dk/#" target=_blank>Whishing Well</a>
+<p><a href="http://www.wayf.dk/en/component/ninjarsssyndicator/?feed_id=4&format=raw" target=_blank>News Feed (RSS)</a>
 		</div>
 	</div>
 </div>
