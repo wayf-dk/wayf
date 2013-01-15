@@ -30,7 +30,7 @@ be provided by your institution we offer a Kanja Virtual Organisation which allo
 <p><a href="http://help.test.wayf.dk/#kontakt" target=_blank>How to handle Errors</a>
 <h2>Generel Services for all users</h2>
 <p><a href="https://consentmgt.wayf.dk/" target=_blank>Consent Administration</a>
-<p><a href="https://kanja.wayf.dk/#" target=_blank>Whishing Well</a>
+<p><a href="https://wishingwell.wayf.dk/" target=_blank>Whishing Well</a>
 <p><a href="http://www.wayf.dk/en/component/ninjarsssyndicator/?feed_id=4&format=raw" target=_blank>News Feed (RSS)</a>
 		</div>
 	</div>
