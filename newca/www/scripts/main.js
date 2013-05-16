@@ -121,15 +121,16 @@ wayf.layout.init = function () {
                 $.each(data.attributes, function (i, val) {
                     var attribute = $('<li></li>'),
                         attributevals;
-
+                    name = i;
+                    if (lang[i]) { name = lang[i]; }
                     if (val.length > 1) {
                         attributevals = $('<ul></ul>');
                         $.each(val, function (i, val2) {
                             attributevals.append($('<li>' + val2 + '</li>'));
                         });
-                        attribute.text(lang[i]).append(attributevals);
+                        attribute.text(name).append(attributevals);
                     } else {
-                        attribute.text(lang[i] + ': ' + val);
+                        attribute.text(name + ': ' + val);
                     }
 
                     attributecontainer.append(attribute);
