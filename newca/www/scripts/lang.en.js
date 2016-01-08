@@ -1,5 +1,5 @@
 var lang = {
-    'PURPOSE' : '<p>The purpose of <b>SPNAME</b> is SPDESC</p>',
+    'PURPOSE' : '<p>SPDESC</p>',
     'CONSENTGIVEN' : '<p>Consent given: CONSENTDATE</p>',
     'CONSENTUSED' : '<p>Consent last used: USEDATE</p>',
     'ATTRRELEASEINFO' : '<p>The following attributes are being released to <b>SPNAME</b></p>',

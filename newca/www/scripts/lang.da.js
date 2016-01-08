@@ -1,5 +1,5 @@
 var lang = {
-    'PURPOSE' : '<p>Formålet med tjenesten <b>SPNAME</b> er SPDESC</p>',
+    'PURPOSE' : '<p>SPDESC</p>',
     'CONSENTGIVEN' : '<p>Samtykke givet: CONSENTDATE</p>',
     'CONSENTUSED' : '<p>Samtykke sidst brugt: USEDATE</p>',
     'ATTRRELEASEINFO' : '<p>Følgende attributter vil blive leveret til <b>SPNAME</b></p>',
